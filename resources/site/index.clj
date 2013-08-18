@@ -1,0 +1,30 @@
+{:title "crsmithdev.com"}
+
+[:div
+ [:div {:class "row"}
+  [:div {:class "col-md-12"}
+   [:h1 "Stumptown narwhal blog aesthetic."]
+   [:p {:class "lead"}
+    "Etsy sartorial Carles, master cleanse selfies butcher leggings."
+    [:br]
+    "DIY fanny pack lo-fi you probably haven't heard of them polaroid."]]]
+ [:div {:class "row"}
+  [:div {:class "col-md-12"}
+   [:p "Pickled aesthetic organic freegan. Irony yr Terry Richardson, synth Banksy sustainable pour-over +1. Marfa 8-bit post-ironic tousled banjo gluten-free. Small batch whatever ennui, 3 wolf moon bespoke selfies Cosby sweater gastropub Schlitz you probably haven't heard of them blue bottle cred. Dreamcatcher Bushwick mlkshk narwhal sustainable, 8-bit selvage fingerstache +1. Yr viral pickled sustainable, craft beer shabby chic gentrify sriracha ethnic butcher keytar Schlitz kitsch. Terry Richardson ethnic mixtape, Tonx master cleanse jean shorts blog butcher pickled kale chips sriracha +1 polaroid helvetica before they sold out."]]]
+ [:div {:class "row"}
+  [:div {:class "col-md-6"}
+   [:h4 "Recent Posts"]
+   (map #(let [f % url (static.core/post-url f)
+               [metadata _] (static.io/read-doc f)
+               date (static.core/parse-date
+                     "yyyy-MM-dd" "dd MMM yyyy"
+                     (re-find #"\d*-\d*-\d*" (str f)))]
+      [:div
+       [:div [:a {:href url} (:title metadata)]
+       [:div date]]])
+      (take 8 (reverse (static.io/list-files :posts))))]
+    [:div {:class "col-md-6"}
+    [:h4 "Recent Activity"]
+    [:div [:div [:a {:href "#"} (java.util.UUID/randomUUID)] [:div "03 August 2013"]]]
+    [:div [:div [:a {:href "#"} (java.util.UUID/randomUUID)] [:div "02 August 2013"]]]
+    [:div [:div [:a {:href "#"} (java.util.UUID/randomUUID)] [:div "01 August 2013"]]]]]]
