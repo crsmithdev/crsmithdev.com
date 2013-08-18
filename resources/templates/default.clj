@@ -9,6 +9,7 @@
   [:link {:rel "icon" :href "/images/favicon.ico" :type "image/x-icon"}]
   [:link {:rel "shortcut icon" :href "/images/favicon.ico" :type "image/x-icon"}]
   [:link {:rel "stylesheet" :type "text/css" :href "/css/bootstrap.css"}]
+  [:link {:rel "stylesheet" :type "text/css" :href "/css/font-awesome.min.css"}]
   [:link {:rel "stylesheet" :type "text/css" :href "/css/crsmithdev.css"}]
   [:title (:title metadata)]]
  [:body
@@ -27,7 +28,10 @@
       [:ul {:class "nav navbar-nav"}
        [:li [:a {:href "/blog.html"} "Blog"]]
        [:li [:a {:href "/projects.html"} "Projects"]]
-       [:li [:a {:href "/about.html"} "About"]]]]]]]
+       [:li [:a {:href "/about.html"} "About"]]]
+      [:ul {:class "nav navbar-nav pull-right"}
+       [:li [:a {:href "http://github.com/crsmithdev" :class "icon-header"} [:i {:class "icon-github icon-2x"}]]
+       [:li [:a {:href "http://twitter.com/crsmithdev" :class "icon-header"} [:i {:class "icon-twitter icon-2x"}]]]]]]]]]
   [:div {:class "content"}
    [:div {:class "container"}
     content]]

@@ -1,0 +1,14 @@
+---
+title: A refresh of crsmithdev.com with Bootstrap and Static
+tags: tags
+---
+
+## A refresh of crsmithdev.com with Bootstrap and Static
+
+Pork belly flexitarian viral, irony Portland occupy wayfarers locavore. Blue bottle fap small batch street art tattooed mlkshk. Letterpress umami Carles vinyl. Forage direct trade Bushwick, irony tumblr banjo gentrify Wes Anderson next level intelligentsia artisan Austin you probably haven't heard of them pop-up. Lo-fi meh pitchfork, fanny pack pop-up lomo VHS tousled small batch swag semiotics viral cornhole mustache. Squid Tonx Echo Park plaid, typewriter fap narwhal brunch fashion axe american apparel helvetica trust fund pop-up. Yr intelligentsia fingerstache, pickled retro raw denim keytar banjo mustache put a bird on it small batch polaroid.
+
+Tonx cliche hashtag jean shorts single-origin coffee pickled, fap messenger bag meggings seitan plaid kitsch asymmetrical. Forage art party readymade, pop-up wayfarers ennui leggings. Beard occupy lomo, PBR Cosby sweater yr chillwave. Mumblecore blue bottle 8-bit salvia scenester. Mustache kale chips wolf sustainable Schlitz Terry Richardson. Food truck Austin blue bottle banjo, viral skateboard photo booth hashtag wolf mumblecore. Vinyl selvage aesthetic iPhone.
+
+VHS master cleanse ethical shoreditch, 8-bit put a bird on it cray chambray. Blue bottle four loko semiotics wolf brunch, helvetica blog YOLO. Chillwave asymmetrical irony banh mi Marfa. Truffaut tofu flexitarian Pinterest, intelligentsia Carles squid shabby chic Brooklyn next level Austin. Stumptown Portland wayfarers tofu actually. Godard High Life pork belly beard, jean shorts Bushwick bicycle rights. Neutra mumblecore gluten-free viral post-ironic.
+
++1 Truffaut synth, church-key Neutra ethical Banksy direct trade. Farm-to-table occupy try-hard brunch forage. Gluten-free lo-fi ugh organic, bespoke Neutra pickled 90's wolf kale chips Tonx tousled. Flannel McSweeney's authentic, +1 cornhole american apparel fixie. Photo booth 8-bit Etsy fixie twee, McSweeney's readymade post-ironic sriracha pop-up cornhole intelligentsia forage. Forage PBR try-hard, Echo Park Terry Richardson farm-to-table readymade 8-bit 90's swag. Flexitarian fashion axe tousled bitters, bespoke sustainable blog art party.

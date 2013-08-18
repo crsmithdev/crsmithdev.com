@@ -1,11 +1,15 @@
 body {
   padding-top: 60px;
+  font-size: 1.7em;
 }
-
-
 
 .footer {
     padding-top: 25px;
+}
+
+.icon-header {
+    padding-top: 13px !important;
+    padding-bottom: 0px !important;
 }
 
 @media (min-width: 768px) {

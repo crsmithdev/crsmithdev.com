@@ -3,7 +3,7 @@
 [:div
  [:div {:class "row"}
   [:div {:class "col-md-12"}
-   [:h2 "Blog posts"]
+   [:h2 "Blog"]
    (map #(let [f % url (static.core/post-url f)
                [metadata _] (static.io/read-doc f)
                date (static.core/parse-date
