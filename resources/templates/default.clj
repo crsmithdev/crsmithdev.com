@@ -41,23 +41,27 @@
     [:script {:src "/js/lib/moment.min.js"}]]]
     "<script type=\"text/javascript\">
     //<![CDATA[
-      $.ajax({
-        url: 'https://api.github.com/users/crsmithdev/events',
-        dataType: 'jsonp',
-        success: function (data) {
-          var commits = _.filter(data.data, function(e) {return e.type == 'PushEvent'});
-          _.each(_.first(commits, 5), function(r) {
-            var commit_message = r.payload.commits[0].message;
-            var commit_url = 'https://github.com/' + r.repo.name + '/commit/' + r.payload.commits[0].sha;
-            var repo_name = r.repo.name.split('/')[1];
-            var date = moment(r.created_at, 'YYYY-MM-DDThh:mm:ssZ');
-            html = '<div><div><a href=\"' + commit_url + '\">' + commit_message + '</a>';
-            html += ' <span class=\"text-muted\">' + repo_name + '</span></div>';
-            html += '<div>' + date.format('DD MMM YYYY') + '</div></div>';
-            $('.gh-recent').append($(html));
-          })
-        }
-      });
+      var ghRecents = $('.gh-recent');
+
+      if (ghRecents.length > 0) {
+        $.ajax({
+          url: 'https://api.github.com/users/crsmithdev/events',
+          dataType: 'jsonp',
+          success: function (data) {
+            var commits = _.filter(data.data, function(e) {return e.type == 'PushEvent'});
+            _.each(_.first(commits, 5), function(r) {
+              var commit_message = r.payload.commits[0].message;
+              var commit_url = 'https://github.com/' + r.repo.name + '/commit/' + r.payload.commits[0].sha;
+              var repo_name = r.repo.name.split('/')[1];
+              var date = moment(r.created_at, 'YYYY-MM-DDThh:mm:ssZ');
+              html = '<div><div><a href=\"' + commit_url + '\">' + commit_message + '</a>';
+              html += ' <span class=\"text-muted\">' + repo_name + '</span></div>';
+              html += '<div>' + date.format('DD MMMM YYYY') + '</div></div>';
+              ghRecents.append($(html));
+            })
+          }
+        })
+      }
     //]]>
     </script>"
   [:div {:class "footer"}
