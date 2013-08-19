@@ -29,12 +29,14 @@
        [:li [:a {:href "/blog.html"} "Blog"]]
        [:li [:a {:href "/projects.html"} "Projects"]]
        [:li [:a {:href "/about.html"} "About"]]]
-      [:ul {:class "nav navbar-nav pull-right"}
+      [:ul {:class "nav navbar-nav navbar-right"}
        [:li [:a {:href "http://github.com/crsmithdev" :class "icon-header"} [:i {:class "icon-github icon-2x"}]]
        [:li [:a {:href "http://twitter.com/crsmithdev" :class "icon-header"} [:i {:class "icon-twitter icon-2x"}]]]]]]]]]
   [:div {:class "content"}
    [:div {:class "container"}
-    content]]
+    content
+    [:script {:src "http://code.jquery.com/jquery.js"}]
+    [:script {:src "/js/lib/bootstrap.min.js"}]]]
   [:div {:class "footer"}
    [:div {:class "container"}
     [:p "Built with "
