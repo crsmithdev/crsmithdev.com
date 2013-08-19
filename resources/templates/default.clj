@@ -36,7 +36,31 @@
    [:div {:class "container"}
     content
     [:script {:src "http://code.jquery.com/jquery.js"}]
-    [:script {:src "/js/lib/bootstrap.min.js"}]]]
+    [:script {:src "/js/lib/bootstrap.min.js"}]
+    [:script {:src "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"}]
+    [:script {:src "/js/lib/moment.min.js"}]]]
+    "<script type=\"text/javascript\">
+    //<![CDATA[
+      $.ajax({
+        url: 'https://api.github.com/users/crsmithdev/events',
+        dataType: 'jsonp',
+        success: function (data) {
+          var commits = _.filter(data.data, function(e) {return e.type == 'PushEvent'});
+          _.each(_.first(commits, 5), function(r) {
+            var commit_message = r.payload.commits[0].message
+            var commit_url = 'https://github.com/' + r.repo.name + '/commit/' + r.payload.commits[0].sha;
+            var repo_name = r.repo.name.split('/')[1];
+            var date = moment(r.created_at, 'YYYY-MM-DDThh:mm:ssZ')
+            str = '<div><div><a href=\"' + commit_url + '\">' + commit_message + '</a>'
+            str += ' <span class=\"text-muted\">' + repo_name + '</span></div>';
+            str += '<div>' + date.format('DD MMM YYYY') + '</div></div>'
+            div = $(str);
+            $('.gh-recent').append(div);
+          })
+        }
+      });
+    //]]>
+    </script>"
   [:div {:class "footer"}
    [:div {:class "container"}
     [:p "Built with "

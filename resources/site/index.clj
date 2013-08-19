@@ -25,6 +25,4 @@
       (take 8 (reverse (static.io/list-files :posts))))]
     [:div {:class "col-md-6"}
     [:h4 "Recent Activity"]
-    [:div [:div [:a {:href "#"} (java.util.UUID/randomUUID)] [:div "03 August 2013"]]]
-    [:div [:div [:a {:href "#"} (java.util.UUID/randomUUID)] [:div "02 August 2013"]]]
-    [:div [:div [:a {:href "#"} (java.util.UUID/randomUUID)] [:div "01 August 2013"]]]]]]
+    [:div {:class "gh-recent"}]]]]
