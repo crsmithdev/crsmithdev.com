@@ -12,6 +12,10 @@ body {
     padding-bottom: 0px !important;
 }
 
+.gh-recent {
+    min-height: 281px;
+}
+
 @media (min-width: 768px) {
     .navbar-header {
         padding-left: 0px;
