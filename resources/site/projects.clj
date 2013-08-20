@@ -1,8 +1,8 @@
 {:title "crsmithdev.com - projects"}
 
 [:div
- [:div {:class "row"}
-  [:div {:class "col-md-12"}
+ [:div.row
+  [:div.col-md-12
    [:h2 "Projects"]
    [:h3 "Arrow"]
    [:p

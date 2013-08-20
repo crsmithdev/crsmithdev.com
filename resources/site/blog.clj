@@ -1,8 +1,8 @@
 {:title "crsmithdev.com - blog"}
 
 [:div
- [:div {:class "row"}
-  [:div {:class "col-md-12"}
+ [:div.row
+  [:div.col-md-12
    [:h2 "Blog"]
    (map #(let [f % url (static.core/post-url f)
                [metadata _] (static.io/read-doc f)

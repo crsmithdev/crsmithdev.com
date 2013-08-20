@@ -5,92 +5,50 @@
   [:meta {:http-equiv "content-type" :content "text/html; charset=UTF-8"}]
   [:meta {:name "description" :content (:description metadata)}]
   [:meta {:name "keywords" :content (:tags metadata)}]
-  [:meta {:name "author" :content "Nurullah Akkaya"}]
+  [:meta {:name "author" :content "Chris Smith"}]
   [:link {:rel "icon" :href "/images/favicon.ico" :type "image/x-icon"}]
   [:link {:rel "shortcut icon" :href "/images/favicon.ico" :type "image/x-icon"}]
-  [:link {:rel "stylesheet" :type "text/css" :href "/css/bootstrap.css"}]
-  [:link {:rel "stylesheet" :type "text/css" :href "/css/font-awesome.min.css"}]
-  [:link {:rel "stylesheet" :type "text/css" :href "/css/highlight.css"}]
-  [:link {:rel "stylesheet" :type "text/css" :href "/css/crsmithdev.css"}]
+  [:link {:rel "stylesheet" :type "text/css" :href "//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome.min.css"}]
+  [:link {:rel "stylesheet" :type "text/css" :href "/css/bootstrap.min.css"}]
+  [:link {:rel "stylesheet" :type "text/css" :href "/css/crsmithdev.min.css"}]
   [:title (:title metadata)]]
  [:body
-  [:div {:class "header"}
-   [:nav {:class "navbar navbar-fixed-top" :role "navigation"}
-    [:div {:class "container"}
-     [:div {:class "navbar-header"}
-      [:button {:type "button" :class "navbar-toggle" :data-toggle "collapse"
-                :data-target ".navbar-ex1-collapse"}
-      [:span {:class "sr-only"} "Toggle navigation"]
-      [:span {:class "icon-bar"}]
-      [:span {:class "icon-bar"}]
-      [:span {:class "icon-bar"}]]
-      [:a {:class "navbar-brand" :href "/index.html"} "Chris Smith"]]
-     [:div {:class "collapse navbar-collapse navbar-ex1-collapse"}
-      [:ul {:class "nav navbar-nav"}
+  [:div.header
+   [:nav.navbar.navbar-fixed-top {:role "navigation"}
+    [:div.container
+     [:div.navbar-header
+      [:button.navbar-toggle {:type "button" :data-toggle "collapse" :data-target ".navbar-ex1-collapse"}
+      [:span.sr-only "Toggle navigation"]
+      [:span.icon-bar]
+      [:span.icon-bar]
+      [:span.icon-bar]]
+      [:a.navbar-brand {:href "/index.html"} "Chris Smith"]]
+     [:div.collapse.navbar-collapse.navbar-ex1-collapse
+      [:ul.nav.navbar-nav
        [:li [:a {:href "/blog.html"} "Blog"]]
        [:li [:a {:href "/projects.html"} "Projects"]]
        [:li [:a {:href "/about.html"} "About"]]]
-      [:ul {:class "nav navbar-nav navbar-right"}
-       [:li [:a {:href "http://github.com/crsmithdev" :class "icon-header"} [:i {:class "icon-github icon-2x"}]]
-       [:li [:a {:href "http://twitter.com/crsmithdev" :class "icon-header"} [:i {:class "icon-twitter icon-2x"}]]
-       [:li [:a {:href "http://www.linkedin.com/in/crsmithdev" :class "icon-header"} [:i {:class "icon-linkedin icon-2x"}]]]]]]]]]]
-  [:div {:class "content"}
-   [:div {:class "container"}
+      [:ul.nav.navbar-nav.navbar-right
+       [:li [:a.icon-header {:href "http://github.com/crsmithdev"} [:i.icon-github.icon-2x]]
+       [:li [:a.icon-header {:href "http://twitter.com/crsmithdev"} [:i.icon-twitter.icon-2x]]
+       [:li [:a.icon-header {:href "http://www.linkedin.com/in/crsmithdev"} [:i.icon-linkedin.icon-2x]]]]]]]]]]
+  [:div.content
+   [:div.container
     (if (= (:type metadata) :post)
-      [:div {:class "row"}
-       [:div {:class "col-md-12"}
+      [:div.row
+       [:div.col-md-12
         content]]
       content)
-    [:script {:src "http://code.jquery.com/jquery.js"}]
-    [:script {:src "/js/lib/bootstrap.min.js"}]
-    [:script {:src "/js/lib/highlight.pack.js"}]
-    [:script {:src "/js/lib/moment.min.js"}]]]
-    "<script type=\"text/javascript\">
-    //<![CDATA[
-
-      var ghRecents = $('.gh-recent');
-
-      if (ghRecents.length > 0) {
-
-        $.ajax({
-          url: 'https://api.github.com/users/crsmithdev/events',
-          dataType: 'jsonp',
-          success: function (data) {
-            var shown = 0;
-
-            for (var i = 0; i < data.data.length && shown < 5; ++i) {
-              var r = data.data[i];
-
-              if (r.type == 'PushEvent') {
-                var commit_message = r.payload.commits[0].message;
-                var commit_url = 'https://github.com/' + r.repo.name + '/commit/' + r.payload.commits[0].sha;
-                var repo_name = r.repo.name.split('/')[1];
-                var date = moment(r.created_at, 'YYYY-MM-DDThh:mm:ssZ');
-                html = '<div><div><a href=\"' + commit_url + '\">' + commit_message + '</a>';
-                html += ' <span class=\"text-muted\">' + repo_name + '</span></div>';
-                html += '<div>' + date.format('DD MMMM YYYY') + '</div></div>';
-                ghRecents.append($(html));
-                ++shown;
-              }
-            }
-          }
-        });
-      }
-    //]]>
-    </script>
-    <script type=\"text/javascript\">
-    //<![CDATA[
-      hljs.initHighlightingOnLoad();
-    //]]>
-    </script>"
-  [:div {:class "footer"}
-   [:div {:class "container"}
-    [:div {:class "row"}
-     [:div {:class "col-md-12"}
+    [:script {:src "//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"}]
+    [:script {:src "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.0-rc2/js/bootstrap.min.js"}]
+    [:script {:src "//cdnjs.cloudflare.com/ajax/libs/highlight.js/7.3/highlight.min.js"}]
+    [:script {:src "/js/crsmithdev.js"}]]]
+  [:div.footer
+   [:div.container
+    [:div.row
+     [:div.col-md-12
       [:p "Built with "
-       [:a {:href "http://getbootstrap.com/"} "Bootstrap"]
-       " and " 
+       [:a {:href "http://getbootstrap.com/"} "Bootstrap"] " and "
        [:a {:ref "https://github.com/nakkaya/static"} "Static"]
        [:br]
-       "&copy; 2013 "
-       [:a {:href "http://crsmithdev.com"} "Chris Smith"]]]]]]]]
+       "&copy; 2013 " [:a {:href "http://crsmithdev.com"} "Chris Smith"]]]]]]]]
