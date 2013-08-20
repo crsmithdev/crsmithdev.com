@@ -10,6 +10,7 @@
   [:link {:rel "shortcut icon" :href "/images/favicon.ico" :type "image/x-icon"}]
   [:link {:rel "stylesheet" :type "text/css" :href "/css/bootstrap.css"}]
   [:link {:rel "stylesheet" :type "text/css" :href "/css/font-awesome.min.css"}]
+  [:link {:rel "stylesheet" :type "text/css" :href "/css/highlight.css"}]
   [:link {:rel "stylesheet" :type "text/css" :href "/css/crsmithdev.css"}]
   [:title (:title metadata)]]
  [:body
@@ -31,12 +32,18 @@
        [:li [:a {:href "/about.html"} "About"]]]
       [:ul {:class "nav navbar-nav navbar-right"}
        [:li [:a {:href "http://github.com/crsmithdev" :class "icon-header"} [:i {:class "icon-github icon-2x"}]]
-       [:li [:a {:href "http://twitter.com/crsmithdev" :class "icon-header"} [:i {:class "icon-twitter icon-2x"}]]]]]]]]]
+       [:li [:a {:href "http://twitter.com/crsmithdev" :class "icon-header"} [:i {:class "icon-twitter icon-2x"}]]
+       [:li [:a {:href "http://www.linkedin.com/in/crsmithdev" :class "icon-header"} [:i {:class "icon-linkedin icon-2x"}]]]]]]]]]]
   [:div {:class "content"}
    [:div {:class "container"}
-    content
+    (if (= (:type metadata) :post)
+      [:div {:class "row"}
+       [:div {:class "col-md-12"}
+        content]]
+      content)
     [:script {:src "http://code.jquery.com/jquery.js"}]
     [:script {:src "/js/lib/bootstrap.min.js"}]
+    [:script {:src "/js/lib/highlight.pack.js"}]
     [:script {:src "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"}]
     [:script {:src "/js/lib/moment.min.js"}]]]
     "<script type=\"text/javascript\">
@@ -63,13 +70,20 @@
         })
       }
     //]]>
+    </script>
+    <script type=\"text/javascript\">
+    //<![CDATA[
+      hljs.initHighlightingOnLoad();
+    //]]>
     </script>"
   [:div {:class "footer"}
    [:div {:class "container"}
-    [:p "Built with "
-     [:a {:href "http://getbootstrap.com/"} "Bootstrap"]
-     " and " 
-     [:a {:ref "https://github.com/nakkaya/static"} "Static"]
-     [:br]
-     "&copy; 2013 "
-     [:a {:href "http://crsmithdev.com"} "Chris Smith"]]]]]]
+    [:div {:class "row"}
+     [:div {:class "col-md-12"}
+      [:p "Built with "
+       [:a {:href "http://getbootstrap.com/"} "Bootstrap"]
+       " and " 
+       [:a {:ref "https://github.com/nakkaya/static"} "Static"]
+       [:br]
+       "&copy; 2013 "
+       [:a {:href "http://crsmithdev.com"} "Chris Smith"]]]]]]]]

@@ -5,6 +5,15 @@ tags: tags
 
 ## A refresh of crsmithdev.com with Bootstrap and Static
 
+    (defn make-route
+      "Returns a function that will only call the handler if the method and Clout
+      route match the request."
+      [method route handler]
+      (if-method method
+        (if-route route
+          (fn [request]
+            (render (handler request) request)))))
+
 Pork belly flexitarian viral, irony Portland occupy wayfarers locavore. Blue bottle fap small batch street art tattooed mlkshk. Letterpress umami Carles vinyl. Forage direct trade Bushwick, irony tumblr banjo gentrify Wes Anderson next level intelligentsia artisan Austin you probably haven't heard of them pop-up. Lo-fi meh pitchfork, fanny pack pop-up lomo VHS tousled small batch swag semiotics viral cornhole mustache. Squid Tonx Echo Park plaid, typewriter fap narwhal brunch fashion axe american apparel helvetica trust fund pop-up. Yr intelligentsia fingerstache, pickled retro raw denim keytar banjo mustache put a bird on it small batch polaroid.
 
 Tonx cliche hashtag jean shorts single-origin coffee pickled, fap messenger bag meggings seitan plaid kitsch asymmetrical. Forage art party readymade, pop-up wayfarers ennui leggings. Beard occupy lomo, PBR Cosby sweater yr chillwave. Mumblecore blue bottle 8-bit salvia scenester. Mustache kale chips wolf sustainable Schlitz Terry Richardson. Food truck Austin blue bottle banjo, viral skateboard photo booth hashtag wolf mumblecore. Vinyl selvage aesthetic iPhone.

@@ -4,7 +4,6 @@
  [:div {:class "row"}
   [:div {:class "col-md-12"}
    [:h2 "Projects"]
-   [:p "Some of the interesting side projects I've worked on recently."]
    [:h3 "Arrow"]
    [:p
     "Arrow is a simple, lightweight Python library, inspired by " [:a {:href "https://github.com/timrwood/moment"} "moment.js"] " and "
