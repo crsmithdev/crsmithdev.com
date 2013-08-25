@@ -3,7 +3,7 @@
 [:div
  [:div.row
   [:div.col-md-12
-   [:h1 "[needs a title]"]]]
+   [:h1 "[untitled]"]]]
  [:div.row
   [:div.col-md-6
    [:p.lead.text-muted
@@ -12,15 +12,13 @@
   [:div.col-md-12
    [:p
     "Hi, I'm Chris, a software engineer from the midwest now living and working in the heart of downtown San Francisco. "
-    "I spend my days hacking @ " [:a {:href "http://cir.ca"} "Circa"] ", where I design, develop and scale APIs and distributed systems. "
-    "In my own time, I work on personal " [:a {:href "/projects.html"} "projects"] ". I'm passionate about building things and solving problems, "
-    "and my current tools of choice are Python, Scala, and Clojure. This site shares my work, a bit "
-    [:a {:href "/about.html"} "about"] " myself as well as my " [:a {:href "/blog.html"} "blog"] " of what I've discovered, learned and done "
-    "in my professional and personal journeys."]
+    "I work at " [:a {:href "http://cir.ca"} "Circa"] ", where I design, develop and scale APIs and distributed systems. "
+    "I'm passionate about building things and solving problems, and my current tools of choice are Python, Scala, and Clojure. "
+    "Here you'll find my " [:a {:href "/blog.html"} "blog"] ", a few of the " [:a {:href "/projects.html"} "projects"] " I've worked on, "
+    "and little more " [:a {:href "/about.html"} "about"] " myself."]
    [:p
-    "I'm active on " [:a {:href "http://twitter.com/crsmithdev"} "Twitter"] " and " [:a {:href "http://github.com/crsmithdev"} "Github"]
-    ". You can also find me on " [:a {:href "http://www.linkedin.com/in/crsmithdev"} "LinkedIn" ] ", or contact me "
-    [:a {:href "mailto:crsmithdev@gmail.com"} "directly"] "."]]]
+    "I'm active on " [:a {:href "http://twitter.com/crsmithdev"} "Twitter"] ", " [:a {:href "http://github.com/crsmithdev"} "Github"]
+    " and " [:a {:href "http://www.linkedin.com/in/crsmithdev"} "LinkedIn" ] "."]]]
  [:br]
  [:div.row
   [:div.col-md-6

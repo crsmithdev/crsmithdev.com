@@ -4,8 +4,24 @@
  [:div.row
   [:div.col-md-12
    [:h2 "About"]
-   [:p "Twee before they sold out kogi asymmetrical, tumblr narwhal blue bottle pour-over readymade raw denim scenester. Ethnic forage try-hard cardigan. Wolf mixtape put a bird on it, whatever Bushwick try-hard flexitarian Vice wayfarers tousled pug post-ironic aesthetic. Tonx gastropub american apparel, literally jean shorts try-hard keffiyeh. Pug thundercats raw denim small batch photo booth High Life. Cray polaroid DIY viral, YOLO deep v kale chips semiotics cornhole chambray banh mi farm-to-table Neutra. Terry Richardson letterpress retro authentic kale chips trust fund tofu Godard YOLO fashion axe."]
-   [:p "Ugh mumblecore Godard banjo, tofu bespoke church-key. Kitsch iPhone Vice 8-bit synth forage, Pinterest next level direct trade authentic typewriter sriracha beard food truck. Banh mi photo booth yr cardigan selfies. Lomo Terry Richardson shabby chic, Echo Park disrupt aesthetic semiotics letterpress skateboard Williamsburg. Lo-fi wayfarers typewriter helvetica small batch whatever, disrupt leggings Tonx letterpress iPhone flexitarian literally. Beard sartorial bicycle rights, ennui mlkshk banh mi fanny pack Truffaut dreamcatcher. Banjo next level freegan polaroid tote bag McSweeney's, pop-up disrupt vinyl."]
+   [:p
+    "Although I originally went to school and left with a degree for something else (psychology), and then went to work in an unrelated field "
+    "(video engineering), I nonetheless found myself burning through a 3-year dash to finish two CS degrees and soak up as much as I could "
+    "about software development.  I had been brought there by a deep dissatisfaction with what I was doing with myself in life, and "
+    "the spark of passions of my younger self awakened by the first, tentative steps back into programming in well over a decade.  I took on "
+    "elaborate projects, published papers, and built software to assist teaching CS courses.  Soon I was cutting my teeth on APIs, web apps and "
+    "sentiment analysis at " [:a {:href "http://gremln.com"} "Gremln"] ", at first from a cramped table at Starbucks, then at the first startup "
+    "incubator in St. Louis."]
+   [:p
+    "A fundraising trip brought me to San Francisco and Silicon Valley, an experience that instantly impressed on me that coming here was clearly "
+    "my next step.  Barely two months later, I towed a small trailer across the US to San Francisco, finding a small apartment at the "
+    "edge of the Tenderloin, and a small, sharp team of colleagues at " [:a {:href "http://cir.ca"} "Circa"] ".  My professional pursuits have "
+    "led me more deeply into open-source development, architecture, distributed systems and functional programming; my living here has placed me "
+    "in one of the focal points of an emerging clash of technologies, ideas and cultures whose effects are only beginning to felt around the world."]
+   [:p
+    "I'm a fan of both good and awful science-fiction and horror in all forms, still very much a student of psychology, a fan of electronic music, "
+    "RPG and strategy games, cycling, and may have already lost the ability to thrive outside of places like this.  I also endeavor to always be "
+    "working on something interesting, or reading about and trying something new with software."]
    [:h3 "Interests & Areas of Expertise"]
     [:ul
      [:li "API design, development and scalability"]
