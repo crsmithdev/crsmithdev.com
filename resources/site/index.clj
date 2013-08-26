@@ -11,8 +11,8 @@
  [:div.row
   [:div.col-md-12
    [:p
-    "Hi, I'm Chris, a software engineer from the midwest now living and working in the heart of downtown San Francisco. "
-    "I work at " [:a {:href "http://cir.ca"} "Circa"] ", where I design, develop and scale APIs and distributed systems. "
+    "Hi, I'm Chris, a software engineer from the midwest now living and working in San Francisco. "
+    "I spend my days at " [:a {:href "http://cir.ca"} "Circa"] ", where I design, develop and scale APIs and distributed systems. "
     "I'm passionate about building things and solving problems, and my current tools of choice are Python, Scala, and Clojure. "
     "Here you'll find my " [:a {:href "/blog.html"} "blog"] ", a few of the " [:a {:href "/projects.html"} "projects"] " I've worked on, "
     "and little more " [:a {:href "/about.html"} "about"] " myself."]

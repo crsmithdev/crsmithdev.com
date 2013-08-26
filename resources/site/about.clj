@@ -5,23 +5,25 @@
   [:div.col-md-12
    [:h2 "About"]
    [:p
-    "Although I originally went to school and left with a degree for something else (psychology), and then went to work in an unrelated field "
-    "(video engineering), I nonetheless found myself burning through a 3-year dash to finish two CS degrees and soak up as much as I could "
-    "about software development.  I had been brought there by a deep dissatisfaction with what I was doing with myself in life, and "
-    "the spark of passions of my younger self awakened by the first, tentative steps back into programming in well over a decade.  I took on "
-    "elaborate projects, published papers, and built software to assist teaching CS courses.  Soon I was cutting my teeth on APIs, web apps and "
-    "sentiment analysis at " [:a {:href "http://gremln.com"} "Gremln"] ", at first from a cramped table at Starbucks, then at the first startup "
-    "incubator in St. Louis."]
+    "Although I originally went to school and studied psychology, and then worked in the far-removed field of video engineering, "
+    "I nonetheless found myself speeding through a 3-year dash to finish two CS degrees and soak up everything I possibly could about "
+    "software development.  I had been brought there by a long-building dissatisfaction in what I had done with my life so far, "
+    "and passions of my younger self re-ignited by my first, tentative steps back into programming in well over a decade. "]
    [:p
-    "A fundraising trip brought me to San Francisco and Silicon Valley, an experience that instantly impressed on me that coming here was clearly "
-    "my next step.  Barely two months later, I towed a small trailer across the US to San Francisco, finding a small apartment at the "
-    "edge of the Tenderloin, and a small, sharp team of colleagues at " [:a {:href "http://cir.ca"} "Circa"] ".  My professional pursuits have "
-    "led me more deeply into open-source development, architecture, distributed systems and functional programming; my living here has placed me "
-    "in one of the focal points of an emerging clash of technologies, ideas and cultures whose effects are only beginning to felt around the world."]
+    "That passion served me well &mdash; I took on elaborate projects, published papers, and built software to assist teaching CS courses. "
+    "Even before graduating, I was cutting my teeth on APIs, web apps and sentiment analysis at social media startup "
+    [:a {:href "http://gremln.com"} "Gremln"] ", at first from a cramped table at Starbucks, then at the first startup incubator in St. Louis."]
    [:p
-    "I'm a fan of both good and awful science-fiction and horror in all forms, still very much a student of psychology, a fan of electronic music, "
-    "RPG and strategy games, cycling, and may have already lost the ability to thrive outside of places like this.  I also endeavor to always be "
-    "working on something interesting, or reading about and trying something new with software."]
+    "A fundraising trip brought me to San Francisco and Silicon Valley, and with that the clear impression that moving here was my only next step. "
+    "Barely two months later, I drove across the US to San Francisco, finding an apartment at the edge of the Tenderloin, and a small, sharp team "
+    "of colleagues at " [:a {:href "http://cir.ca"} "Circa"] "."]
+   [:p
+    "My profession pursuits have since led me more deeply into open-source development, architecture, distributed systems and functional programming; "
+    "my life her has placed me in one of the focal points of an emerging collision of technologies, ideas and cultures whose effects are only "
+    "just beginning to be felt around the world."]
+   [:p
+    "I'm a fan of both good nad awful science-fiction and horror in all forms, electronic music, RPG and strategy games and cycling.  I'm also always "
+    "reading about or hacking on something new."]
    [:h3 "Interests & Areas of Expertise"]
     [:ul
      [:li "API design, development and scalability"]
