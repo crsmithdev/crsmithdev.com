@@ -22,8 +22,8 @@
     "my life her has placed me in one of the focal points of an emerging collision of technologies, ideas and cultures whose effects are only "
     "just beginning to be felt around the world."]
    [:p
-    "I'm a fan of both good nad awful science-fiction and horror in all forms, electronic music, RPG and strategy games and cycling.  I'm also always "
-    "reading about or hacking on something new."]
+    "I can usually be found watching or reading or reading science-fiction and horror, listening to electronic music, playing RPG and strategy games, "
+    "or just cycling around and beyond the city.  But always, I'm hacking away at a project or otherwise learning about something new in tech."]
    [:h3 "Interests & Areas of Expertise"]
     [:ul
      [:li "API design, development and scalability"]
