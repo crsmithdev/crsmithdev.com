@@ -22,7 +22,7 @@
     "my life here has placed me in one of the focal points of an emerging collision of technologies, ideas and cultures whose effects are only "
     "just beginning to be felt around the world."]
    [:p
-    "I can usually be found watching or reading or reading science-fiction and horror, listening to electronic music, playing RPG and strategy games, "
+    "I can usually be found watching or reading science-fiction and horror, listening to electronic music, playing RPG and strategy games, "
     "or just cycling around and beyond the city.  But always, I'm hacking away at a project or otherwise learning about something new in tech."]
    [:h3 "Interests & Areas of Expertise"]
     [:ul
