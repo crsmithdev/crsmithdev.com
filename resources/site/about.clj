@@ -18,8 +18,8 @@
     "Barely two months later, I drove across the US to San Francisco, finding an apartment at the edge of the Tenderloin, and a small, sharp team "
     "of colleagues at " [:a {:href "http://cir.ca"} "Circa"] "."]
    [:p
-    "My profession pursuits have since led me more deeply into open-source development, architecture, distributed systems and functional programming; "
-    "my life her has placed me in one of the focal points of an emerging collision of technologies, ideas and cultures whose effects are only "
+    "My professional pursuits have since led me more deeply into open-source development, architecture, distributed systems and functional programming; "
+    "my life here has placed me in one of the focal points of an emerging collision of technologies, ideas and cultures whose effects are only "
     "just beginning to be felt around the world."]
    [:p
     "I can usually be found watching or reading or reading science-fiction and horror, listening to electronic music, playing RPG and strategy games, "
