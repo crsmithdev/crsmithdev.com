@@ -7,11 +7,11 @@
  [:div.row
   [:div.col-md-6
    [:p.lead.text-muted
-    "Writings on code, startups and living in San Francisco."]]]
+    "Code and other things."]]]
  [:div.row
   [:div.col-md-12
    [:p
-    "Hi, I'm Chris, a software engineer from the midwest now living and working in San Francisco. "
+    "I'm Chris, a software engineer from the midwest now living and working in San Francisco. "
     "I spend my days at " [:a {:href "http://cir.ca"} "Circa"] ", where I design, develop and scale APIs and distributed systems. "
     "I'm passionate about building things and solving problems, and my current tools of choice are Python, Scala, and Clojure. "
     "Here you'll find my " [:a {:href "/blog.html"} "blog"] ", a few of the " [:a {:href "/projects.html"} "projects"] " I've worked on, "
