@@ -6,6 +6,7 @@
   [:meta {:name "description" :content (:description metadata)}]
   [:meta {:name "keywords" :content (:tags metadata)}]
   [:meta {:name "author" :content "Chris Smith"}]
+  [:meta {:name "viewport" :content "width=device-width, initial-scale=1.0"}]
   [:link {:rel "icon" :href "/images/favicon.ico" :type "image/x-icon"}]
   [:link {:rel "shortcut icon" :href "/images/favicon.ico" :type "image/x-icon"}]
   [:link {:rel "stylesheet" :type "text/css" :href "//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome.min.css"}]
