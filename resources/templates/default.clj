@@ -10,8 +10,8 @@
   [:link {:rel "icon" :href "/images/favicon.ico" :type "image/x-icon"}]
   [:link {:rel "shortcut icon" :href "/images/favicon.ico" :type "image/x-icon"}]
   [:link {:rel "stylesheet" :type "text/css" :href "//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome.min.css"}]
-  [:link {:rel "stylesheet" :type "text/css" :href "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.0-rc2/css/bootstrap.min.css"}]
-  ;;[:link {:rel "stylesheet" :type "text/css" :href "/css/crsmithdev.css"}]
+  [:link {:rel "stylesheet" :type "text/css" :href "/css/bootstrap.min.css"}]
+  [:link {:rel "stylesheet" :type "text/css" :href "/css/crsmithdev.css"}]
   [:title (:title metadata)]]
  [:body
   [:div.header
@@ -41,9 +41,9 @@
         content]]
       content)
     [:script {:src "//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"}]
-    [:script {:src "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.0-rc2/js/bootstrap.min.js"}]]]
-    ;;[:script {:src "//cdnjs.cloudflare.com/ajax/libs/highlight.js/7.3/highlight.min.js"}]
-    ;;[:script {:src "/js/crsmithdev.js"}]]]
+    [:script {:src "//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.0-rc2/js/bootstrap.min.js"}]
+    [:script {:src "//cdnjs.cloudflare.com/ajax/libs/highlight.js/7.3/highlight.min.js"}]
+    [:script {:src "/js/crsmithdev.js"}]]]
   [:div.footer
    [:div.container
     [:div.row
