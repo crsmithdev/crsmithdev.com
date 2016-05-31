@@ -1,7 +1,7 @@
 +++
 date = "2013-03-26T11:31:53+07:00"
-draft = true
-title = "building better email habits with mailbox"
+type = "post"
+title = "Building Better Email Habits with Mailbox"
 
 +++
 
