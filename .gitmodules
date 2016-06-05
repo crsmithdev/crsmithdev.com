@@ -1,0 +1,6 @@
+[submodule "public"]
+	path = public
+	url = git@github.com:crsmithdev/crsmithdev.github.com.git
+[submodule "themes/hugo-future-imperfect"]
+	path = themes/hugo-future-imperfect
+	url = https://github.com/jpescador/hugo-future-imperfect.git
