@@ -1,99 +1,19 @@
 baseurl = "http://crsmithdev.com/"
 languageCode = "en-us"
 title = "Chris Smith"
-theme = "hugo-future-imperfect"
+theme = "hemingway2"
 preserveTaxonomyNames = true
 paginate = 3
 googleAnalytics = "UA-40826256-2"
 
-[params]
+[[params.social]]
+url = "https://github.com/crsmithdev"
+fa_icon = "fa-github"
 
-    # Sets the meta tag description, usually reserved for the main page
-    description          = "HTML5 UP theme, Future Imperfect with some extra goodies, ported by Julio Pescador. Powered by Hugo"
-    navbarTitle          = "Chris Smith"
+[[params.social]]
+url = "https://linkedin.com/in/crsmithdev"
+fa_icon = "fa-linkedin"
 
-    # Social media buttons that appear on the sidebar
-    socialAppearAtTop    = true
-    socialAppearAtBottom = true
-
-    # set this to the section name if section is not post
-    viewMorePostLink     = "/blog/"
-
-# Optional Params
-
-    categoriesByCount    = true
-    includeReadingTime   = true
-
-    # The set of favicons used are based on the write-up from this link:
-    # https://github.com/audreyr/favicon-cheat-sheet
-    # Please see the favicon partial template for more information
-    loadFavicon          = false
-    faviconVersion       = ""
-
-    # Load custom CSS or JavaScript files. This replaces the deprecated params
-    # minifiedFilesCSS and minifiedFilesJS. The variable is an array so that you
-    # can load multiple files if necessary. You can also load the standard theme
-    # files by adding the value, "default".
-    # customCSS            = ["default", "/path/to/file"]
-    # customJS             = ["default", "/path/to/file"]
-
-# parms.intro will appear on the sidebar
-# This is optional, but it's suggested to use
-[params.intro]
-    header    = "Chris Smith"
-    paragraph = ""
-
-# Adjust the amount of recent posts on the sidebar.
-# This is optional. The default value 5 will be used
-[params.postAmount]
-    sidebar = 3
-
-# Set up your menu items in the navigation bar
-# You can use identifier to prepend a font awesome icon to your text
-[[menu.main]]
-    name = "Blog"
-    url = "/blog"
-    weight = 1
-
-[[menu.main]]
-    name = "Projects"
-    url = "/projects"
-    weight = 2
-
-[[menu.main]]
-    name = "About"
-    url = "/about"
-    weight = 3
-
-# Insert your username and the icon will apear on the page as long as
-# socialAppearAtTop or socialAppearAtBottom is set to true in the params area
-# The social media icons will appear on the sidebar
-[social]
-    github          = "crsmithdev"
-    bitbucket       = ""
-    jsfiddle        = ""
-    codepen         = ""
-    foursquare      = ""
-    dribbble        = ""
-    deviantart      = ""
-    behance         = ""
-    flickr          = "101318049@N05"
-    instagram       = ""
-    youtube         = ""
-    vimeo           = ""
-    vine            = ""
-    medium          = ""
-    wordpress       = ""
-    tumblr          = ""
-    xing            = ""
-    linkedin        = "crsmithdev"
-    slideshare      = ""
-    stackoverflow   = ""
-    reddit          = ""
-    pinterest       = ""
-    googleplus      = ""
-    facebook        = ""
-    facebook_admin  = ""
-    twitter_domain  = ""
-    twitter         = "crsmithdev"
-    email           = "crsmithdev@gmail.com"
+[[params.social]]
+url = "https://twitter.com/crsmithdev"
+fa_icon = "fa-twitter"

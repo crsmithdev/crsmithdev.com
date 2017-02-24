@@ -1,0 +1,28 @@
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+        <a class="nav-item" href="{{ .Site.BaseURL }}"><h1 class="title">{{ .Site.Title }}</h1></a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          {{ range .Site.Params.social }}
+          <a class="level-item" href="{{ .url }}">
+            <span class="icon">
+              <i class="fa {{ .fa_icon }}"></i>
+            </span>
+          </a>
+          {{ end }}
+        </nav>
+      </div>
+    </nav>
+     <div class="nav">
+      <div class="nav-left">
+        <a class="nav-item" style="margin-top:-30px" href="{{ .Site.BaseURL }}"><h3 class="title2">Blog</h3></a>
+        <a class="nav-item" style="margin-top:-30px" href="{{ .Site.BaseURL }}"><h3 class="title2">About</h3></a>
+        <a class="nav-item" style="margin-top:-30px" href="{{ .Site.BaseURL }}"><h3 class="title2">Code</h3></a>
+      </div>
+    </div>
+
+  </div>
+</section>

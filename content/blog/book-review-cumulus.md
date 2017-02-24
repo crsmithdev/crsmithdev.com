@@ -6,8 +6,6 @@ categories = ["books"]
 
 +++
 
-{{< img-post path="/images" file="cumulus-cover.jpg" alt="Cumulus cover" type="center" >}}
-
 [Cumulus](https://www.amazon.com/Cumulus-Eliot-Peper-ebook/dp/B01E4L5L6S) is a new novel from Eliot Peper, set in an near-future Bay Area remade by severe economic inequality, ubiquitous surveillance and consolidation of corporate power.  While it works better as a commentary than as a novel, the dystopia it presents is a plausible evolution of current economic and social trends and worth a read by fans of the genre, or anyone interested in where another decade or so might take us.
 
 The namesake of the book, the Cumulus corporation, is a vast AI-powered information aggregator that has embedded itself into every aspect of digital life.  Cumulus has absorbed many other companies to add to its growing collective, including concepts, if not names, that will be familiar: Fleet, a driverless future Uber, internet provider Bandwidth, cloud storage service Backend, and mercenary service Security amongst others.  Cumulus sucks in staggering amounts of real-time data from every device, service, media platform and subsidiary, weaving a complex, intricate and invasive intelligence portrait of anyone connected.  Think [Facebook listening to you on your phone microphone](http://qz.com/697923/heres-how-to-stop-facebook-from-listening-to-you-on-your-phone/) and take it to its most disturbing possible conclusion.
