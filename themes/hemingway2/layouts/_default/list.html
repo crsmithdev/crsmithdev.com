@@ -10,6 +10,9 @@
         {{ partial "tags" .Params.tags }}
       {{ end }}
       <div class="content">
+        {{ if .Params.featuredImage }}
+          <img src="{{ .Params.featuredImage }}" />
+        {{ end }}
         {{ .Summary | plainify | safeHTML }}
         {{ if .Truncated }}
         ...<a class="button is-link" href="{{ .Permalink }}" style="height:28px">

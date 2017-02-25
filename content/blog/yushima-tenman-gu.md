@@ -3,12 +3,13 @@ date = "2016-06-05T21:00:11+07:00"
 title = "Yushima Tenman-gū"
 type = "post"
 categories = ["travel", "photography"]
+featuredImage = "/images/yushima-shrine.jpg"
 
 +++
 
 ![alt](/images/yushima-shrine.jpg)
 
-[Yushima Tenman-gū](https://en.wikipedia.org/wiki/Yushima_Tenman-g%C5%AB) is a small Shinto shrine in northern Tokyo I found after getting off at the wrong train station on the way to [Ueno Park](https://en.wikipedia.org/wiki/Ueno_Park).  The building pictured above is actually not the main shrine itself, but one of the other buildings in the complex.  
+[Yushima Tenman-gū](https://en.wikipedia.org/wiki/Yushima_Tenman-g%C5%AB) is a small Shinto shrine in northern Tokyo I found after getting off at the wrong train station on the way to [Ueno Park](https://en.wikipedia.org/wiki/Ueno_Park).  The building pictured above is actually not the main shrine itself, but one of the other buildings in the complex.
 
 From [Wikipedia](https://en.wikipedia.org/wiki/Yushima_Tenman-g%C5%AB):
 
