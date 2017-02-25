@@ -6,19 +6,19 @@ categories = ["habits"]
 
 +++
 
-## Building Better Email Habits with Mailbox
-
-### Introduction
+# Introduction
 
 As my first-ever blog post, I'm presenting my recent experience with the recent email app, [Mailbox](http://mailboxapp.com).  This is less about the app itself, however (or it recently being snapped up by Dropbox for $100 million), but more about how I used it to help me examine and improve my behavior when it comes to handling and communicating via email.
 
-### Mailbox
+<!--more-->
+
+# Mailbox
 
 Briefly, Mailbox is an iPhone app that integrates aggressively with one or more of your email accounts (GMail only, for now), and through a gesture-focused UI presents four actions to be taken on any one email:  archive it, delete it, reschedule it for later, or send it to a list.  Of the four, rescheduling is the most interesting, as it yanks the email from your inbox at that moment and then returns it after a selectable interval.  The gestures and UI are slick, performance is good, and despite the significant wait to actually be able to USE the app (roughly 3 weeks in the queue), it has managed to become the default email application on my phone already.  5 stars from me.
 
 But this is not an app review, it's a behavioral one.  What's immediately clear about the Mailbox experience is that it is entirely geared toward reaching and maintaining "inbox zero".  The app badge indicates the total number of emails in your inbox, **not** the number of unread ones.  By default, push notifications are enabled for **all** emails (though this is configurable).  Clearing your way to zero rewards you with a peek at a nice, relaxing image, and the option to share the first time you accomplish it.  Clearly, a strongly opinionated design.
 
-### Diving in
+# Diving in
 
 What hit me immediately upon using the app for the first time, however, looked more like this:  across two accounts, an app badge of 900+ and a steady snowfall of push notifications about incoming emails.  Obviously a broken state of affairs even in the absence of an opinionated email app, but also one that is effectively incompatible with Mailbox.  A reflexive response from me might be to defer trying out the app until I got around to cleaning up my inbox...and then to defer cleaning my inbox until some undefined date and time that's easy to forget and conveniently lets me continue doing things just as I have been.
 
@@ -26,7 +26,7 @@ I've been wanting to take a more active role in examining, managing and changing
 
 Most importantly, I resolved to cast a critical eye on the process, and keep some notes so I could write about it.
 
-### Behavior
+# Behavior
 
 It took little introspection to quickly identify my typical pattern of managing email.  As with many things, it was clearly a sub-optimal pattern that I had grown well-accustomed to through years of extensive practice.  What follows is the cycle I would repeat every several months:
 
@@ -46,7 +46,7 @@ Let's take a look specifically at what's wrong with this:
 * **Things get lost**:  When my inbox contains hundreds of read and unread items, I can't glance at it and get an instant sense of what I need to respond to.  It becomes very likely that I will miss important items, and even more likely that when I decide to clean it up in bulk I'll misfile, delete or otherwise overlook something that I shouldn't.
 * **It becomes a low-grade stressor**:  Email is now a pile of unfinished tasks and questionably-relevant bits of information.  It is just another minor aspect of life that I feel I've lost control of.
 
-### Getting Things Done
+# Getting Things Done
 
 What really jumped out at me immediately upon using Mailbox was that it very closely parallels principles in David Allen's [Getting Things Done: The Art of Stress-Free Productivity](http://www.amazon.com/Getting-Things-Done-Stress-Free-Productivity/dp/B0012OMFHY/ref=zg_bs_2569_3).  Mailbox's actions match Allen's "do it, delegate it, defer it, drop it", with a clear mapping:  do it &rarr; archive, delegate it &rarr; list, defer it &rarr; reschedule, and drop it &rarr; delete.  A quick search revealed a few others mentioning this as possible, partial inspiration for the approach the app takes.
 
@@ -54,7 +54,7 @@ Allen's argument is that applying this methodology frees up mental space for hig
 
 The organizational system proposed in Getting Things Done now definitely appears to be a product of it's time (originally published in 2002), and makes heavier use of paper and files.  However, Mailbox neatly uses gestures to map this process onto the fully paperless system of email, replacing filing into physical folders with flicks of the thumb.
 
-### Using Mailbox
+# Using Mailbox
 
 Getting started with Mailbox is easy: once you can use the app, clean out your inbox and start using it at zero.  The trick of it, of course, is maintaining zero.  Here are some of the things I learned in the process:
 
@@ -65,7 +65,7 @@ Getting started with Mailbox is easy: once you can use the app, clean out your i
 * **Use lists sparingly**:  I treat them as temporary storage, mostly for newsletters that I **do** want to read, or things that I can't deal with quickly.  Remove items after a few days at most:  if you're hanging onto it that long but not reading or acting on it, take a good look at why that's the case and if it really makes sense.  Don't let lists become holding tanks for a lot of unfinished business:  you're shifting the problem elsewhere and letting bad habits continue.
 * **Reschedule**:  This is actually a really good way to defer things meaningfully, especially if notifications are enabled for rescheduled messages.  The interruption of a quick reminder should encourage judicious use.
 
-### Progress
+# Progress
 
 After three weeks, I've maintained a steady state of inbox zero, and have significantly reduced my incoming email volume.  What's surprised me the most is that by using the app as a tool for behavioral change and reinforcement, I've managed to trade a healthy dose of dysfunction and disorganization for a very small moment of extra effort throughout the day.  It feels like a bit of gamification without the annoyance and artificiality of rewards:  the reward is a stack of minor accomplishments, and seeing that repeated over time.
 

@@ -3,7 +3,9 @@
 {{ partial "nav" . }}
 <section class="section">
   <div class="container">
+    {{ if eq .Type "post" }}
     <h2 class="subtitle is-6">{{ .Date.Format "January 2, 2006" }}</h2>
+    {{ end }}
     <h1 class="title">{{ .Title }}</h1>
     {{ if .Params.tags }}
       {{ partial "tags" .Params.tags }}

@@ -6,11 +6,11 @@ categories = ["code"]
 
 +++
 
-## Running Redis 2.6 on Docker
-
-### Docker
+# Docker
 
 With the end of my free tier eligibility looming on AWS, I took advantage of the [Rackspace developer discount](http://developer.rackspace.com/devtrial/) and set up a new account and personal server this weekend.  One of the technologies I've been most interested in recently is [Docker](http://www.docker.io), a container engine for Linux which aims to be the intermodal shipping container for applications and their dependencies.  A brand-new box seemed like the perfect time to dig in to it.
+
+<!--more-->
 
 To get a sense of what Docker is and how it works, I'd recommend going through the [getting started](http://www.docker.io/gettingstarted/) tutorial as well as some of the examples in the [documentation](http://docs.docker.io/en/latest/).  However, here's a very brief rundown:
 
@@ -25,7 +25,7 @@ To get a sense of what Docker is and how it works, I'd recommend going through t
 
 One of the documentation examples describes setting up a [Redis](http://redis.io) service.  Following the example was straightforward, but I felt it was missing two things when I was finished.  First, it uses Redis 2.4, which is already quite out of date (as of this writing, Redis 2.8 is nearing release).  Plus, it felt awkward having to specify a lengthy command and config file each time the container started.
 
-### Installing Redis 2.6
+# Installing Redis 2.6
 
 The first thing to do is start a container from a base image, in this case the `ubuntu` image pulled during setup:
 
@@ -57,7 +57,7 @@ Verify the server is working by running the following:
     redis-server /etc/redis/redis.conf
 
 
-### Run commands and images 
+# Run commands and images 
 
 In the example, the resulting container is committed to an image, and then run:
 
@@ -79,7 +79,7 @@ Note that it is still possible to override the image-specified run command.  The
 
     sudo docker run -i -t crsmithdev/redis2.6 /bin/bash
 
-### Handling data
+# Handling data
 
 One important point:  what about the data and log files that result from the Redis process?  Every time I run Redis from that image, I get a new container with fresh data.  That's ideal for some situations, but less so for for others: in a production environment, it's entirely possible I'd want to be able to start a new Redis container, but be able to load a dumpfile from a previous one.
 
@@ -97,7 +97,7 @@ Connecting via `redis-cli` and executing `SAVE` should result in a `dump.rdb` fi
 
 If you specify a different logfile location in `redis.conf`, it's possible to add a second volume to the `run` command.
 
-### Fin!
+# Fin!
 
 And that's it.  This image can then be downloaded and started, producing a running, fully-functional Redis server in literally a few seconds.
 

@@ -17,3 +17,7 @@ fa_icon = "fa-linkedin"
 [[params.social]]
 url = "https://twitter.com/crsmithdev"
 fa_icon = "fa-twitter"
+
+[[params.social]]
+url = "mailto:crsmithdev@gmail.com"
+fa_icon = "fa-envelope"

@@ -1,7 +1,7 @@
 $blue: #2077b2
 $primary: $blue
 $grey-dark: #42464c
-$family-sans-serif: "游ゴシック", YuGothic, "ヒラギノ角ゴ Pro", "Hiragino Kaku Gothic Pro", "メイリオ", "Meiryo", sans-serif
+$family-sans-serif: Lato,'Hiragino Kaku Gothic Pro',メイリオ,Meiryo,sans-serif
 
 @import "node_modules/bulma/bulma"
 
@@ -24,9 +24,10 @@ $family-sans-serif: "游ゴシック", YuGothic, "ヒラギノ角ゴ Pro", "Hira
 
 html
   background-color: transparent
+  
 
 .section
-  padding: 20px 20px
+  padding: 20px 20px 10px 20px
 
 .nav .level-item
   margin-left: 10px
@@ -36,20 +37,46 @@ html
 
 .title
   line-height: 1.25
-  font-size: 24px
+  font-size: 26px
   a
     color: #222324
   &.notfound
     font-size: 20vw
 
+.title3
+  line-height: 1.25
+  font-size: 32px
+  a
+    color: #222324
+  &.notfound
+    font-size: 20vw
+
+.button.is-link
+  padding: 5px
+
+.nav
+  min-height: 0px
+
+.nav-item
+  padding: 5px
+
 .title2
   line-height: 1.25
-  font-size: 18px
+  font-size: 20px
+  margin-left: 2px
   color: #69707a
+
+
   a
     color: #69707a
   &.notfound
     font-size: 20vw
+
+h3.title2
+  border-bottom: 1px solid white
+  &:hover
+    border-bottom: 1px solid #69707a
+    
 
 code
   color: inherit
@@ -59,7 +86,7 @@ code
 
 
 article+article
-  margin-top: 80px
+  margin-top: 50px
 
 .content
   h1, h2, h3, h4, h5, h6
@@ -78,15 +105,15 @@ article+article
   h5+h6:not(:first-child)
     margin-top: 20px
   h1
-    font-size: 24px
+    font-size: 22px
     &::before
       content: "# "
   h2
-    font-size: 22px
+    font-size: 20px
     &::before
       content: "## "
   h3
-    font-size: 20px
+    font-size: 18px
     &::before
       content: "### "
   h4
