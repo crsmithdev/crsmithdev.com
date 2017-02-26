@@ -11,13 +11,20 @@ url = "https://github.com/crsmithdev"
 fa_icon = "fa-github"
 
 [[params.social]]
-url = "https://linkedin.com/in/crsmithdev"
-fa_icon = "fa-linkedin"
-
-[[params.social]]
 url = "https://twitter.com/crsmithdev"
 fa_icon = "fa-twitter"
 
 [[params.social]]
+url = "https://linkedin.com/in/crsmithdev"
+fa_icon = "fa-linkedin"
+
+[[params.social]]
+url = "https://keybase.io/crsmithdev"
+fa_icon = "fa-key"
+
+[[params.social]]
 url = "mailto:crsmithdev@gmail.com"
 fa_icon = "fa-envelope"
+
+[params.highlight]
+style = "github"

@@ -11,7 +11,27 @@ title = "About Me"
 
 +++
 
-TBA
+Hi, I'm Chris Smith.
+
+Currently, I am engineering manager at [Uber](https://www.uber.com/), which I joined as an engineer in 2014.  In my time there, I've worked in the data engineering and developer experience organizations, where I've built real-time data infrastructure, microservices, developer frameworks and data visualization tools, and led teams at both the technical and managerial levels.  Prior to Uber, I was a full-stack and operations engineer at [Circa](http://circa.com/), and lead software developer at [Gremlin Social](https://www.gremlinsocial.com/).
+
+I hold a B.S. and M.S. in computer science from [Webster University](http://www.webster.edu/), with an emphasis in distributed systems, completed in 2011.  I also have a background in psychology, with a B.A in 2003.  
+
+My areas of interest and expertise include:
+
+ - Distributed systems and databases
+ - Data engineering, infrastructure and real-time analytics
+ - Architecture, frameworks and scalable engineering practices
+ - Mentorship, management, personal and organizational growth
+ - Machine learning and natural language processing
+
+For several years during the 2000s, I worked as a video engineer for IATSE local 143 in St. Louis, MO.
+
+I am also a Buddhist and daily meditator.  I am a founder and coordinator of mindfulness@, a mindfulness & meditation practice group at Uber.  I have a particular interest in the intersection of mindfulness and technology, and in 
+
+I live in San Francisco, CA with my fiancee Leah.
+
+
 
 <!--
 Although I originally went to school and studied psychology, and then worked in the far-removed field of video engineering, I nonetheless found myself speeding through a 3-year dash to finish two CS degrees and soak up everything I possibly could about software development. I had been brought there by a long-building dissatisfaction in what I had done with my life so far, and passions of my younger self re-ignited by my first, tentative steps back into programming in well over a decade.
