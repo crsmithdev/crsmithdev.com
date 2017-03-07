@@ -1,4 +1,4 @@
-baseurl = "http://crsmithdev.com/"
+baseurl = "https://crsmithdev.com/"
 languageCode = "en-us"
 title = "Chris Smith"
 theme = "hemingway2"

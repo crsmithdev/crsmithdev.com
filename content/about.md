@@ -11,13 +11,13 @@ title = "About Me"
 
 +++
 
-Hi, I'm Chris Smith.
+Hi, I'm Chris Smith. I live in San Francisco, California and do software, startup and mindfulness things.
 
-Currently, I am engineering manager at [Uber](https://www.uber.com/), which I joined as an engineer in 2014.  In my time there, I've worked in the data engineering and developer experience organizations, where I've built real-time data infrastructure, microservices, developer frameworks and data visualization tools, and led teams at both the technical and managerial levels.  Prior to Uber, I was a full-stack and operations engineer at [Circa](http://circa.com/), and lead software developer at [Gremlin Social](https://www.gremlinsocial.com/).
+I'm an engineering manager at [Uber](https://www.uber.com/), having joined the company as an engineer in 2014.  In my time at Uber, I've worked in the data engineering and developer experience organizations, where I've built real-time data infrastructure, microservices, developer frameworks and data visualization tools, contributing individually and leading teams at the technical and managerial levels.  Prior to Uber, I was a full-stack and operations engineer at [Circa](http://circa.com/), and lead software developer at [Gremlin Social](https://www.gremlinsocial.com/).
 
-I hold a B.S. and M.S. in computer science from [Webster University](http://www.webster.edu/), with an emphasis in distributed systems, completed in 2011.  I also have a background in psychology, with a B.A in 2003.  
+My educational background in computer science consists of a B.S. (2010) and M.S. (2011) with an emphasis in distributed systems from [Webster University](http://www.webster.edu/).  I also hold a B.A in psychology, completed in 2003.  Before college, I attended [St. Louis Priory School](https://www.priory.org/).
 
-My areas of interest and expertise include:
+Areas of my expertise and interest in the industry include:
 
  - Distributed systems and databases
  - Data engineering, infrastructure and real-time analytics
@@ -25,22 +25,8 @@ My areas of interest and expertise include:
  - Mentorship, management, personal and organizational growth
  - Machine learning and natural language processing
 
-For several years during the 2000s, I worked as a video engineer for IATSE local 143 in St. Louis, MO.
+I also develop and maintain several [open-source software projects](/projects).
 
-I am also a Buddhist and daily meditator.  I am a founder and coordinator of mindfulness@, a mindfulness & meditation practice group at Uber.  I have a particular interest in the intersection of mindfulness and technology, and in 
+I am a Buddhist and daily practitioner of meditation.  While at Uber, I founded and grew a cross-company meditation and mindfulness practice group, and research the effects of mindfulness in the workplace.  I have a particular interest in the intersection of mind and technology, and in how we can build software products with healthier iteraction patterns and more positive impacts on society and culture.
 
-I live in San Francisco, CA with my fiancee Leah.
-
-
-
-<!--
-Although I originally went to school and studied psychology, and then worked in the far-removed field of video engineering, I nonetheless found myself speeding through a 3-year dash to finish two CS degrees and soak up everything I possibly could about software development. I had been brought there by a long-building dissatisfaction in what I had done with my life so far, and passions of my younger self re-ignited by my first, tentative steps back into programming in well over a decade.
-
-That passion served me well — I took on elaborate projects, published papers, and built software to assist teaching CS courses. Even before graduating, I was cutting my teeth on APIs, web apps and sentiment analysis at social media startup [Gremln](https://gremln.com), at first from a cramped table at Starbucks, then at the first startup incubator in St. Louis.
-
-A fundraising trip brought me to San Francisco and Silicon Valley, and with that the clear impression that moving here was my only next step. Barely two months later, I drove across the US to San Francisco, finding an apartment at the edge of the Tenderloin, and a small, sharp team of colleagues at [Circa](https://cir.ca).
-
-My professional pursuits have since led me more deeply into open-source development, architecture, distributed systems and functional programming; my life here has placed me in one of the focal points of an emerging collision of technologies, ideas and cultures whose effects are only just beginning to be felt around the world.
-
-I can usually be found watching or reading science-fiction and horror, listening to electronic music, playing RPG and strategy games, or just cycling around and beyond the city. But always, I'm hacking away at a project or otherwise learning about something new in tech.
--->
+When not working, I can usually be found writing code, reading books, taking classes, meditating, practicing yoga, watching Netflix or playing computer games.  I gravitate towards history, science fiction, psychology and philosophy.  I also enjoy travelling whenever possible, recently taking a 3-month trip to Asia in 2016, visiting Japan, Thailand, Singapore and Malaysia.
