@@ -1,0 +1,10 @@
+{
+  "name": "hemingway",
+  "scripts": {
+    "sass": "node-sass --output-style compressed sass/style.sass static/css/style.css"
+  },
+  "devDependencies": {
+    "bulma": "^0.1.2",
+    "sass": "^0.5.0"
+  }
+}

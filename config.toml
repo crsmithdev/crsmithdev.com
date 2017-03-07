@@ -1,7 +1,7 @@
 baseurl = "https://crsmithdev.com/"
 languageCode = "en-us"
 title = "Chris Smith"
-theme = "hemingway2"
+theme = "crsmithdev"
 preserveTaxonomyNames = true
 paginate = 3
 googleAnalytics = "UA-40826256-2"
@@ -28,3 +28,4 @@ fa_icon = "fa-envelope"
 
 [params.highlight]
 style = "github"
+languages = ["python"]

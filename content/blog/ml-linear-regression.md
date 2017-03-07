@@ -219,8 +219,8 @@ def gradient_descent_multi(X, y, theta, alpha, iterations):
     m = len(X)
 
     for i in range(iterations):
-        cost = (1/m) * np.matmul(X.T, np.matmul(X, theta) - y)
-        theta = theta - alpha * cost
+        gradient = (1/m) * np.matmul(X.T, np.matmul(X, theta) - y)
+        theta = theta - alpha * gradient
 
     return theta
 
@@ -245,10 +245,10 @@ $$`
 ```python
 from numpy.linalg import inv
 
-def gradient_descent_multi_normal(X, y):
+def normal_eq(X, y):
     return inv(X.T.dot(X)).dot(X.T).dot(y)
 
-theta = gradient_descent_multi_normal(X, y)
+theta = normal_eq(X, y)
 cost = compute_cost(X, y, theta)
 
 print('theta:', theta)
