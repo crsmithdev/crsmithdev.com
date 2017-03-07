@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>code on Chris Smith</title>
+    <link>https://crsmithdev.com/categories/code/index.xml</link>
+    <description>Recent content in code on Chris Smith</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="https://crsmithdev.com/categories/code/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Running Redis 2.6 on Docker</title>
+      <link>https://crsmithdev.com/blog/running-redis-26-on-docker/</link>
+      <pubDate>Sun, 15 Sep 2013 11:34:46 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/blog/running-redis-26-on-docker/</guid>
+      <description>&lt;h1 id=&#34;docker&#34;&gt;Docker&lt;/h1&gt;
+
+&lt;p&gt;With the end of my free tier eligibility looming on AWS, I took advantage of the &lt;a href=&#34;http://developer.rackspace.com/devtrial/&#34;&gt;Rackspace developer discount&lt;/a&gt; and set up a new account and personal server this weekend.  One of the technologies I&amp;rsquo;ve been most interested in recently is &lt;a href=&#34;http://www.docker.io&#34;&gt;Docker&lt;/a&gt;, a container engine for Linux which aims to be the intermodal shipping container for applications and their dependencies.  A brand-new box seemed like the perfect time to dig in to it.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;To get a sense of what Docker is and how it works, I&amp;rsquo;d recommend going through the &lt;a href=&#34;http://www.docker.io/gettingstarted/&#34;&gt;getting started&lt;/a&gt; tutorial as well as some of the examples in the &lt;a href=&#34;http://docs.docker.io/en/latest/&#34;&gt;documentation&lt;/a&gt;.  However, here&amp;rsquo;s a very brief rundown:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Docker uses &lt;a href=&#34;https://en.wikipedia.org/wiki/LXC&#34;&gt;LXC&lt;/a&gt; and a &lt;a href=&#34;https://en.wikipedia.org/wiki/Union_filesystem&#34;&gt;union file system&lt;/a&gt; (&lt;a href=&#34;https://en.wikipedia.org/wiki/Aufs&#34;&gt;AUFS&lt;/a&gt;) to run isolated containers (&lt;strong&gt;not&lt;/strong&gt; VMs).&lt;/li&gt;
+&lt;li&gt;Software and its dependencies are packaged into an &lt;strong&gt;image&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;Images are immutable and stateless.&lt;/li&gt;
+&lt;li&gt;Images can be committed in layers to form more complex images.&lt;/li&gt;
+&lt;li&gt;An image running a process is called a &lt;strong&gt;container&lt;/strong&gt;, which is stateful.&lt;/li&gt;
+&lt;li&gt;A container exists as running or stopped, and can be run interactively or in the background.&lt;/li&gt;
+&lt;li&gt;Images are lightweight, perhaps 100Mb for a Redis server running on Ubuntu.&lt;/li&gt;
+&lt;li&gt;Containers are not virtual machines, so they are lightening-fast to boot and lightweight on resources.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;One of the documentation examples describes setting up a &lt;a href=&#34;http://redis.io&#34;&gt;Redis&lt;/a&gt; service.  Following the example was straightforward, but I felt it was missing two things when I was finished.  First, it uses Redis 2.4, which is already quite out of date (as of this writing, Redis 2.8 is nearing release).  Plus, it felt awkward having to specify a lengthy command and config file each time the container started.&lt;/p&gt;
+
+&lt;h1 id=&#34;installing-redis-2-6&#34;&gt;Installing Redis 2.6&lt;/h1&gt;
+
+&lt;p&gt;The first thing to do is start a container from a base image, in this case the &lt;code&gt;ubuntu&lt;/code&gt; image pulled during setup:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo docker run -i -t ubuntu /bin/bash
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This results in a root shell on a new, running Ubuntu container.  A few things will be needed in order to download, build and test Redis:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;apt-get install wget build-essential tcl8.5
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To install Redis 2.6, it&amp;rsquo;s necessary to build it from source:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;wget get http://download.redis.io/releases/redis-2.6.16.tar.gz
+tar xvf redis-2.6.16.tar.gz
+cd redis-2.6.16
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Build it, run some tests and install once completed:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;make
+make test
+make install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Lastly, move the config file to a more standard location:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;mkdir /etc/redis
+mv redis.conf /etc/redis/redis.conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Verify the server is working by running the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;redis-server /etc/redis/redis.conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;run-commands-and-images&#34;&gt;Run commands and images&lt;/h1&gt;
+
+&lt;p&gt;In the example, the resulting container is committed to an image, and then run:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo docker commit &amp;lt;container_id&amp;gt; crsmithdev/redis
+sudo docker run -d -p 6379 crsmithdev/redis2.6 /usr/bin/redis-server /etc/redis/redis.conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is still a bit clunky &amp;mdash; why do &lt;code&gt;redis-server&lt;/code&gt; and the config file have to be specified each time it&amp;rsquo;s run?  Forunately, they can be built into the image itself:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo docker commit -run=&#39;{&amp;quot;Cmd&amp;quot;:[&amp;quot;/usr/local/bin/redis-server&amp;quot;, &amp;quot;/etc/redis/redis.conf&amp;quot;]}&#39; \
+    &amp;lt;container_id&amp;gt; crsmithdev/redis2.6
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That way, you can run the container like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo docker run -d -p 6379:6379 crsmithdev/redis2.6
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Specifying -p 6379:6379 ensures that the server&amp;rsquo;s port 6379 is mapped to the container&amp;rsquo;s port 6379.  Otherwise, Docker will assign a random local server port in the 49000s, which is probably unwanted in most non-development environments.&lt;/p&gt;
+
+&lt;p&gt;Note that it is still possible to override the image-specified run command.  The following will open a shell using the image, instead of launching Redis:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo docker run -i -t crsmithdev/redis2.6 /bin/bash
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;handling-data&#34;&gt;Handling data&lt;/h1&gt;
+
+&lt;p&gt;One important point:  what about the data and log files that result from the Redis process?  Every time I run Redis from that image, I get a new container with fresh data.  That&amp;rsquo;s ideal for some situations, but less so for for others: in a production environment, it&amp;rsquo;s entirely possible I&amp;rsquo;d want to be able to start a new Redis container, but be able to load a dumpfile from a previous one.&lt;/p&gt;
+
+&lt;p&gt;Fortunately, you can share one or more volumes with the host server easily.  Modify &lt;code&gt;redis.conf&lt;/code&gt; on the container to specify a dumpfile location of your choice:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;dir /data/redis
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then, run the image specifying a mount point on the server:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo docker run -d -p 6379:6379 -v /mnt/redis:/data/redis:rw crsmithdev/redis2.6
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Connecting via &lt;code&gt;redis-cli&lt;/code&gt; and executing &lt;code&gt;SAVE&lt;/code&gt; should result in a &lt;code&gt;dump.rdb&lt;/code&gt; file in &lt;code&gt;/mnt/redis&lt;/code&gt;.  Redis will be logging to stdout unless specified otherwise, so the logs are viewable using a Docker command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo docker logs &amp;lt;container_d&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you specify a different logfile location in &lt;code&gt;redis.conf&lt;/code&gt;, it&amp;rsquo;s possible to add a second volume to the &lt;code&gt;run&lt;/code&gt; command.&lt;/p&gt;
+
+&lt;h1 id=&#34;fin&#34;&gt;Fin!&lt;/h1&gt;
+
+&lt;p&gt;And that&amp;rsquo;s it.  This image can then be downloaded and started, producing a running, fully-functional Redis server in literally a few seconds.&lt;/p&gt;
+
+&lt;p&gt;You can grab my image &lt;a href=&#34;https://index.docker.io/u/crsmithdev/redis2.6/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;UPDATE 9-15 - updated container run arguments, and added a bit about volumes.&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>A Blog Refresh with Bootstrap and Static</title>
+      <link>https://crsmithdev.com/blog/a-blog-refresh-with-bootstrap-and-static/</link>
+      <pubDate>Sun, 02 Jun 2013 11:34:28 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/blog/a-blog-refresh-with-bootstrap-and-static/</guid>
+      <description>&lt;p&gt;Earlier this year, I finally set up a blog on my domain, having owned but left it unused for over a year.  My needs were simple:  it was to be a completely static site, hostable on GitHub Pages or Dropbox, and the focus of the project was in &lt;strong&gt;no&lt;/strong&gt; way to be the technology or process of creating and maintaining it.  Despite the part of me that automatically geeked out at the opportunity to build my own completely custom blog generator from scratch, the point of doing it was to provide myself with a straightforward platform for &lt;em&gt;writing&lt;/em&gt;, not to go on a technical adventure in creating one.  Although I&amp;rsquo;ve only written two posts on it so far, the effort was successful: in short order, I&amp;rsquo;d set up &lt;a href=&#34;http://octopress.org&#34;&gt;Octopress&lt;/a&gt; and had it deploying to Pages.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;I found it usable but lacking in a few key ways, the most significant of which was that I was simply underwhelmed with the themes available for Octopress, and had little interest in building a new theme or heavily modifying an existing one.  Moreover, it felt very much like a monolithic framework, into a tiny corner of which were tucked the contents of my blog.  I realized that what I wanted was a simple engine that would handle the work of converting Markdown to HTML and stitching the results together with templates, but would otherwise stay out of the way as much as possible, impose little structure and even less of its own code on me, and give me total control over the design without relying on theming.&lt;/p&gt;
+
+&lt;p&gt;I was also eager to address a few specific issues:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;It was &lt;em&gt;only&lt;/em&gt; a blog, lacking even a bio page.&lt;/li&gt;
+&lt;li&gt;Responsiveness was questionable.&lt;/li&gt;
+&lt;li&gt;Syntax highlighting was not supported.&lt;/li&gt;
+&lt;li&gt;I wanted to add a simple display of recent GitHub activity.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Lastly, as Clojure is quickly eclipsing all others as my hacking language of choice, I was heavily biased towards finding a solution that was written in and used it.&lt;/p&gt;
+
+&lt;h1 id=&#34;components&#34;&gt;Components&lt;/h1&gt;
+
+&lt;p&gt;In the end, I selected the following:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://getbootstrap.com&#34;&gt;Bootstrap 3&lt;/a&gt; - newly released, rebuilt and responsive-first.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://bootswatch.com/flatly/&#34;&gt;Flatly&lt;/a&gt; theme from &lt;a href=&#34;http://bootswatch.com/&#34;&gt;Bootswatch&lt;/a&gt; - a flat, simple and readable theme for Bootstrap 3.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/nakkaya/static&#34;&gt;Static&lt;/a&gt; - a tiny, embeddable static site generator in Clojure.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://fortawesome.github.io/Font-Awesome/&#34;&gt;Font Awesome&lt;/a&gt; - high-quality icons.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://code.google.com/p/google-code-prettify/&#34;&gt;google-code-prettify&lt;/a&gt; - code syntax highlighting.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&#34;static&#34;&gt;Static&lt;/h1&gt;
+
+&lt;p&gt;Static is a very simple static site generator, with full documentation that spans about &lt;a href=&#34;http:/nakkaya.com/static.html&#34;&gt;two pages&lt;/a&gt;.  What&amp;rsquo;s most refreshing about Static (compared to Octropress, at least) is that it&amp;rsquo;s built as a separate project, and then the .jar is copied into the repo for the site that will use it.  This means that the only traces of it that end up in the blog project are the .jar itself, and a few, flexible conventions regarding directory structure.&lt;/p&gt;
+
+&lt;p&gt;Here&amp;rsquo;s all that&amp;rsquo;s needed to get started with Static:&lt;/p&gt;
+
+&lt;!--?prettify lang=sh--&gt;
+
+&lt;pre&gt;&lt;code&gt;git clone https://github.com/nakkaya/static.git
+cd static
+lein deps
+lein uberjar
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This results in a .jar named &lt;code&gt;static-app.jar&lt;/code&gt; in the &lt;code&gt;target&lt;/code&gt; directory, which can then be copied into a fresh repo for a site:&lt;/p&gt;
+
+&lt;!--?prettify lang=sh--&gt;
+
+&lt;pre&gt;&lt;code&gt;cd ..
+mkdir crsmithdev.com
+cd crsmithdev.com
+git init
+cp ../static/target/static-app.jar .
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;At minimum, this is the default structure of files and directories needed for a site:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;.
+|-- config.clj
+`-- resources
+    |-- posts
+    |-- public
+    |-- site
+    |-- templates
+        `-- default.clj
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A brief description of what all these are:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;config.clj&lt;/code&gt; - global site configuration options.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;posts&lt;/code&gt; - blog posts, in markdown or org-mode format.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;public&lt;/code&gt; - public site resources and directories (&lt;code&gt;js&lt;/code&gt;, &lt;code&gt;css&lt;/code&gt;, etc.), to be copied to the root of the generated site.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;site&lt;/code&gt; - Hiccup templates for the content of non-blog-post pages.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;templates&lt;/code&gt; - Full-page Hiccup templates.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;All that&amp;rsquo;s needed to build the site is this:&lt;/p&gt;
+
+&lt;!--?prettify lang=sh--&gt;
+
+&lt;pre&gt;&lt;code&gt;java -jar static-app.jar --build
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;--watch&lt;/code&gt; option can be used to rebuild automatically when a file changes.  When the site builds, something like the following should result:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[+] INFO: Using tmp location: /var/folders/r5/30xb2fj573b_s9_2f18y4s_00000gn/T/static/
+[+] INFO: Processing Public  0.011 secs
+[+] INFO: Processing Site  0.213 secs
+[+] INFO: Processing Posts  0.695 secs
+[+] INFO: Creating RSS  0.07 secs
+[+] INFO: Creating Tags  0.03 secs
+[+] INFO: Creating Sitemap  0.0040 secs
+[+] INFO: Creating Aliases  0.01 secs
+[+] INFO: Build took  1.034 secs
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;An &lt;code&gt;html&lt;/code&gt; directory will be created in the root of the site, containing all the generated HTML.  I found that pointing my local nginx at this folder was the most straightforward way to serve the site locally while working on it, although Static does offer a &lt;code&gt;--jetty&lt;/code&gt; option to serve it as well.  The contents of my &lt;code&gt;config.clj&lt;/code&gt; are as follows:&lt;/p&gt;
+
+&lt;!--?prettify lang=clj--&gt;
+
+&lt;pre&gt;&lt;code&gt;[:site-title &amp;quot;crsmithdev.com&amp;quot;
+ :site-description &amp;quot;crsmithdev.com&amp;quot;
+ :site-url &amp;quot;http://crsmithdev.com&amp;quot;
+ :in-dir &amp;quot;resources/&amp;quot;
+ :out-dir &amp;quot;html/&amp;quot;
+ :default-template &amp;quot;default.clj&amp;quot;
+ :encoding &amp;quot;UTF-8&amp;quot;
+ :blog-as-index false
+ :create-archives false
+ :atomic-build true]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;html-templating-with-hiccup&#34;&gt;HTML templating with Hiccup&lt;/h1&gt;
+
+&lt;p&gt;Static uses &lt;a href=&#34;https://github.com/weavejester/hiccup&#34;&gt;Hiccup&lt;/a&gt;, a great templating library for Clojure, to specify the structure of pages it generates.  Having never used it before, I instantly found it to be very natural and efficient &amp;mdash; the syntax is extremely minimal, vectors and maps are used for elements and their attributes, respectively, and it&amp;rsquo;s possible to embed Clojure code right along with element definitions.&lt;/p&gt;
+
+&lt;p&gt;Here&amp;rsquo;s what the first few lines of my default template look like:&lt;/p&gt;
+
+&lt;!--?prettify lang=clj--&gt;
+
+&lt;pre&gt;&lt;code&gt;[:html
+ {:xmlns &amp;quot;http://www.w3.org/1999/xhtml&amp;quot; :lang &amp;quot;en&amp;quot; :xml:lang &amp;quot;en&amp;quot;}
+ [:head
+  [:meta {:http-equiv &amp;quot;content-type&amp;quot; :content &amp;quot;text/html; charset=UTF-8&amp;quot;}]
+  [:meta {:name &amp;quot;description&amp;quot; :content (:description metadata)}]
+  [:meta {:name &amp;quot;keywords&amp;quot; :content (:tags metadata)}]
+  [:meta {:name &amp;quot;author&amp;quot; :content &amp;quot;Chris Smith&amp;quot;}]
+  [:meta {:name &amp;quot;viewport&amp;quot; :content &amp;quot;width=device-width, initial-scale=1.0&amp;quot;}]
+  [:link {:rel &amp;quot;icon&amp;quot; :href &amp;quot;/images/favicon.ico&amp;quot; :type &amp;quot;image/x-icon&amp;quot;}]
+  [:link {:rel &amp;quot;shortcut icon&amp;quot; :href &amp;quot;/images/favicon.ico&amp;quot; :type &amp;quot;image/x-icon&amp;quot;}]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note the access of the &lt;code&gt;:description&lt;/code&gt; and &lt;code&gt;:tags&lt;/code&gt; from &lt;code&gt;metadata&lt;/code&gt;.  Static injects a few values into page rendering, specifically &lt;code&gt;metadata&lt;/code&gt; and &lt;code&gt;content&lt;/code&gt;.  &lt;code&gt;metadata&lt;/code&gt; provides some information about what kind of page is being rendered, as well as the metadata specified in the headers of blog posts, while &lt;code&gt;content&lt;/code&gt; is the actual Markdown or Hiccup-generated content that the template will include.  Because of this, it&amp;rsquo;s possible to specify different behaviors depending on what&amp;rsquo;s being rendered:&lt;/p&gt;
+
+&lt;!--?prettify lang=clj--&gt;
+
+&lt;pre&gt;&lt;code&gt;[:div.content
+ [:div.container
+  (if (= (:type metadata) :post)
+    [:div.row
+     [:div.col-md-12
+      content
+      [:div#disqus_thread]
+      [:script {:type &amp;quot;text/javascript&amp;quot;}
+       &amp;quot;// ... (disqus js)&amp;quot;]]]
+    content)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Above, if the page is a post, a simple Bootstrap grid is created, followed by the standard JS to include Disqus comments.  Note the terse syntax for specifying element classes:  this is actually one of two possible syntaxes to define classes and ids.  Below, these two forms are equivalent:&lt;/p&gt;
+
+&lt;!--?prettify lang=clj--&gt;
+
+&lt;pre&gt;&lt;code&gt;[:div {:class &amp;quot;col-md-12&amp;quot;} &amp;quot;...&amp;quot;]
+[:div.col-md-12 &amp;quot;...&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In the absence of a ready way to list blog post titles and dates, I found and adapted some code from the site of Static&amp;rsquo;s &lt;a href=&#34;http://nakkaya.com/&#34;&gt;author&lt;/a&gt;.  A number of functions are made available within templates, although they are largely undocumented:&lt;/p&gt;
+
+&lt;!--?prettify lang=clj--&gt;
+
+&lt;pre&gt;&lt;code&gt;[:div.row
+ [:div.col-md-6
+  [:h4 &amp;quot;Recent Blog Posts&amp;quot;]
+  (map #(let [f % url (static.core/post-url f)
+              [metadata _] (static.io/read-doc f)
+              date (static.core/parse-date
+                    &amp;quot;yyyy-MM-dd&amp;quot; &amp;quot;dd MMMM yyyy&amp;quot;
+                    (re-find #&amp;quot;\d*-\d*-\d*&amp;quot; (str f)))]
+     [:div
+      [:div [:a {:href url} (:title metadata)]
+      [:div date]]])
+     (take 5 (reverse (static.io/list-files :posts))))]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;bootstrap-3-font-awesome-and-theming&#34;&gt;Bootstrap 3, Font Awesome, and theming&lt;/h1&gt;
+
+&lt;p&gt;Fortunately, Bootstrap 3 was nearing release as I was beginning to work on the site, so I grabbed the RC2 version and went to work.  &lt;a href=&#34;http://bootswatch.com/&#34;&gt;Bootswatch&lt;/a&gt; provides a nice selection of attractive, free themes for Bootstrap 3, of which I picked &lt;a href=&#34;http://bootswatch.com/flatly/&#34;&gt;Flatly&lt;/a&gt;. &lt;a href=&#34;http://fortawesome.github.io/Font-Awesome/&#34;&gt;Font Awesome&lt;/a&gt; has high-quality icons for Twitter, GitHub and LinkedIn (amongst many, many others), making it an easy choice here.&lt;/p&gt;
+
+&lt;p&gt;There are plenty of great starting points / tutorials already out there for Bootstrap (I&amp;rsquo;d recommend this &lt;a href=&#34;http://getbootstrap.com/getting-started/#template&#34;&gt;starter template&lt;/a&gt;).  I did make some adjustments to the Flatly theme, though, with the goal of making the site a bit easier on the reader&amp;rsquo;s eyes and more suitable for text-dense pages:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Changed the standard font to &lt;strong&gt;Source Sans Pro&lt;/strong&gt; (from the default &lt;strong&gt;Lato&lt;/strong&gt;)&lt;/li&gt;
+&lt;li&gt;Changed the code font to &lt;strong&gt;Source Code Pro&lt;/strong&gt; (from the default &lt;strong&gt;Monaco&lt;/strong&gt;).&lt;/li&gt;
+&lt;li&gt;Increased line-height to 24px.&lt;/li&gt;
+&lt;li&gt;Narrowed the container max-width to 840px.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The fonts can be found at &lt;a href=&#34;http://www.google.com/fonts&#34;&gt;Google Fonts&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h1 id=&#34;github-activity&#34;&gt;Github Activity&lt;/h1&gt;
+
+&lt;p&gt;While there are some JS libraries to access the GitHub API, my needs were so simple that I was unwilling to introduce additional dependencies to just to parse a little bit of JSON and generate a few DOM elements.  For the same reason, while I ordinarily would be using libraries like &lt;a href=&#34;http://underscorejs.org&#34;&gt;underscore.js&lt;/a&gt; and &lt;a href=&#34;http://momentjs.org&#34;&gt;moment.js&lt;/a&gt; for dates, templating or even iteration, here I opted for vanilla JS.&lt;/p&gt;
+
+&lt;p&gt;The full code to retrieve, process and display my GitHub commits can be found &lt;a href=&#34;https://github.com/crsmithdev/crsmithdev.com/blob/master/resources/public/js/crsmithdev.js&#34;&gt;here&lt;/a&gt;.  I needed a function to retrieve some JSON from GitHub, transform some of that data into a list of DOM elements, and then append those elements to any containers matching a certain CSS selector:&lt;/p&gt;
+
+&lt;!--?prettify lang=js--&gt;
+
+&lt;pre&gt;&lt;code&gt;var activity = function(sel, n) {
+    var containers = $(sel);
+
+    if (containers.length &amp;gt; 0) {
+        $.ajax({
+            url: &#39;https://api.github.com/users/crsmithdev/events&#39;,
+            dataType: &#39;jsonp&#39;,
+            success: function (json) {
+                var elements = commits(json.data, n);
+                containers.append(elements);
+            }
+        });
+    }
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Parsing the JSON is straightforward, as every event that involves a commit will have a &lt;code&gt;payload.commit&lt;/code&gt; property containing an array of commits.  Using arrays and a native &lt;code&gt;.join()&lt;/code&gt; function should be preferred to string concatenation, in the absence of templating:&lt;/p&gt;
+
+&lt;!--?prettify lang=js--&gt;
+
+&lt;pre&gt;&lt;code&gt;var repo = event.repo.name.split(&#39;/&#39;)[1];
+var date = toDateString(event.created_at);
+
+for (var j = 0; j &amp;lt; event.payload.commits.length; ++j) {
+    var commit = event.payload.commits[j];
+
+    var arr = [&#39;&amp;lt;div&amp;gt;&amp;lt;div&amp;gt;&amp;lt;a href=https://github.com/&amp;quot;&#39;, event.repo.name, &#39;/commit/&#39;,
+        commit.sha, &#39;&amp;quot;&amp;gt;&#39;, commit.message, &#39;&amp;lt;/a&amp;gt; &amp;lt;span class=&amp;quot;text-muted&amp;quot;&amp;gt;&#39;, repo,
+        &#39;&amp;lt;/span&amp;gt;&amp;lt;/div&amp;gt;&#39;, &#39;&amp;lt;div&amp;gt;&#39;, date, &#39;&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;&#39;];
+
+    elements.push($(arr.join(&#39;&#39;)));
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Dates are handled with a simple function and an array of month names.  The GitHub API provides dates in ISO-8601 format (YYYY-MM-DDThh:mm:ssZ), so it&amp;rsquo;s easy to extract the year, month, and day:&lt;/p&gt;
+
+&lt;!--?prettify lang=js--&gt;
+
+&lt;pre&gt;&lt;code&gt;var months = [&#39;January&#39;, &#39;Febuary&#39;, &#39;March&#39;, &#39;April&#39;, &#39;May&#39;, &#39;June&#39;, &#39;July&#39;, &#39;August&#39;,
+    &#39;September&#39;, &#39;October&#39;, &#39;November&#39;, &#39;December&#39;];
+
+// ...
+
+var toDateString = function(date) {
+
+    try {
+        var parts = date.split(&#39;T&#39;)[0].split(&#39;-&#39;);
+        var month = months[parseInt(parts[1]) - 1];
+        return [parts[2], month, parts[0]].join(&#39; &#39;);
+    }
+    catch (e) {
+        return &#39;???&#39;;
+    }
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And of course, all this is wrapped in a module that exposes only one public method, and run when ready:&lt;/p&gt;
+
+&lt;!--?prettify lang=js--&gt;
+
+&lt;pre&gt;&lt;code&gt;$(function() {
+    ghActivity.activity(&#39;.gh-recent&#39;, 5);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;syntax-highlighting&#34;&gt;Syntax Highlighting&lt;/h1&gt;
+
+&lt;p&gt;Originally I attempted to use &lt;a href=&#34;http://softwaremaniacs.org/soft/highlight/en/&#34;&gt;highlight.js&lt;/a&gt;, but quickly ran into issues:  nearly all of the guesses it made about what kind of syntax was being presented were wrong, and it was difficult to override its default guessing behavior, especially given that I was writing the posts in Markdown, not raw HTML.  Fortunately, &lt;a href=&#34;https://code.google.com/p/google-code-prettify/&#34;&gt;google-code-prettify&lt;/a&gt; was a much more usable option, even though it does require an &lt;a href=&#34;https://code.google.com/p/google-code-prettify/source/browse/trunk/src/lang-clj.js&#34;&gt;extension&lt;/a&gt; to handle Clojure.&lt;/p&gt;
+
+&lt;p&gt;If I posts &lt;em&gt;were&lt;/em&gt; written HTML, using google-code-prettify would look something like this:&lt;/p&gt;
+
+&lt;!--?prettify lang=html--&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;pre class=&amp;quot;prettyprint lang-clj&amp;quot;&amp;gt;&amp;lt;code&amp;gt;
+   [:h3 &amp;quot;Interests &amp;amp; Areas of Expertise&amp;quot;]
+    [:ul
+     [:li &amp;quot;API design, development and scalability&amp;quot;]
+     [:li &amp;quot;Distributed systems and architecture&amp;quot;]
+     [:li &amp;quot;Functional programming&amp;quot;]
+     ; ...
+&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;But since posts are written in Markdown, that isn&amp;rsquo;t an option.  There&amp;rsquo;s no way to add a class to the auto-generated &lt;code&gt;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;...&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&lt;/code&gt; blocks, and although I could have used literal HTML instead, that brings with it some other issues (angle brackets in code then have to be manually escaped, for example).  Fortunately, google-code-prettify allows the use of directives in HTML comments preceding code blocks, meaning this works the same as the above:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;!--?prettify lang=clj--&amp;gt;
+
+    [:h3 &amp;quot;Interests &amp;amp; Areas of Expertise&amp;quot;]
+     [:ul
+      [:li &amp;quot;API design, development and scalability&amp;quot;]
+      [:li &amp;quot;Distributed systems and architecture&amp;quot;]
+      [:li &amp;quot;Functional programming&amp;quot;]
+      ; ...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;deployment&#34;&gt;Deployment&lt;/h1&gt;
+
+&lt;p&gt;Deployment to GitHub Pages was very straightforward.  I nuked my existing &lt;a href=&#34;https://github.com/crsmithdev/crsmithdev.github.com&#34;&gt;crsmithdev.github.com&lt;/a&gt; master and copied over all the files from the &lt;code&gt;html&lt;/code&gt; directory, being sure to add a CNAME file referencing my &lt;a href=&#34;http://crsmithdev.com&#34;&gt;crsmithdev.com&lt;/a&gt; domain so Pages would work currently under it.  One push and the site was up and running.&lt;/p&gt;
+
+&lt;h1 id=&#34;future-work&#34;&gt;Future work&lt;/h1&gt;
+
+&lt;p&gt;I&amp;rsquo;m much happier with the site now, but still see some areas for improvement:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Some optimizations could definitely improve load times.  I&amp;rsquo;ll likely write a future post about this.&lt;/li&gt;
+&lt;li&gt;I&amp;rsquo;d very much like to be able to partially render blog posts on the index page (a title and two paragraphs or so).&lt;/li&gt;
+&lt;li&gt;Simply put, I need to write more.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Of course, the last of these is the most difficult for me, which is often a sign that it&amp;rsquo;s the most important.&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

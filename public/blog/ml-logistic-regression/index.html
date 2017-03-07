@@ -1,0 +1,574 @@
+
+<!DOCTYPE html>
+<html lang="en-us">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="" name="keywords">
+<meta content="Logistic Regression in Machine Learning - Chris Smith" property="og:title">
+
+<title>Logistic Regression in Machine Learning | Chris Smith</title>
+
+<link rel="stylesheet" href="https://crsmithdev.com//css/style.css">
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lobster|Lato:400,700">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/github.min.css">
+
+
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+        <a class="nav-item" href="https://crsmithdev.com/"><h1 class="title3">Chris Smith</h1></a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://linkedin.com/in/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-linkedin"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://keybase.io/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-key"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="mailto:crsmithdev@gmail.com">
+            <span class="icon">
+              <i class="fa fa-envelope"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+     <nav class="nav">
+      <div class="nav-left">
+        <a class="nav-item" href="https://crsmithdev.com/"><h3 class="title2">Blog</h3></a>
+        <a class="nav-item" href="https://crsmithdev.com/projects"><h3 class="title2">Projects</h3></a>
+        <a class="nav-item" href="https://crsmithdev.com/about"><h3 class="title2">About</h3></a>
+      </div>
+    </nav>
+
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    
+    <h2 class="subtitle is-6">March 6, 2017</h2>
+    
+    <h1 class="title">Logistic Regression in Machine Learning</h1>
+    
+    <div class="content">
+      
+
+<p>This is the second in a series of posts in which I explore concepts in Andrew Ng&rsquo;s <a href="https://www.coursera.org/learn/machine-learning">Introduction to Machine Learning</a> course on Coursera.  In each, I&rsquo;m implementing a machine learning algorithm in Python:  first using standard Python data science and numerical libraries, and then with <a href="https://www.tensorflow.org/">TensorFlow</a>.</p>
+
+<p>The algorithm described here is <a href="link">logistic regression</a>.  Logistic regression is recognizably similar to <a href="link self">linear regression</a>, but instead of predicting a continuous output, classifies training examples by a set of categories or labels.  For example, linear regression on a set of social and economic data might be used to predict a person&rsquo;s income, but logistic regression could be used to predict whether that person was married, had children, or had ever been arrested.  In a basic sense, logistic regression only answers questions that have yes / no answers, or questions that can be answered with a 1 or 0.  However, it can easily be <a href="https://en.wikipedia.org/wiki/Multinomial_logistic_regression">extended</a> to problems where there are a larger set of categories.</p>
+
+<p>Here, I&rsquo;m using the <a href="https://archive.ics.uci.edu/ml/datasets/Wine">Wine</a> dataset from UCI. It maps thirteen continuous variables representing chemical contents of a wine to three labels, each a different winery in Italy.</p>
+
+<h1 id="loading-and-plotting-data">Loading and Plotting Data</h1>
+
+<p>Initially, I&rsquo;m only using two features from the data set: alcohol and ash.  The labels are supplied as an array of data with values from <code>1</code> to <code>3</code>, but at first, I only want a simple regression problem with a yes or no answer.</p>
+
+<p>To do this, I first filter the data set, reducing it to only include wines with labels <code>1</code> or <code>2</code>.  Then, I use the scikit-learn <code>label_binarize</code> function, which takes an $m$-length list with $n$ possible values (two, in this case), and converts it to an $m \times n$ matrix, where each column represents one label with a value of <code>1</code>, and all others with a value of <code>0</code>.  I choose the first column, though the second would be equally valid here, just with the labels reversed.</p>
+
+<p>I&rsquo;ve provided a small example of <code>label_binarize</code> below, shuffling the whole input data set first (the examples are sorted by winery), and then selecting the first ten.</p>
+
+<pre><code class="language-python">import pandas as pd
+import numpy as np
+from sklearn.preprocessing import label_binarize
+
+data = pd.read_csv('data.txt')
+
+reduced = data[data['class'] &lt;= 2]
+X = reduced.as_matrix(columns=['alcohol', 'ash'])
+y = label_binarize(reduced['class'].values, [1, 2])[:,0]
+
+example = np.copy(data['class'].values)
+np.random.shuffle(example)
+example = example[0:10]
+print('original:', example)
+example = label_binarize(example, list(set(example)))
+print('binarized:', example)
+print('1s vs all:', example[:,0])
+</code></pre>
+
+<pre><code>original: [3 1 2 2 3 1 1 3 2 3]
+binarized: [[0 0 1]
+ [1 0 0]
+ [0 1 0]
+ [0 1 0]
+ [0 0 1]
+ [1 0 0]
+ [1 0 0]
+ [0 0 1]
+ [0 1 0]
+ [0 0 1]]
+1s vs all: [0 1 0 0 0 1 1 0 0 0]
+</code></pre>
+
+<p>I also split the data into training and testing sets before going further.  A simple way to do this is with the <code>train_test_split</code> function from scikit-learn, which allows me to specify a percentage (here 25%) to sample randomly from the data set and partition away for testing.</p>
+
+<pre><code class="language-python">from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+print('train:', len(X_train), 'test:', len(X_test))
+</code></pre>
+
+<pre><code>train: 97 test: 33
+</code></pre>
+
+<p>Because I&rsquo;m going to be drawing a lot of data plots, I define a function that takes an $n \times 2$ array of data points <code>xy</code>, and an $n \times 1$ array <code>labels</code> to vary the symbol and color for each point.  This function supports three distinct labels, sufficient for this data set.</p>
+
+<pre><code class="language-python">import matplotlib.pyplot as plt
+%matplotlib inline
+
+MARKERS = ['+', 'x', '.']
+COLORS = ['red', 'green', 'blue']
+
+def plot_points(xy, labels):
+
+    for i, label in enumerate(set(labels)):
+        points = np.array([xy[j,:] for j in range(len(xy)) if labels[j] == label])
+        marker = MARKERS[i % len(MARKERS)]
+        color = COLORS[i % len(COLORS)]
+        plt.scatter(points[:,0], points[:,1], marker=marker, color=color)
+
+plot_points(X_train, y_train)
+</code></pre>
+
+<p><img src="/images/ml-logistic-regression/ml-logistic-regression_5_0.png#center" alt="png" /></p>
+
+<p>There&rsquo;s a fairly obvious area near the center of the plot where a line could divide the two colors of points with a small amount of error.</p>
+
+<h1 id="simple-logistic-regression">Simple Logistic Regression</h1>
+
+<p>To implement logistic regression, I need a hypothesis function $h_\theta(x)$, a cost function $J(\theta)$, and a gradient function that computes the partial derivatives of $J(\theta)$.</p>
+
+<p>In logistic regression, $h_\theta$ is the <a href="https://www.quora.com/Logistic-Regression-Why-sigmoid-function">sigmoid</a> function.  The sigmoid function is bounded between 0 and 1, and produces a value that can be interpreted as a probability.  This value can also be a yes / no answer with a cross-over, or decision boundary, at 0.5:</p>
+
+<p><code>$$
+h_\theta(x) = \frac{1}{1 + e^{ \theta^Tx}}
+$$</code></p>
+
+<p>Using <a href="https://en.wikipedia.org/wiki/Mean_squared_error">mean squared error</a> from linear regression isn&rsquo;t a good idea here, as the resulting cost function <a href="http://mathworld.wolfram.com/SigmoidFunction.html">isn&rsquo;t convex</a> and so is not well-suited for gradient descent.  Instead, the difference of $h_\theta(x^i) - y^i$ is calculated differently for $y=0$ and $y=1$, and the result is <a href="https://stackoverflow.com/questions/32986123/why-the-cost-function-of-logistic-regression-has-a-logarithmic-expression">transformed</a> <a href="https://math.stackexchange.com/questions/886555/deriving-cost-function-using-mle-why-use-log-function">logarithmically</a> into a convex function:</p>
+
+<p><code>$$
+J(\theta) =-\frac{1}{m}\sum_{i=1}^{m}y^{i}\log(h_\theta(x^{i}))+(1-y^{i})\log(1-h_\theta(x^{i}))
+$$</code></p>
+
+<p>Fortunately, the <a href="https://math.stackexchange.com/questions/477207/derivative-of-cost-function-for-logistic-regression">derivative</a> of this function is exactly the same as that of linear regression, just with a different $h_\theta(x)$:</p>
+
+<p><code>$$
+\frac{\partial}{\partial\theta_{j}}J(\theta) =\sum_{i=1}^{m}(h_\theta(x^{i})-y^i)x_j^i
+$$</code></p>
+
+<pre><code class="language-python">import numpy as np
+
+def sigmoid(X):
+    return 1 / (1 + np.exp(-X))
+
+def cost(theta, X, y):
+    theta = theta[:,None]
+    y = y[:,None]
+
+    hyp = sigmoid(X.dot(theta))
+    pos = np.multiply(-y, np.log(hyp))
+    neg = np.multiply((1 - y), np.log(1 - hyp))
+
+    return np.sum(pos - neg) / (len(X))
+
+def gradient(theta, X, y):
+    theta = theta[:,None]
+    y = y[:,None]
+
+    error = sigmoid(X.dot(theta)) - y
+    return X.T.dot(error) / len(X)
+</code></pre>
+
+<p>It&rsquo;s worth noting the treatment of <code>y</code> and <code>theta</code> above.  In each function, I explicitly convert each to an $n$ or $m \times 1$ <code>ndarray</code>, so the matrix operations work correctly.  An alternative is to use a numpy <code>matrix</code>, which has stricter linear algebra semantics and treats 1-dimensional matrices more like column vectors.  However, I found that it was awkward to get the matrix interface to work correctly with both the optimization function used below, and with TensorFlow.  The indexing syntax can be thought of as explicitly columnizing the array of parameters or labels.</p>
+
+<p>Instead of manually writing a gradient descent, I use an optimization algorithm from Scipy called <a href="https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.optimize.fmin_tnc.html"><code>fmin_tnc</code></a> to perform it.  This function takes as parameters the cost function, an initial set of parameters for $\theta$, the gradient function, and a tuple of args to pass to each.  I define a <code>train</code> function that prepends a columns of 1s to the training data (allowing for a bias parameter $\theta_0$), run the minimization function and return the first of its return values, final parameters for $\theta$.</p>
+
+<pre><code class="language-python">from scipy.optimize import fmin_tnc
+
+def train(X, y):
+    X = np.insert(X, 0, np.ones(len(X)), axis=1)
+    theta = np.zeros(X.shape[1])
+    result = fmin_tnc(func=cost, x0=theta, fprime=gradient, args=(X, y))
+
+    return result[0]
+
+theta = train(X_train, y_train)
+print('theta: ', theta)
+</code></pre>
+
+<pre><code>theta:  [ 116.44453348   -8.22298266   -3.26236478]
+</code></pre>
+
+<h1 id="decision-boundaries-and-evaluation">Decision Boundaries and Evaluation</h1>
+
+<p>I can evaluate the results of the optimization visually and statistically, but I also need one more function: <code>predict</code>, which takes an array of examples <code>X</code> and learned parameter values <code>theta</code> as inputs and returns the predicted label for each.  Here too, 1s must be prepended to the inputs, and I return an integer value representing whether the result of the <code>sigmoid</code> hypothesis function is equal to or greater than 0.5.</p>
+
+<p>To test the results of those predictions, Scikit-learn provides three functions to calculate <a href="https://en.wikipedia.org/wiki/Precision_and_recall">accuracy, precision and recall</a>.  The test data from earlier is used here, so the results represent the performance of the classifier on unseen data.</p>
+
+<pre><code class="language-python">from sklearn.metrics import accuracy_score, precision_score, recall_score
+
+def predict(X, theta):
+    X = np.insert(X, 0, np.ones(len(X)), axis=1)
+    return (sigmoid(X * np.matrix(theta).T) &gt;= 0.5).astype(int)
+
+predictions = predict(X_test, theta)
+
+print('accuracy:', accuracy_score(y_test, predictions))
+print('precision:', precision_score(y_test, predictions, average='macro'))
+print('recall:', recall_score(y_test, predictions, average='macro'))
+</code></pre>
+
+<pre><code>accuracy: 0.848484848485
+precision: 0.868421052632
+recall: 0.868421052632
+</code></pre>
+
+<p>It&rsquo;s much more interesting to review the results visually, at least while the number of features is limited to two.  To do this, I need to plot the input points again, then overlay the decision boundary on top.  I tried several approaches for this in Matplotlib, and found that an unfilled countour plot gave me the best results.  This can also be done by manually calculating the function to plot, or using a filled contour plot that shades over the actual areas, but doing the math by hand is tedious, and the colormaps for filled contour plots leave a lot to be desired visually.</p>
+
+<p>Below, I define a function <code>plot_boundary</code> that takes $n \times 2$ matrix of feature values $(x_0, x_1)$ and a prediction function, then builds a mesh grid of $(x, y)$ points corresponding to possible $(x_0, x_1)$ values within the input range.  After running the prediction function on all of them, the result is an $(x, y, z)$ point in space.  Because the result isn&rsquo;t continuous and flips directly from 0 to 1, there&rsquo;s only one contour that can be drawn on the plot: the decision boundary.</p>
+
+<pre><code class="language-python">from matplotlib import cm
+
+def plot_boundary(X, pred):
+
+    x_min, x_max = X[:,0].min() - .1, X[:,0].max() + .1
+    y_min, y_max = X[:,1].min() - .1, X[:,1].max() + .1
+
+    xs, ys = np.meshgrid(
+        np.linspace(x_min, x_max, 200),
+        np.linspace(y_min, y_max, 200)
+    )
+
+    xys = np.column_stack([xs.ravel(), ys.ravel()])
+    zs = pred(xys).reshape(xs.shape)
+
+    plt.contour(xs, ys, zs, colors='black')
+
+plot_points(X_train, y_train)
+plot_boundary(X_train, lambda x: predict(x, theta))
+</code></pre>
+
+<p><img src="/images/ml-logistic-regression/ml-logistic-regression_13_0.png#center" alt="png" /></p>
+
+<h1 id="multinomial-logistic-regression">Multinomial Logistic Regression</h1>
+
+<p>With the basics working, the next step is something more interesting: a similar set of two features from the data set (this time alcohol and flavanoids), but with all three labels instead of two.  The only differences below in loading the data are that I no longer filter out rows with the third label, that I use the full output from <code>label_binarize</code>, resulting in an $m \times 3$ array for <code>y</code>.</p>
+
+<pre><code class="language-python">X = data.as_matrix(columns=['alcohol', 'flavanoids'])
+y = data.as_matrix(columns=['class'])
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+y_train = label_binarize(y_train, [1, 2, 3])
+
+plot_points(X_train, y_train.argmax(axis=1))
+</code></pre>
+
+<p><img src="/images/ml-logistic-regression/ml-logistic-regression_15_0.png#center" alt="png" /></p>
+
+<p>The plotted data points again suggest some obvious linear boundaries between the wines.</p>
+
+<p>It turns out that solving this as three one-vs-all problems is trivial, and re-uses all the code I just wrote.  Instead of one array of <code>theta</code> values I train three, one per problem, and then define a new <code>predict_multi</code> function that computes the three sigmoids for each example using each array of <code>theta</code> parameters.  This time, rather than return <code>1</code> or <code>0</code> based on whether the value is above or below 0.5, I return the <code>argmax</code> of each resulting row, the index of the largest value.</p>
+
+<pre><code class="language-python">def predict_multi(X, thetas):
+    X = np.insert(X, 0, np.ones(len(X)), axis=1)
+    preds = [sigmoid(X * np.asmatrix(t).T) for t in thetas]
+    return np.column_stack(preds).argmax(axis=1)
+
+thetas = [train(X_train, y_train[:,i]) for i in range(0,3)]
+predictions = predict_multi(X_test, thetas) + 1
+
+print('accuracy:', accuracy_score(y_test, predictions))
+print('precision:', precision_score(y_test, predictions, average='macro'))
+print('recall:', recall_score(y_test, predictions, average='macro'))
+
+plot_points(X_train, y_train.argmax(axis=1))
+plot_boundary(X_train, lambda x: predict_multi(x, thetas))
+</code></pre>
+
+<pre><code>accuracy: 0.933333333333
+precision: 0.945304437564
+recall: 0.928540305011
+</code></pre>
+
+<p><img src="/images/ml-logistic-regression/ml-logistic-regression_17_1.png#center" alt="png" /></p>
+
+<p>Looking at the plot above, it seems like the boundaries could be much more accurate if they didn&rsquo;t have to be straight lines.  To allow for this, I define a function <code>transform</code> to add some polynomial features, converting each input example of $(x_0, x_1)$ to $(x_0, x_1, x_2, x_3, x_4)$, where $x_2 = x_0^2$, $x_3 = x_1^2$ and $x_4 = x_0x_1$.</p>
+
+<pre><code class="language-python">def transform_x(x):
+    return [x[0], x[1], x[0] ** 2, x[1] ** 2, x[0] * x[1]]
+
+def transform(X):
+    return np.apply_along_axis(transform_x, 1, X)
+
+X_train = transform(X_train)
+X_test = transform(X_test)
+
+thetas = [train(X_train, y_train[:,i]) for i in range(0,3)]
+predictions = predict_multi(X_test, thetas) + 1
+
+print('accuracy:', accuracy_score(y_test, predictions))
+print('precision:', precision_score(y_test, predictions, average='macro'))
+print('recall:', recall_score(y_test, predictions, average='macro'))
+
+plot_points(X_train, y_train.argmax(axis=1))
+plot_boundary(X_train, lambda x: predict_multi(transform(x), thetas))
+</code></pre>
+
+<pre><code>accuracy: 0.977777777778
+precision: 0.981481481481
+recall: 0.981481481481
+</code></pre>
+
+<p><img src="/images/ml-logistic-regression/ml-logistic-regression_19_1.png#center" alt="png" /></p>
+
+<h1 id="regularization">Regularization</h1>
+
+<p>Next, I want to include all the features from the data set.  To do this, instead of specifying what columns I want to include, I use <code>drop</code> to include everything except the <code>class</code> column.</p>
+
+<p>Because I&rsquo;m now significantly increasing the number of features, I apply <a href="https://www.quora.com/What-is-regularization-in-machine-learning">regularization</a> as part of new cost and gradient functions.  Regularization prevents overfitting, a situation where a large number of features allows the classifier to fit the training set <em>too</em> exactly, meaning that it fails to generalize well and perform accurately on data it hasn&rsquo;t yet seen.</p>
+
+<p>To avoid this problem, I add an additional term to the cost function and its gradient, representing the aggregated weights of each $\theta$ parameter.  Adding this term effectively increases the cost, meaning that the overall impact of feature weights is muted, and the fit to the training set is softened.  Note that for each of the new cost and gradient functions, the summation for regularization starts at $j = 1$, since the constant bia parameter $\theta_0$ is typically not regularized:</p>
+
+<p><code>$$
+J(\theta) =-\frac{1}{m}\sum_{i=1}^{m}[y^{i}\log(h_\theta(x^{i}))+(1-y^{i})\log(1-h_\theta(x^{i}))] + \frac{\lambda}{2m}\sum_{j=1}^{n}\theta_j^2 \\
+\frac{\partial}{\partial\theta_{j}}J(\theta) =\sum_{i=1}^{m}(h_\theta(x^{i})-y^i)x_j^i + \frac{\lambda}{m}\theta_j
+$$</code></p>
+
+<p>Below, I define the new cost and gradient functions, as well as a new function to train the classifier, given the addition of a new parameter <code>l</code>, for $\lambda$.  This parameter can be adjusted to change the effect of regularization; here I&rsquo;m just using <code>1.0</code>.  In each case, I ensure that $\theta_0$ isn&rsquo;t regularized by creating a temporary <code>theta_reg</code>, starting with a zero followed by elements one and onward from <code>theta</code>.</p>
+
+<pre><code class="language-python">X = data.drop('class', 1).as_matrix()
+y = data.as_matrix(columns=['class'])
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+y_train = label_binarize(y_train, [1, 2, 3])
+
+def cost_reg(theta, X, y, lambda_):
+    theta_reg = np.array((0, *theta[1:]))[:,None]
+    reg = lambda_ * np.square(theta_reg).sum() / (2 * len(X))
+
+    return cost(theta, X, y) + reg
+
+def gradient_reg(theta, X, y, lambda_):
+    theta_reg = np.array((0, *theta[1:]))[:,None]
+    reg = lambda_ * theta_reg / len(X)
+
+    return gradient(theta, X, y) + reg
+
+def train_reg(X, y, lambda_):
+    X = np.insert(X, 0, np.ones(len(X)), axis=1)
+    theta = np.zeros(X.shape[1])
+    result = fmin_tnc(func=cost_reg, x0=theta, fprime=gradient_reg, args=(X, y, lambda_))
+
+    return result[0]
+
+thetas = [train_reg(X_train, y_train[:,i], 1.0) for i in range(0,3)]
+predictions = predict_multi(X_test, thetas) + 1
+
+print('accuracy:', accuracy_score(y_test, predictions))
+print('precision:', precision_score(y_test, predictions, average='macro'))
+print('recall:', recall_score(y_test, predictions, average='macro'))
+</code></pre>
+
+<pre><code>accuracy: 0.977777777778
+precision: 0.981481481481
+recall: 0.97619047619
+</code></pre>
+
+<h1 id="logistic-regression-with-tensorflow">Logistic Regression with TensorFlow</h1>
+
+<p>In this last section, I implement logistic regression using TensorFlow and test the model using the same data set.  TensorFlow allows for a significantly more compact and higher-level representation of the problem as a computational graph, resulting in less code and faster development of models.</p>
+
+<p>One item definitely worth calling out is the use of the <a href="https://www.tensorflow.org/api_docs/python/tf/train/AdamOptimizer"><code>AdamOptimizer</code></a> instead of the <a href="https://www.tensorflow.org/api_docs/python/tf/train/GradientDescentOptimizer"><code>GradientDescentOptimizer</code></a> from the previous post.  Although the latter can still be used here, I found it a poor fit for two reasons:  it is <em>very</em> sensitive to learning rate and lambda parameters, and it converges extremely slowly.  Correct convergence required a very low learning rate (around 0.001 at most), and could still be seen decreasing at over 300,000 iterations, with a curve that appeared linear after the first thousand.  Poor tuning resulted in the optimizer spinning out of control and emitting <code>nan</code> values for all the parameters.</p>
+
+<p>Using a different optimizer helped tremendously, especially one that is <a href="https://stackoverflow.com/questions/33919948/how-to-set-adaptive-learning-rate-for-gradientdescentoptimizer">adaptive</a>.  It converges significantly faster and requires much less hand-holding to do so.  Even then, these graphs take typically 25x the time to converge properly compared to the manual implementation above, and I&rsquo;m not sure why this is the case.  Since Tensorflow does the calculus itself to find the gradient, it could be that this is the result of some issue or lack of optimization.  On the other hand, given that the platform is designed to distribute computations and scale to significantly larger data sets, this could be some overhead that is quite reasonable in those scenarios but is felt heavily in a small demonstration with a tiny number of examples.</p>
+
+<p>I also adjusted all placeholders and variables to <code>tf.float64</code>, to avoid any issues with numerical precision.  After this and the adaptive optimizer, the results improved dramatically.</p>
+
+<p>Because I want to build a few different graphs, I define a function that builds one given a few parameters: the number of features, the number of labels, and a lambda value for regularization.  This function <code>tf_create</code> builds a graph, and returns two functions itself: one to train the algorithm by running the optimizer, and another to predict labels for new values.  To compute the loss for regularization, I use the built-in <code>tf.nn.l2_loss</code> function, which is equivalent to the regularization loss I computed manually before.</p>
+
+<pre><code class="language-python">import tensorflow as tf
+
+def tf_create(n_features, n_labels, lambda_):
+
+    examples = tf.placeholder(tf.float64, [None, n_features])
+    labels = tf.placeholder(tf.float64, [None, n_labels])
+    weights = tf.Variable(tf.zeros([n_features, n_labels], dtype=tf.float64))
+    bias = tf.Variable(tf.zeros([n_labels], dtype=tf.float64))
+
+    hyp = tf.sigmoid(tf.matmul(examples, weights) + bias)
+    loss = tf.reduce_mean(-labels * tf.log(hyp) - (1 - labels) * tf.log(1 - hyp))
+    reg = lambda_ * tf.nn.l2_loss(weights)
+    cost = loss + reg
+
+    train = tf.train.AdamOptimizer().minimize(cost)
+    predict = tf.argmax(hyp, axis=1)
+
+    def train_(sess, X, y, iterations):
+        for i in range(iterations):
+            sess.run(train, feed_dict={examples: X, labels: y})
+
+    def predict_(sess, X):
+        return sess.run(predict, feed_dict={examples: X})
+
+    return train_, predict_
+</code></pre>
+
+<p>First, I evaluate the model against the 2-feature, 3-label example from above.</p>
+
+<pre><code class="language-python">X = data.as_matrix(columns=['alcohol', 'flavanoids'])
+y = label_binarize(data['class'], [1, 2, 3])
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+
+with tf.Session() as sess:
+
+    train, predict = tf_create(X.shape[1], y.shape[1], 0.0)
+    sess.run(tf.global_variables_initializer())
+    train(sess, X_train, y_train, 30000)
+
+    predictions = predict(sess, X_test)
+    y_test = y_test.argmax(axis=1)
+
+    print('accuracy:', accuracy_score(y_test, predictions))
+    print('precision:', precision_score(y_test, predictions, average='macro'))
+    print('recall:', recall_score(y_test, predictions, average='macro'))
+
+    plot_boundary(X_train, lambda x: predict(sess, x))
+    plot_points(X_train, y_train.argmax(axis=1))
+</code></pre>
+
+<pre><code>accuracy: 0.955555555556
+precision: 0.95584045584
+recall: 0.95584045584
+</code></pre>
+
+<p><img src="/images/ml-logistic-regression/ml-logistic-regression_25_1.png#center" alt="png" /></p>
+
+<p>Next, I use the <code>transform</code> function to apply additional polynomial features to the dataset, allowing for a non-linear decision boundary.</p>
+
+<pre><code class="language-python">X = data.as_matrix(columns=['alcohol', 'flavanoids'])
+X = transform(X)
+y = label_binarize(data['class'], [1, 2, 3])
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+
+with tf.Session() as sess:
+
+    train, predict = tf_create(X.shape[1], y.shape[1], 0.0)
+    sess.run(tf.global_variables_initializer())
+    train(sess, X_train, y_train, 30000)
+
+    predictions = predict(sess, X_test)
+    y_test = y_test.argmax(axis=1)
+
+    print('accuracy:', accuracy_score(y_test, predictions))
+    print('precision:', precision_score(y_test, predictions, average='macro'))
+    print('recall:', recall_score(y_test, predictions, average='macro'))
+
+    plot_boundary(X_train, lambda x: predict(sess, transform(x)))
+    plot_points(X_train, y_train.argmax(axis=1))
+</code></pre>
+
+<pre><code>accuracy: 0.977777777778
+precision: 0.97619047619
+recall: 0.980392156863
+</code></pre>
+
+<p><img src="/images/ml-logistic-regression/ml-logistic-regression_27_1.png#center" alt="png" /></p>
+
+<p>Finally, I include all the features from the data set, all the labels, and apply a small amount of regularization.</p>
+
+<pre><code class="language-python">X = data.drop('class', 1).as_matrix()
+y = label_binarize(data['class'], [1, 2, 3])
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+
+with tf.Session() as sess:
+
+    train, predict = tf_create(X.shape[1], y.shape[1], 0.1)
+    sess.run(tf.global_variables_initializer())
+    train(sess, X_train, y_train, 30000)
+
+    predictions = predict(sess, X_test)
+    y_test = y_test.argmax(axis=1)
+
+    print('accuracy:', accuracy_score(y_test, predictions))
+    print('precision:', precision_score(y_test, predictions, average='macro'))
+    print('recall:', recall_score(y_test, predictions, average='macro'))
+</code></pre>
+
+<pre><code>accuracy: 0.955555555556
+precision: 0.961873638344
+recall: 0.951178451178
+</code></pre>
+
+<p>You can find the IPython notebook for this post on <a href="https://github.com/crsmithdev/notebooks/blob/master/ml-logistic-regression/ml-logistic-regression.ipynb">GitHub</a>.</p>
+
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+          extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-40826256-2', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

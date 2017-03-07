@@ -1,0 +1,433 @@
+
+<!DOCTYPE html>
+<html lang="en-us">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="" name="keywords">
+<meta content="A Blog Refresh with Bootstrap and Static - Chris Smith" property="og:title">
+
+<title>A Blog Refresh with Bootstrap and Static | Chris Smith</title>
+
+<link rel="stylesheet" href="https://crsmithdev.com//css/style.css">
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lobster|Lato:400,700">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/github.min.css">
+
+
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+        <a class="nav-item" href="https://crsmithdev.com/"><h1 class="title3">Chris Smith</h1></a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://linkedin.com/in/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-linkedin"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://keybase.io/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-key"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="mailto:crsmithdev@gmail.com">
+            <span class="icon">
+              <i class="fa fa-envelope"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+     <nav class="nav">
+      <div class="nav-left">
+        <a class="nav-item" href="https://crsmithdev.com/"><h3 class="title2">Blog</h3></a>
+        <a class="nav-item" href="https://crsmithdev.com/projects"><h3 class="title2">Projects</h3></a>
+        <a class="nav-item" href="https://crsmithdev.com/about"><h3 class="title2">About</h3></a>
+      </div>
+    </nav>
+
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    
+    <h2 class="subtitle is-6">June 2, 2013</h2>
+    
+    <h1 class="title">A Blog Refresh with Bootstrap and Static</h1>
+    
+    <div class="content">
+      <p>Earlier this year, I finally set up a blog on my domain, having owned but left it unused for over a year.  My needs were simple:  it was to be a completely static site, hostable on GitHub Pages or Dropbox, and the focus of the project was in <strong>no</strong> way to be the technology or process of creating and maintaining it.  Despite the part of me that automatically geeked out at the opportunity to build my own completely custom blog generator from scratch, the point of doing it was to provide myself with a straightforward platform for <em>writing</em>, not to go on a technical adventure in creating one.  Although I&rsquo;ve only written two posts on it so far, the effort was successful: in short order, I&rsquo;d set up <a href="http://octopress.org">Octopress</a> and had it deploying to Pages.</p>
+
+<p></p>
+
+<p>I found it usable but lacking in a few key ways, the most significant of which was that I was simply underwhelmed with the themes available for Octopress, and had little interest in building a new theme or heavily modifying an existing one.  Moreover, it felt very much like a monolithic framework, into a tiny corner of which were tucked the contents of my blog.  I realized that what I wanted was a simple engine that would handle the work of converting Markdown to HTML and stitching the results together with templates, but would otherwise stay out of the way as much as possible, impose little structure and even less of its own code on me, and give me total control over the design without relying on theming.</p>
+
+<p>I was also eager to address a few specific issues:</p>
+
+<ul>
+<li>It was <em>only</em> a blog, lacking even a bio page.</li>
+<li>Responsiveness was questionable.</li>
+<li>Syntax highlighting was not supported.</li>
+<li>I wanted to add a simple display of recent GitHub activity.</li>
+</ul>
+
+<p>Lastly, as Clojure is quickly eclipsing all others as my hacking language of choice, I was heavily biased towards finding a solution that was written in and used it.</p>
+
+<h1 id="components">Components</h1>
+
+<p>In the end, I selected the following:</p>
+
+<ul>
+<li><a href="http://getbootstrap.com">Bootstrap 3</a> - newly released, rebuilt and responsive-first.</li>
+<li><a href="http://bootswatch.com/flatly/">Flatly</a> theme from <a href="http://bootswatch.com/">Bootswatch</a> - a flat, simple and readable theme for Bootstrap 3.</li>
+<li><a href="https://github.com/nakkaya/static">Static</a> - a tiny, embeddable static site generator in Clojure.</li>
+<li><a href="http://fortawesome.github.io/Font-Awesome/">Font Awesome</a> - high-quality icons.</li>
+<li><a href="https://code.google.com/p/google-code-prettify/">google-code-prettify</a> - code syntax highlighting.</li>
+</ul>
+
+<h1 id="static">Static</h1>
+
+<p>Static is a very simple static site generator, with full documentation that spans about <a href="http:/nakkaya.com/static.html">two pages</a>.  What&rsquo;s most refreshing about Static (compared to Octropress, at least) is that it&rsquo;s built as a separate project, and then the .jar is copied into the repo for the site that will use it.  This means that the only traces of it that end up in the blog project are the .jar itself, and a few, flexible conventions regarding directory structure.</p>
+
+<p>Here&rsquo;s all that&rsquo;s needed to get started with Static:</p>
+
+<!--?prettify lang=sh-->
+
+<pre><code>git clone https://github.com/nakkaya/static.git
+cd static
+lein deps
+lein uberjar
+</code></pre>
+
+<p>This results in a .jar named <code>static-app.jar</code> in the <code>target</code> directory, which can then be copied into a fresh repo for a site:</p>
+
+<!--?prettify lang=sh-->
+
+<pre><code>cd ..
+mkdir crsmithdev.com
+cd crsmithdev.com
+git init
+cp ../static/target/static-app.jar .
+</code></pre>
+
+<p>At minimum, this is the default structure of files and directories needed for a site:</p>
+
+<pre><code>.
+|-- config.clj
+`-- resources
+    |-- posts
+    |-- public
+    |-- site
+    |-- templates
+        `-- default.clj
+</code></pre>
+
+<p>A brief description of what all these are:</p>
+
+<ul>
+<li><code>config.clj</code> - global site configuration options.</li>
+<li><code>posts</code> - blog posts, in markdown or org-mode format.</li>
+<li><code>public</code> - public site resources and directories (<code>js</code>, <code>css</code>, etc.), to be copied to the root of the generated site.</li>
+<li><code>site</code> - Hiccup templates for the content of non-blog-post pages.</li>
+<li><code>templates</code> - Full-page Hiccup templates.</li>
+</ul>
+
+<p>All that&rsquo;s needed to build the site is this:</p>
+
+<!--?prettify lang=sh-->
+
+<pre><code>java -jar static-app.jar --build
+</code></pre>
+
+<p>The <code>--watch</code> option can be used to rebuild automatically when a file changes.  When the site builds, something like the following should result:</p>
+
+<pre><code>[+] INFO: Using tmp location: /var/folders/r5/30xb2fj573b_s9_2f18y4s_00000gn/T/static/
+[+] INFO: Processing Public  0.011 secs
+[+] INFO: Processing Site  0.213 secs
+[+] INFO: Processing Posts  0.695 secs
+[+] INFO: Creating RSS  0.07 secs
+[+] INFO: Creating Tags  0.03 secs
+[+] INFO: Creating Sitemap  0.0040 secs
+[+] INFO: Creating Aliases  0.01 secs
+[+] INFO: Build took  1.034 secs
+</code></pre>
+
+<p>An <code>html</code> directory will be created in the root of the site, containing all the generated HTML.  I found that pointing my local nginx at this folder was the most straightforward way to serve the site locally while working on it, although Static does offer a <code>--jetty</code> option to serve it as well.  The contents of my <code>config.clj</code> are as follows:</p>
+
+<!--?prettify lang=clj-->
+
+<pre><code>[:site-title &quot;crsmithdev.com&quot;
+ :site-description &quot;crsmithdev.com&quot;
+ :site-url &quot;http://crsmithdev.com&quot;
+ :in-dir &quot;resources/&quot;
+ :out-dir &quot;html/&quot;
+ :default-template &quot;default.clj&quot;
+ :encoding &quot;UTF-8&quot;
+ :blog-as-index false
+ :create-archives false
+ :atomic-build true]
+</code></pre>
+
+<h1 id="html-templating-with-hiccup">HTML templating with Hiccup</h1>
+
+<p>Static uses <a href="https://github.com/weavejester/hiccup">Hiccup</a>, a great templating library for Clojure, to specify the structure of pages it generates.  Having never used it before, I instantly found it to be very natural and efficient &mdash; the syntax is extremely minimal, vectors and maps are used for elements and their attributes, respectively, and it&rsquo;s possible to embed Clojure code right along with element definitions.</p>
+
+<p>Here&rsquo;s what the first few lines of my default template look like:</p>
+
+<!--?prettify lang=clj-->
+
+<pre><code>[:html
+ {:xmlns &quot;http://www.w3.org/1999/xhtml&quot; :lang &quot;en&quot; :xml:lang &quot;en&quot;}
+ [:head
+  [:meta {:http-equiv &quot;content-type&quot; :content &quot;text/html; charset=UTF-8&quot;}]
+  [:meta {:name &quot;description&quot; :content (:description metadata)}]
+  [:meta {:name &quot;keywords&quot; :content (:tags metadata)}]
+  [:meta {:name &quot;author&quot; :content &quot;Chris Smith&quot;}]
+  [:meta {:name &quot;viewport&quot; :content &quot;width=device-width, initial-scale=1.0&quot;}]
+  [:link {:rel &quot;icon&quot; :href &quot;/images/favicon.ico&quot; :type &quot;image/x-icon&quot;}]
+  [:link {:rel &quot;shortcut icon&quot; :href &quot;/images/favicon.ico&quot; :type &quot;image/x-icon&quot;}]
+</code></pre>
+
+<p>Note the access of the <code>:description</code> and <code>:tags</code> from <code>metadata</code>.  Static injects a few values into page rendering, specifically <code>metadata</code> and <code>content</code>.  <code>metadata</code> provides some information about what kind of page is being rendered, as well as the metadata specified in the headers of blog posts, while <code>content</code> is the actual Markdown or Hiccup-generated content that the template will include.  Because of this, it&rsquo;s possible to specify different behaviors depending on what&rsquo;s being rendered:</p>
+
+<!--?prettify lang=clj-->
+
+<pre><code>[:div.content
+ [:div.container
+  (if (= (:type metadata) :post)
+    [:div.row
+     [:div.col-md-12
+      content
+      [:div#disqus_thread]
+      [:script {:type &quot;text/javascript&quot;}
+       &quot;// ... (disqus js)&quot;]]]
+    content)
+</code></pre>
+
+<p>Above, if the page is a post, a simple Bootstrap grid is created, followed by the standard JS to include Disqus comments.  Note the terse syntax for specifying element classes:  this is actually one of two possible syntaxes to define classes and ids.  Below, these two forms are equivalent:</p>
+
+<!--?prettify lang=clj-->
+
+<pre><code>[:div {:class &quot;col-md-12&quot;} &quot;...&quot;]
+[:div.col-md-12 &quot;...&quot;]
+</code></pre>
+
+<p>In the absence of a ready way to list blog post titles and dates, I found and adapted some code from the site of Static&rsquo;s <a href="http://nakkaya.com/">author</a>.  A number of functions are made available within templates, although they are largely undocumented:</p>
+
+<!--?prettify lang=clj-->
+
+<pre><code>[:div.row
+ [:div.col-md-6
+  [:h4 &quot;Recent Blog Posts&quot;]
+  (map #(let [f % url (static.core/post-url f)
+              [metadata _] (static.io/read-doc f)
+              date (static.core/parse-date
+                    &quot;yyyy-MM-dd&quot; &quot;dd MMMM yyyy&quot;
+                    (re-find #&quot;\d*-\d*-\d*&quot; (str f)))]
+     [:div
+      [:div [:a {:href url} (:title metadata)]
+      [:div date]]])
+     (take 5 (reverse (static.io/list-files :posts))))]
+</code></pre>
+
+<h1 id="bootstrap-3-font-awesome-and-theming">Bootstrap 3, Font Awesome, and theming</h1>
+
+<p>Fortunately, Bootstrap 3 was nearing release as I was beginning to work on the site, so I grabbed the RC2 version and went to work.  <a href="http://bootswatch.com/">Bootswatch</a> provides a nice selection of attractive, free themes for Bootstrap 3, of which I picked <a href="http://bootswatch.com/flatly/">Flatly</a>. <a href="http://fortawesome.github.io/Font-Awesome/">Font Awesome</a> has high-quality icons for Twitter, GitHub and LinkedIn (amongst many, many others), making it an easy choice here.</p>
+
+<p>There are plenty of great starting points / tutorials already out there for Bootstrap (I&rsquo;d recommend this <a href="http://getbootstrap.com/getting-started/#template">starter template</a>).  I did make some adjustments to the Flatly theme, though, with the goal of making the site a bit easier on the reader&rsquo;s eyes and more suitable for text-dense pages:</p>
+
+<ul>
+<li>Changed the standard font to <strong>Source Sans Pro</strong> (from the default <strong>Lato</strong>)</li>
+<li>Changed the code font to <strong>Source Code Pro</strong> (from the default <strong>Monaco</strong>).</li>
+<li>Increased line-height to 24px.</li>
+<li>Narrowed the container max-width to 840px.</li>
+</ul>
+
+<p>The fonts can be found at <a href="http://www.google.com/fonts">Google Fonts</a>.</p>
+
+<h1 id="github-activity">Github Activity</h1>
+
+<p>While there are some JS libraries to access the GitHub API, my needs were so simple that I was unwilling to introduce additional dependencies to just to parse a little bit of JSON and generate a few DOM elements.  For the same reason, while I ordinarily would be using libraries like <a href="http://underscorejs.org">underscore.js</a> and <a href="http://momentjs.org">moment.js</a> for dates, templating or even iteration, here I opted for vanilla JS.</p>
+
+<p>The full code to retrieve, process and display my GitHub commits can be found <a href="https://github.com/crsmithdev/crsmithdev.com/blob/master/resources/public/js/crsmithdev.js">here</a>.  I needed a function to retrieve some JSON from GitHub, transform some of that data into a list of DOM elements, and then append those elements to any containers matching a certain CSS selector:</p>
+
+<!--?prettify lang=js-->
+
+<pre><code>var activity = function(sel, n) {
+    var containers = $(sel);
+
+    if (containers.length &gt; 0) {
+        $.ajax({
+            url: 'https://api.github.com/users/crsmithdev/events',
+            dataType: 'jsonp',
+            success: function (json) {
+                var elements = commits(json.data, n);
+                containers.append(elements);
+            }
+        });
+    }
+};
+</code></pre>
+
+<p>Parsing the JSON is straightforward, as every event that involves a commit will have a <code>payload.commit</code> property containing an array of commits.  Using arrays and a native <code>.join()</code> function should be preferred to string concatenation, in the absence of templating:</p>
+
+<!--?prettify lang=js-->
+
+<pre><code>var repo = event.repo.name.split('/')[1];
+var date = toDateString(event.created_at);
+
+for (var j = 0; j &lt; event.payload.commits.length; ++j) {
+    var commit = event.payload.commits[j];
+
+    var arr = ['&lt;div&gt;&lt;div&gt;&lt;a href=https://github.com/&quot;', event.repo.name, '/commit/',
+        commit.sha, '&quot;&gt;', commit.message, '&lt;/a&gt; &lt;span class=&quot;text-muted&quot;&gt;', repo,
+        '&lt;/span&gt;&lt;/div&gt;', '&lt;div&gt;', date, '&lt;/div&gt;&lt;/div&gt;'];
+
+    elements.push($(arr.join('')));
+}
+</code></pre>
+
+<p>Dates are handled with a simple function and an array of month names.  The GitHub API provides dates in ISO-8601 format (YYYY-MM-DDThh:mm:ssZ), so it&rsquo;s easy to extract the year, month, and day:</p>
+
+<!--?prettify lang=js-->
+
+<pre><code>var months = ['January', 'Febuary', 'March', 'April', 'May', 'June', 'July', 'August',
+    'September', 'October', 'November', 'December'];
+
+// ...
+
+var toDateString = function(date) {
+
+    try {
+        var parts = date.split('T')[0].split('-');
+        var month = months[parseInt(parts[1]) - 1];
+        return [parts[2], month, parts[0]].join(' ');
+    }
+    catch (e) {
+        return '???';
+    }
+};
+</code></pre>
+
+<p>And of course, all this is wrapped in a module that exposes only one public method, and run when ready:</p>
+
+<!--?prettify lang=js-->
+
+<pre><code>$(function() {
+    ghActivity.activity('.gh-recent', 5);
+});
+</code></pre>
+
+<h1 id="syntax-highlighting">Syntax Highlighting</h1>
+
+<p>Originally I attempted to use <a href="http://softwaremaniacs.org/soft/highlight/en/">highlight.js</a>, but quickly ran into issues:  nearly all of the guesses it made about what kind of syntax was being presented were wrong, and it was difficult to override its default guessing behavior, especially given that I was writing the posts in Markdown, not raw HTML.  Fortunately, <a href="https://code.google.com/p/google-code-prettify/">google-code-prettify</a> was a much more usable option, even though it does require an <a href="https://code.google.com/p/google-code-prettify/source/browse/trunk/src/lang-clj.js">extension</a> to handle Clojure.</p>
+
+<p>If I posts <em>were</em> written HTML, using google-code-prettify would look something like this:</p>
+
+<!--?prettify lang=html-->
+
+<pre><code>&lt;pre class=&quot;prettyprint lang-clj&quot;&gt;&lt;code&gt;
+   [:h3 &quot;Interests &amp; Areas of Expertise&quot;]
+    [:ul
+     [:li &quot;API design, development and scalability&quot;]
+     [:li &quot;Distributed systems and architecture&quot;]
+     [:li &quot;Functional programming&quot;]
+     ; ...
+&lt;/code&gt;&lt;/pre&gt;
+</code></pre>
+
+<p>But since posts are written in Markdown, that isn&rsquo;t an option.  There&rsquo;s no way to add a class to the auto-generated <code>&lt;pre&gt;&lt;code&gt;...&lt;/code&gt;&lt;/pre&gt;</code> blocks, and although I could have used literal HTML instead, that brings with it some other issues (angle brackets in code then have to be manually escaped, for example).  Fortunately, google-code-prettify allows the use of directives in HTML comments preceding code blocks, meaning this works the same as the above:</p>
+
+<pre><code>&lt;!--?prettify lang=clj--&gt;
+
+    [:h3 &quot;Interests &amp; Areas of Expertise&quot;]
+     [:ul
+      [:li &quot;API design, development and scalability&quot;]
+      [:li &quot;Distributed systems and architecture&quot;]
+      [:li &quot;Functional programming&quot;]
+      ; ...
+</code></pre>
+
+<h1 id="deployment">Deployment</h1>
+
+<p>Deployment to GitHub Pages was very straightforward.  I nuked my existing <a href="https://github.com/crsmithdev/crsmithdev.github.com">crsmithdev.github.com</a> master and copied over all the files from the <code>html</code> directory, being sure to add a CNAME file referencing my <a href="http://crsmithdev.com">crsmithdev.com</a> domain so Pages would work currently under it.  One push and the site was up and running.</p>
+
+<h1 id="future-work">Future work</h1>
+
+<p>I&rsquo;m much happier with the site now, but still see some areas for improvement:</p>
+
+<ul>
+<li>Some optimizations could definitely improve load times.  I&rsquo;ll likely write a future post about this.</li>
+<li>I&rsquo;d very much like to be able to partially render blog posts on the index page (a title and two paragraphs or so).</li>
+<li>Simply put, I need to write more.</li>
+</ul>
+
+<p>Of course, the last of these is the most difficult for me, which is often a sign that it&rsquo;s the most important.</p>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+          extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-40826256-2', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

@@ -1,0 +1,1475 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Chris Smith</title>
+    <link>https://crsmithdev.com/index.xml</link>
+    <description>Recent content on Chris Smith</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 06 Mar 2017 21:00:11 +0700</lastBuildDate>
+    <atom:link href="https://crsmithdev.com/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Logistic Regression in Machine Learning</title>
+      <link>https://crsmithdev.com/blog/ml-logistic-regression/</link>
+      <pubDate>Mon, 06 Mar 2017 21:00:11 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/blog/ml-logistic-regression/</guid>
+      <description>
+
+&lt;p&gt;This is the second in a series of posts in which I explore concepts in Andrew Ng&amp;rsquo;s &lt;a href=&#34;https://www.coursera.org/learn/machine-learning&#34;&gt;Introduction to Machine Learning&lt;/a&gt; course on Coursera.  In each, I&amp;rsquo;m implementing a machine learning algorithm in Python:  first using standard Python data science and numerical libraries, and then with &lt;a href=&#34;https://www.tensorflow.org/&#34;&gt;TensorFlow&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The algorithm described here is &lt;a href=&#34;link&#34;&gt;logistic regression&lt;/a&gt;.  Logistic regression is recognizably similar to &lt;a href=&#34;link self&#34;&gt;linear regression&lt;/a&gt;, but instead of predicting a continuous output, classifies training examples by a set of categories or labels.  For example, linear regression on a set of social and economic data might be used to predict a person&amp;rsquo;s income, but logistic regression could be used to predict whether that person was married, had children, or had ever been arrested.  In a basic sense, logistic regression only answers questions that have yes / no answers, or questions that can be answered with a 1 or 0.  However, it can easily be &lt;a href=&#34;https://en.wikipedia.org/wiki/Multinomial_logistic_regression&#34;&gt;extended&lt;/a&gt; to problems where there are a larger set of categories.&lt;/p&gt;
+
+&lt;p&gt;Here, I&amp;rsquo;m using the &lt;a href=&#34;https://archive.ics.uci.edu/ml/datasets/Wine&#34;&gt;Wine&lt;/a&gt; dataset from UCI. It maps thirteen continuous variables representing chemical contents of a wine to three labels, each a different winery in Italy.&lt;/p&gt;
+
+&lt;h1 id=&#34;loading-and-plotting-data&#34;&gt;Loading and Plotting Data&lt;/h1&gt;
+
+&lt;p&gt;Initially, I&amp;rsquo;m only using two features from the data set: alcohol and ash.  The labels are supplied as an array of data with values from &lt;code&gt;1&lt;/code&gt; to &lt;code&gt;3&lt;/code&gt;, but at first, I only want a simple regression problem with a yes or no answer.&lt;/p&gt;
+
+&lt;p&gt;To do this, I first filter the data set, reducing it to only include wines with labels &lt;code&gt;1&lt;/code&gt; or &lt;code&gt;2&lt;/code&gt;.  Then, I use the scikit-learn &lt;code&gt;label_binarize&lt;/code&gt; function, which takes an $m$-length list with $n$ possible values (two, in this case), and converts it to an $m \times n$ matrix, where each column represents one label with a value of &lt;code&gt;1&lt;/code&gt;, and all others with a value of &lt;code&gt;0&lt;/code&gt;.  I choose the first column, though the second would be equally valid here, just with the labels reversed.&lt;/p&gt;
+
+&lt;p&gt;I&amp;rsquo;ve provided a small example of &lt;code&gt;label_binarize&lt;/code&gt; below, shuffling the whole input data set first (the examples are sorted by winery), and then selecting the first ten.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import pandas as pd
+import numpy as np
+from sklearn.preprocessing import label_binarize
+
+data = pd.read_csv(&#39;data.txt&#39;)
+
+reduced = data[data[&#39;class&#39;] &amp;lt;= 2]
+X = reduced.as_matrix(columns=[&#39;alcohol&#39;, &#39;ash&#39;])
+y = label_binarize(reduced[&#39;class&#39;].values, [1, 2])[:,0]
+
+example = np.copy(data[&#39;class&#39;].values)
+np.random.shuffle(example)
+example = example[0:10]
+print(&#39;original:&#39;, example)
+example = label_binarize(example, list(set(example)))
+print(&#39;binarized:&#39;, example)
+print(&#39;1s vs all:&#39;, example[:,0])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;original: [3 1 2 2 3 1 1 3 2 3]
+binarized: [[0 0 1]
+ [1 0 0]
+ [0 1 0]
+ [0 1 0]
+ [0 0 1]
+ [1 0 0]
+ [1 0 0]
+ [0 0 1]
+ [0 1 0]
+ [0 0 1]]
+1s vs all: [0 1 0 0 0 1 1 0 0 0]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I also split the data into training and testing sets before going further.  A simple way to do this is with the &lt;code&gt;train_test_split&lt;/code&gt; function from scikit-learn, which allows me to specify a percentage (here 25%) to sample randomly from the data set and partition away for testing.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+print(&#39;train:&#39;, len(X_train), &#39;test:&#39;, len(X_test))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;train: 97 test: 33
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Because I&amp;rsquo;m going to be drawing a lot of data plots, I define a function that takes an $n \times 2$ array of data points &lt;code&gt;xy&lt;/code&gt;, and an $n \times 1$ array &lt;code&gt;labels&lt;/code&gt; to vary the symbol and color for each point.  This function supports three distinct labels, sufficient for this data set.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import matplotlib.pyplot as plt
+%matplotlib inline
+
+MARKERS = [&#39;+&#39;, &#39;x&#39;, &#39;.&#39;]
+COLORS = [&#39;red&#39;, &#39;green&#39;, &#39;blue&#39;]
+
+def plot_points(xy, labels):
+
+    for i, label in enumerate(set(labels)):
+        points = np.array([xy[j,:] for j in range(len(xy)) if labels[j] == label])
+        marker = MARKERS[i % len(MARKERS)]
+        color = COLORS[i % len(COLORS)]
+        plt.scatter(points[:,0], points[:,1], marker=marker, color=color)
+
+plot_points(X_train, y_train)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/ml-logistic-regression/ml-logistic-regression_5_0.png#center&#34; alt=&#34;png&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;There&amp;rsquo;s a fairly obvious area near the center of the plot where a line could divide the two colors of points with a small amount of error.&lt;/p&gt;
+
+&lt;h1 id=&#34;simple-logistic-regression&#34;&gt;Simple Logistic Regression&lt;/h1&gt;
+
+&lt;p&gt;To implement logistic regression, I need a hypothesis function $h_\theta(x)$, a cost function $J(\theta)$, and a gradient function that computes the partial derivatives of $J(\theta)$.&lt;/p&gt;
+
+&lt;p&gt;In logistic regression, $h_\theta$ is the &lt;a href=&#34;https://www.quora.com/Logistic-Regression-Why-sigmoid-function&#34;&gt;sigmoid&lt;/a&gt; function.  The sigmoid function is bounded between 0 and 1, and produces a value that can be interpreted as a probability.  This value can also be a yes / no answer with a cross-over, or decision boundary, at 0.5:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;$$
+h_\theta(x) = \frac{1}{1 + e^{ \theta^Tx}}
+$$&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Using &lt;a href=&#34;https://en.wikipedia.org/wiki/Mean_squared_error&#34;&gt;mean squared error&lt;/a&gt; from linear regression isn&amp;rsquo;t a good idea here, as the resulting cost function &lt;a href=&#34;http://mathworld.wolfram.com/SigmoidFunction.html&#34;&gt;isn&amp;rsquo;t convex&lt;/a&gt; and so is not well-suited for gradient descent.  Instead, the difference of $h_\theta(x^i) - y^i$ is calculated differently for $y=0$ and $y=1$, and the result is &lt;a href=&#34;https://stackoverflow.com/questions/32986123/why-the-cost-function-of-logistic-regression-has-a-logarithmic-expression&#34;&gt;transformed&lt;/a&gt; &lt;a href=&#34;https://math.stackexchange.com/questions/886555/deriving-cost-function-using-mle-why-use-log-function&#34;&gt;logarithmically&lt;/a&gt; into a convex function:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;$$
+J(\theta) =-\frac{1}{m}\sum_{i=1}^{m}y^{i}\log(h_\theta(x^{i}))+(1-y^{i})\log(1-h_\theta(x^{i}))
+$$&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Fortunately, the &lt;a href=&#34;https://math.stackexchange.com/questions/477207/derivative-of-cost-function-for-logistic-regression&#34;&gt;derivative&lt;/a&gt; of this function is exactly the same as that of linear regression, just with a different $h_\theta(x)$:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;$$
+\frac{\partial}{\partial\theta_{j}}J(\theta) =\sum_{i=1}^{m}(h_\theta(x^{i})-y^i)x_j^i
+$$&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import numpy as np
+
+def sigmoid(X):
+    return 1 / (1 + np.exp(-X))
+
+def cost(theta, X, y):
+    theta = theta[:,None]
+    y = y[:,None]
+
+    hyp = sigmoid(X.dot(theta))
+    pos = np.multiply(-y, np.log(hyp))
+    neg = np.multiply((1 - y), np.log(1 - hyp))
+
+    return np.sum(pos - neg) / (len(X))
+
+def gradient(theta, X, y):
+    theta = theta[:,None]
+    y = y[:,None]
+
+    error = sigmoid(X.dot(theta)) - y
+    return X.T.dot(error) / len(X)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It&amp;rsquo;s worth noting the treatment of &lt;code&gt;y&lt;/code&gt; and &lt;code&gt;theta&lt;/code&gt; above.  In each function, I explicitly convert each to an $n$ or $m \times 1$ &lt;code&gt;ndarray&lt;/code&gt;, so the matrix operations work correctly.  An alternative is to use a numpy &lt;code&gt;matrix&lt;/code&gt;, which has stricter linear algebra semantics and treats 1-dimensional matrices more like column vectors.  However, I found that it was awkward to get the matrix interface to work correctly with both the optimization function used below, and with TensorFlow.  The indexing syntax can be thought of as explicitly columnizing the array of parameters or labels.&lt;/p&gt;
+
+&lt;p&gt;Instead of manually writing a gradient descent, I use an optimization algorithm from Scipy called &lt;a href=&#34;https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.optimize.fmin_tnc.html&#34;&gt;&lt;code&gt;fmin_tnc&lt;/code&gt;&lt;/a&gt; to perform it.  This function takes as parameters the cost function, an initial set of parameters for $\theta$, the gradient function, and a tuple of args to pass to each.  I define a &lt;code&gt;train&lt;/code&gt; function that prepends a columns of 1s to the training data (allowing for a bias parameter $\theta_0$), run the minimization function and return the first of its return values, final parameters for $\theta$.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from scipy.optimize import fmin_tnc
+
+def train(X, y):
+    X = np.insert(X, 0, np.ones(len(X)), axis=1)
+    theta = np.zeros(X.shape[1])
+    result = fmin_tnc(func=cost, x0=theta, fprime=gradient, args=(X, y))
+
+    return result[0]
+
+theta = train(X_train, y_train)
+print(&#39;theta: &#39;, theta)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;theta:  [ 116.44453348   -8.22298266   -3.26236478]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;decision-boundaries-and-evaluation&#34;&gt;Decision Boundaries and Evaluation&lt;/h1&gt;
+
+&lt;p&gt;I can evaluate the results of the optimization visually and statistically, but I also need one more function: &lt;code&gt;predict&lt;/code&gt;, which takes an array of examples &lt;code&gt;X&lt;/code&gt; and learned parameter values &lt;code&gt;theta&lt;/code&gt; as inputs and returns the predicted label for each.  Here too, 1s must be prepended to the inputs, and I return an integer value representing whether the result of the &lt;code&gt;sigmoid&lt;/code&gt; hypothesis function is equal to or greater than 0.5.&lt;/p&gt;
+
+&lt;p&gt;To test the results of those predictions, Scikit-learn provides three functions to calculate &lt;a href=&#34;https://en.wikipedia.org/wiki/Precision_and_recall&#34;&gt;accuracy, precision and recall&lt;/a&gt;.  The test data from earlier is used here, so the results represent the performance of the classifier on unseen data.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from sklearn.metrics import accuracy_score, precision_score, recall_score
+
+def predict(X, theta):
+    X = np.insert(X, 0, np.ones(len(X)), axis=1)
+    return (sigmoid(X * np.matrix(theta).T) &amp;gt;= 0.5).astype(int)
+
+predictions = predict(X_test, theta)
+
+print(&#39;accuracy:&#39;, accuracy_score(y_test, predictions))
+print(&#39;precision:&#39;, precision_score(y_test, predictions, average=&#39;macro&#39;))
+print(&#39;recall:&#39;, recall_score(y_test, predictions, average=&#39;macro&#39;))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;accuracy: 0.848484848485
+precision: 0.868421052632
+recall: 0.868421052632
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It&amp;rsquo;s much more interesting to review the results visually, at least while the number of features is limited to two.  To do this, I need to plot the input points again, then overlay the decision boundary on top.  I tried several approaches for this in Matplotlib, and found that an unfilled countour plot gave me the best results.  This can also be done by manually calculating the function to plot, or using a filled contour plot that shades over the actual areas, but doing the math by hand is tedious, and the colormaps for filled contour plots leave a lot to be desired visually.&lt;/p&gt;
+
+&lt;p&gt;Below, I define a function &lt;code&gt;plot_boundary&lt;/code&gt; that takes $n \times 2$ matrix of feature values $(x_0, x_1)$ and a prediction function, then builds a mesh grid of $(x, y)$ points corresponding to possible $(x_0, x_1)$ values within the input range.  After running the prediction function on all of them, the result is an $(x, y, z)$ point in space.  Because the result isn&amp;rsquo;t continuous and flips directly from 0 to 1, there&amp;rsquo;s only one contour that can be drawn on the plot: the decision boundary.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from matplotlib import cm
+
+def plot_boundary(X, pred):
+
+    x_min, x_max = X[:,0].min() - .1, X[:,0].max() + .1
+    y_min, y_max = X[:,1].min() - .1, X[:,1].max() + .1
+
+    xs, ys = np.meshgrid(
+        np.linspace(x_min, x_max, 200),
+        np.linspace(y_min, y_max, 200)
+    )
+
+    xys = np.column_stack([xs.ravel(), ys.ravel()])
+    zs = pred(xys).reshape(xs.shape)
+
+    plt.contour(xs, ys, zs, colors=&#39;black&#39;)
+
+plot_points(X_train, y_train)
+plot_boundary(X_train, lambda x: predict(x, theta))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/ml-logistic-regression/ml-logistic-regression_13_0.png#center&#34; alt=&#34;png&#34; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;multinomial-logistic-regression&#34;&gt;Multinomial Logistic Regression&lt;/h1&gt;
+
+&lt;p&gt;With the basics working, the next step is something more interesting: a similar set of two features from the data set (this time alcohol and flavanoids), but with all three labels instead of two.  The only differences below in loading the data are that I no longer filter out rows with the third label, that I use the full output from &lt;code&gt;label_binarize&lt;/code&gt;, resulting in an $m \times 3$ array for &lt;code&gt;y&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;X = data.as_matrix(columns=[&#39;alcohol&#39;, &#39;flavanoids&#39;])
+y = data.as_matrix(columns=[&#39;class&#39;])
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+y_train = label_binarize(y_train, [1, 2, 3])
+
+plot_points(X_train, y_train.argmax(axis=1))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/ml-logistic-regression/ml-logistic-regression_15_0.png#center&#34; alt=&#34;png&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The plotted data points again suggest some obvious linear boundaries between the wines.&lt;/p&gt;
+
+&lt;p&gt;It turns out that solving this as three one-vs-all problems is trivial, and re-uses all the code I just wrote.  Instead of one array of &lt;code&gt;theta&lt;/code&gt; values I train three, one per problem, and then define a new &lt;code&gt;predict_multi&lt;/code&gt; function that computes the three sigmoids for each example using each array of &lt;code&gt;theta&lt;/code&gt; parameters.  This time, rather than return &lt;code&gt;1&lt;/code&gt; or &lt;code&gt;0&lt;/code&gt; based on whether the value is above or below 0.5, I return the &lt;code&gt;argmax&lt;/code&gt; of each resulting row, the index of the largest value.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def predict_multi(X, thetas):
+    X = np.insert(X, 0, np.ones(len(X)), axis=1)
+    preds = [sigmoid(X * np.asmatrix(t).T) for t in thetas]
+    return np.column_stack(preds).argmax(axis=1)
+
+thetas = [train(X_train, y_train[:,i]) for i in range(0,3)]
+predictions = predict_multi(X_test, thetas) + 1
+
+print(&#39;accuracy:&#39;, accuracy_score(y_test, predictions))
+print(&#39;precision:&#39;, precision_score(y_test, predictions, average=&#39;macro&#39;))
+print(&#39;recall:&#39;, recall_score(y_test, predictions, average=&#39;macro&#39;))
+
+plot_points(X_train, y_train.argmax(axis=1))
+plot_boundary(X_train, lambda x: predict_multi(x, thetas))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;accuracy: 0.933333333333
+precision: 0.945304437564
+recall: 0.928540305011
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/ml-logistic-regression/ml-logistic-regression_17_1.png#center&#34; alt=&#34;png&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Looking at the plot above, it seems like the boundaries could be much more accurate if they didn&amp;rsquo;t have to be straight lines.  To allow for this, I define a function &lt;code&gt;transform&lt;/code&gt; to add some polynomial features, converting each input example of $(x_0, x_1)$ to $(x_0, x_1, x_2, x_3, x_4)$, where $x_2 = x_0^2$, $x_3 = x_1^2$ and $x_4 = x_0x_1$.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def transform_x(x):
+    return [x[0], x[1], x[0] ** 2, x[1] ** 2, x[0] * x[1]]
+
+def transform(X):
+    return np.apply_along_axis(transform_x, 1, X)
+
+X_train = transform(X_train)
+X_test = transform(X_test)
+
+thetas = [train(X_train, y_train[:,i]) for i in range(0,3)]
+predictions = predict_multi(X_test, thetas) + 1
+
+print(&#39;accuracy:&#39;, accuracy_score(y_test, predictions))
+print(&#39;precision:&#39;, precision_score(y_test, predictions, average=&#39;macro&#39;))
+print(&#39;recall:&#39;, recall_score(y_test, predictions, average=&#39;macro&#39;))
+
+plot_points(X_train, y_train.argmax(axis=1))
+plot_boundary(X_train, lambda x: predict_multi(transform(x), thetas))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;accuracy: 0.977777777778
+precision: 0.981481481481
+recall: 0.981481481481
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/ml-logistic-regression/ml-logistic-regression_19_1.png#center&#34; alt=&#34;png&#34; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;regularization&#34;&gt;Regularization&lt;/h1&gt;
+
+&lt;p&gt;Next, I want to include all the features from the data set.  To do this, instead of specifying what columns I want to include, I use &lt;code&gt;drop&lt;/code&gt; to include everything except the &lt;code&gt;class&lt;/code&gt; column.&lt;/p&gt;
+
+&lt;p&gt;Because I&amp;rsquo;m now significantly increasing the number of features, I apply &lt;a href=&#34;https://www.quora.com/What-is-regularization-in-machine-learning&#34;&gt;regularization&lt;/a&gt; as part of new cost and gradient functions.  Regularization prevents overfitting, a situation where a large number of features allows the classifier to fit the training set &lt;em&gt;too&lt;/em&gt; exactly, meaning that it fails to generalize well and perform accurately on data it hasn&amp;rsquo;t yet seen.&lt;/p&gt;
+
+&lt;p&gt;To avoid this problem, I add an additional term to the cost function and its gradient, representing the aggregated weights of each $\theta$ parameter.  Adding this term effectively increases the cost, meaning that the overall impact of feature weights is muted, and the fit to the training set is softened.  Note that for each of the new cost and gradient functions, the summation for regularization starts at $j = 1$, since the constant bia parameter $\theta_0$ is typically not regularized:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;$$
+J(\theta) =-\frac{1}{m}\sum_{i=1}^{m}[y^{i}\log(h_\theta(x^{i}))+(1-y^{i})\log(1-h_\theta(x^{i}))] + \frac{\lambda}{2m}\sum_{j=1}^{n}\theta_j^2 \\
+\frac{\partial}{\partial\theta_{j}}J(\theta) =\sum_{i=1}^{m}(h_\theta(x^{i})-y^i)x_j^i + \frac{\lambda}{m}\theta_j
+$$&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Below, I define the new cost and gradient functions, as well as a new function to train the classifier, given the addition of a new parameter &lt;code&gt;l&lt;/code&gt;, for $\lambda$.  This parameter can be adjusted to change the effect of regularization; here I&amp;rsquo;m just using &lt;code&gt;1.0&lt;/code&gt;.  In each case, I ensure that $\theta_0$ isn&amp;rsquo;t regularized by creating a temporary &lt;code&gt;theta_reg&lt;/code&gt;, starting with a zero followed by elements one and onward from &lt;code&gt;theta&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;X = data.drop(&#39;class&#39;, 1).as_matrix()
+y = data.as_matrix(columns=[&#39;class&#39;])
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+y_train = label_binarize(y_train, [1, 2, 3])
+
+def cost_reg(theta, X, y, lambda_):
+    theta_reg = np.array((0, *theta[1:]))[:,None]
+    reg = lambda_ * np.square(theta_reg).sum() / (2 * len(X))
+
+    return cost(theta, X, y) + reg
+
+def gradient_reg(theta, X, y, lambda_):
+    theta_reg = np.array((0, *theta[1:]))[:,None]
+    reg = lambda_ * theta_reg / len(X)
+
+    return gradient(theta, X, y) + reg
+
+def train_reg(X, y, lambda_):
+    X = np.insert(X, 0, np.ones(len(X)), axis=1)
+    theta = np.zeros(X.shape[1])
+    result = fmin_tnc(func=cost_reg, x0=theta, fprime=gradient_reg, args=(X, y, lambda_))
+
+    return result[0]
+
+thetas = [train_reg(X_train, y_train[:,i], 1.0) for i in range(0,3)]
+predictions = predict_multi(X_test, thetas) + 1
+
+print(&#39;accuracy:&#39;, accuracy_score(y_test, predictions))
+print(&#39;precision:&#39;, precision_score(y_test, predictions, average=&#39;macro&#39;))
+print(&#39;recall:&#39;, recall_score(y_test, predictions, average=&#39;macro&#39;))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;accuracy: 0.977777777778
+precision: 0.981481481481
+recall: 0.97619047619
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;logistic-regression-with-tensorflow&#34;&gt;Logistic Regression with TensorFlow&lt;/h1&gt;
+
+&lt;p&gt;In this last section, I implement logistic regression using TensorFlow and test the model using the same data set.  TensorFlow allows for a significantly more compact and higher-level representation of the problem as a computational graph, resulting in less code and faster development of models.&lt;/p&gt;
+
+&lt;p&gt;One item definitely worth calling out is the use of the &lt;a href=&#34;https://www.tensorflow.org/api_docs/python/tf/train/AdamOptimizer&#34;&gt;&lt;code&gt;AdamOptimizer&lt;/code&gt;&lt;/a&gt; instead of the &lt;a href=&#34;https://www.tensorflow.org/api_docs/python/tf/train/GradientDescentOptimizer&#34;&gt;&lt;code&gt;GradientDescentOptimizer&lt;/code&gt;&lt;/a&gt; from the previous post.  Although the latter can still be used here, I found it a poor fit for two reasons:  it is &lt;em&gt;very&lt;/em&gt; sensitive to learning rate and lambda parameters, and it converges extremely slowly.  Correct convergence required a very low learning rate (around 0.001 at most), and could still be seen decreasing at over 300,000 iterations, with a curve that appeared linear after the first thousand.  Poor tuning resulted in the optimizer spinning out of control and emitting &lt;code&gt;nan&lt;/code&gt; values for all the parameters.&lt;/p&gt;
+
+&lt;p&gt;Using a different optimizer helped tremendously, especially one that is &lt;a href=&#34;https://stackoverflow.com/questions/33919948/how-to-set-adaptive-learning-rate-for-gradientdescentoptimizer&#34;&gt;adaptive&lt;/a&gt;.  It converges significantly faster and requires much less hand-holding to do so.  Even then, these graphs take typically 25x the time to converge properly compared to the manual implementation above, and I&amp;rsquo;m not sure why this is the case.  Since Tensorflow does the calculus itself to find the gradient, it could be that this is the result of some issue or lack of optimization.  On the other hand, given that the platform is designed to distribute computations and scale to significantly larger data sets, this could be some overhead that is quite reasonable in those scenarios but is felt heavily in a small demonstration with a tiny number of examples.&lt;/p&gt;
+
+&lt;p&gt;I also adjusted all placeholders and variables to &lt;code&gt;tf.float64&lt;/code&gt;, to avoid any issues with numerical precision.  After this and the adaptive optimizer, the results improved dramatically.&lt;/p&gt;
+
+&lt;p&gt;Because I want to build a few different graphs, I define a function that builds one given a few parameters: the number of features, the number of labels, and a lambda value for regularization.  This function &lt;code&gt;tf_create&lt;/code&gt; builds a graph, and returns two functions itself: one to train the algorithm by running the optimizer, and another to predict labels for new values.  To compute the loss for regularization, I use the built-in &lt;code&gt;tf.nn.l2_loss&lt;/code&gt; function, which is equivalent to the regularization loss I computed manually before.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import tensorflow as tf
+
+def tf_create(n_features, n_labels, lambda_):
+
+    examples = tf.placeholder(tf.float64, [None, n_features])
+    labels = tf.placeholder(tf.float64, [None, n_labels])
+    weights = tf.Variable(tf.zeros([n_features, n_labels], dtype=tf.float64))
+    bias = tf.Variable(tf.zeros([n_labels], dtype=tf.float64))
+
+    hyp = tf.sigmoid(tf.matmul(examples, weights) + bias)
+    loss = tf.reduce_mean(-labels * tf.log(hyp) - (1 - labels) * tf.log(1 - hyp))
+    reg = lambda_ * tf.nn.l2_loss(weights)
+    cost = loss + reg
+
+    train = tf.train.AdamOptimizer().minimize(cost)
+    predict = tf.argmax(hyp, axis=1)
+
+    def train_(sess, X, y, iterations):
+        for i in range(iterations):
+            sess.run(train, feed_dict={examples: X, labels: y})
+
+    def predict_(sess, X):
+        return sess.run(predict, feed_dict={examples: X})
+
+    return train_, predict_
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;First, I evaluate the model against the 2-feature, 3-label example from above.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;X = data.as_matrix(columns=[&#39;alcohol&#39;, &#39;flavanoids&#39;])
+y = label_binarize(data[&#39;class&#39;], [1, 2, 3])
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+
+with tf.Session() as sess:
+
+    train, predict = tf_create(X.shape[1], y.shape[1], 0.0)
+    sess.run(tf.global_variables_initializer())
+    train(sess, X_train, y_train, 30000)
+
+    predictions = predict(sess, X_test)
+    y_test = y_test.argmax(axis=1)
+
+    print(&#39;accuracy:&#39;, accuracy_score(y_test, predictions))
+    print(&#39;precision:&#39;, precision_score(y_test, predictions, average=&#39;macro&#39;))
+    print(&#39;recall:&#39;, recall_score(y_test, predictions, average=&#39;macro&#39;))
+
+    plot_boundary(X_train, lambda x: predict(sess, x))
+    plot_points(X_train, y_train.argmax(axis=1))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;accuracy: 0.955555555556
+precision: 0.95584045584
+recall: 0.95584045584
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/ml-logistic-regression/ml-logistic-regression_25_1.png#center&#34; alt=&#34;png&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Next, I use the &lt;code&gt;transform&lt;/code&gt; function to apply additional polynomial features to the dataset, allowing for a non-linear decision boundary.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;X = data.as_matrix(columns=[&#39;alcohol&#39;, &#39;flavanoids&#39;])
+X = transform(X)
+y = label_binarize(data[&#39;class&#39;], [1, 2, 3])
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+
+with tf.Session() as sess:
+
+    train, predict = tf_create(X.shape[1], y.shape[1], 0.0)
+    sess.run(tf.global_variables_initializer())
+    train(sess, X_train, y_train, 30000)
+
+    predictions = predict(sess, X_test)
+    y_test = y_test.argmax(axis=1)
+
+    print(&#39;accuracy:&#39;, accuracy_score(y_test, predictions))
+    print(&#39;precision:&#39;, precision_score(y_test, predictions, average=&#39;macro&#39;))
+    print(&#39;recall:&#39;, recall_score(y_test, predictions, average=&#39;macro&#39;))
+
+    plot_boundary(X_train, lambda x: predict(sess, transform(x)))
+    plot_points(X_train, y_train.argmax(axis=1))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;accuracy: 0.977777777778
+precision: 0.97619047619
+recall: 0.980392156863
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/ml-logistic-regression/ml-logistic-regression_27_1.png#center&#34; alt=&#34;png&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Finally, I include all the features from the data set, all the labels, and apply a small amount of regularization.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;X = data.drop(&#39;class&#39;, 1).as_matrix()
+y = label_binarize(data[&#39;class&#39;], [1, 2, 3])
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+
+with tf.Session() as sess:
+
+    train, predict = tf_create(X.shape[1], y.shape[1], 0.1)
+    sess.run(tf.global_variables_initializer())
+    train(sess, X_train, y_train, 30000)
+
+    predictions = predict(sess, X_test)
+    y_test = y_test.argmax(axis=1)
+
+    print(&#39;accuracy:&#39;, accuracy_score(y_test, predictions))
+    print(&#39;precision:&#39;, precision_score(y_test, predictions, average=&#39;macro&#39;))
+    print(&#39;recall:&#39;, recall_score(y_test, predictions, average=&#39;macro&#39;))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;accuracy: 0.955555555556
+precision: 0.961873638344
+recall: 0.951178451178
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can find the IPython notebook for this post on &lt;a href=&#34;https://github.com/crsmithdev/notebooks/blob/master/ml-logistic-regression/ml-logistic-regression.ipynb&#34;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Linear Regression in Machine Learning</title>
+      <link>https://crsmithdev.com/blog/ml-linear-regression/</link>
+      <pubDate>Sun, 26 Feb 2017 21:00:11 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/blog/ml-linear-regression/</guid>
+      <description>
+
+&lt;p&gt;This is the first of a series of posts in which I&amp;rsquo;ll be exploring concepts taught in Andrew Ng&amp;rsquo;s &lt;a href=&#34;https://www.coursera.org/learn/machine-learning&#34;&gt;Introduction to Machine Learning&lt;/a&gt; course on Coursera.  As a CS student, I enjoyed doing odd or extra things with my assignments — I found it added a greater challenge and allowed me to learn outside the scope of the class in a well-structured way.  So, as I progress through this course, I&amp;rsquo;ll be posting another take on the coursework in Python, using a Jupyter notebook.&lt;/p&gt;
+
+&lt;p&gt;Each post will begin with an implementation of the algorithm for the week, tracking closely to the requirements and terminology of the assignment, but trading Octave/MATLAB functions for standard Python data science tools, and then conclude by exploring what the same algorithm would look like built in &lt;a href=&#34;https://www.tensorflow.org/&#34;&gt;Tensorflow&lt;/a&gt;.  I&amp;rsquo;ll also be using different data sets, to make things a bit more interesting, and to avoid duplicating material from the course.&lt;/p&gt;
+
+&lt;p&gt;The first programming assignment covers &lt;a href=&#34;https://en.wikipedia.org/wiki/Linear_regression&#34;&gt;linear regression&lt;/a&gt;.  Linear regression attempts to fit a line of best fit to a data set, using one or more features as coefficients for a linear equation.  Here, I&amp;rsquo;ll discuss:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Loading, manipulating and plotting data using numpy and matplotlib&lt;/li&gt;
+&lt;li&gt;The hypothesis and cost functions for linear regression&lt;/li&gt;
+&lt;li&gt;Gradient descent with one variable and multiple variables&lt;/li&gt;
+&lt;li&gt;Feature scaling and normalization&lt;/li&gt;
+&lt;li&gt;Vectorization and the normal equation&lt;/li&gt;
+&lt;li&gt;Linear regression and gradient descent in Tensorflow&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In this post, I&amp;rsquo;m using the &lt;a href=&#34;https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset&#34;&gt;UCI Bike Sharing Data Set&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h1 id=&#34;loading-and-plotting-data&#34;&gt;Loading and Plotting Data&lt;/h1&gt;
+
+&lt;p&gt;For the first part, we&amp;rsquo;ll be doing linear regression with one variable, and so we&amp;rsquo;ll use only two fields from the daily data set: the normalized high temperature in C, and the total number of bike rentals.  The values for rentals are scaled by a factor of a thousand, given the  difference in magnitude between them and the normalized temperatures.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import pandas as pd
+
+data = pd.read_csv(&amp;quot;./data.csv&amp;quot;)
+temps = data[&#39;atemp&#39;].values
+rentals = data[&#39;cnt&#39;].values / 1000
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The plot reveals some degree of correlation between temperature and bike rentals, as one might guess.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import matplotlib.pyplot as plt
+%matplotlib inline
+
+plt.scatter(temps, rentals, marker=&#39;x&#39;, color=&#39;red&#39;)
+plt.xlabel(&#39;Normalized Temperature in C&#39;)
+plt.ylabel(&#39;Bike Rentals in 1000s&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/ml-linear-regression//ml-linear-regression_5_1.png#center&#34; alt=&#34;png&#34; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;simple-linear-regression&#34;&gt;Simple Linear Regression&lt;/h1&gt;
+
+&lt;p&gt;We&amp;rsquo;ll start by implementing the &lt;a href=&#34;https://en.wikipedia.org/wiki/Loss_function&#34;&gt;cost function&lt;/a&gt; for linear regression, specifically &lt;a href=&#34;https://en.wikipedia.org/wiki/Mean_squared_error&#34;&gt;mean squared error&lt;/a&gt; (MSE).  Intuitively, MSE represents an aggregation of the distances between point&amp;rsquo;s actual y value and what a hypothesis function $h_\theta(x)$ predicted it would be.  That hypothesis function and the cost function $J(\theta)$ are defined as&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;\begin{align}
+h_\theta(x) &amp;amp; = \theta_0 + \theta_1x_1 \\
+J(\theta) &amp;amp; = \frac{1}{2m}\sum\limits_{i = 1}^{m}(h_\theta(x^{(i)}) - y^{(i)})^2
+\end{align}&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;where $\theta$ is a vector of feature weights, $x^{(i)}$ is the ith training example, $y^{(i)}$ is that example&amp;rsquo;s y value, and $x_j$ is the value for its jth feature.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import numpy as np
+
+def compute_cost(X, y, theta):
+    return np.sum(np.square(np.matmul(X, theta) - y)) / (2 * len(y))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Before computing the cost with an initial guess for $\theta$, a column of 1s is prepended onto the input data.  This allows us to vectorize the cost function, as well as make it usable for multiple linear regression later.  This first value $\theta_0$ now behaves as a constant in the cost function.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;theta = np.zeros(2)
+X = np.column_stack((np.ones(len(temps)), temps))
+y = rentals
+cost = compute_cost(X, y, theta)
+
+print(&#39;theta:&#39;, theta)
+print(&#39;cost:&#39;, cost)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;theta: [ 0.  0.]
+cost: 12.0184064412
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We&amp;rsquo;ll now minimize the cost using the &lt;a href=&#34;https://en.wikipedia.org/wiki/Gradient_descent&#34;&gt;gradient descent&lt;/a&gt; algorithm.  Intuitively, gradient descent takes small, linear hops down the slope of a function in each feature dimension, with the size of each hop determined by the partial derivative of the cost function with respect to that feature and a learning rate multiplier $\alpha$.  If tuned properly, the algorithm converges on a global minimum by iteratively adjusting feature weights $\theta$ of the cost function, as shown here for two feature dimensions:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;\begin{align}
+\theta_0 &amp;amp; := \theta_0 - \alpha\frac{\partial}{\partial\theta_0} J(\theta_0,\theta_1) \\
+\theta_1 &amp;amp; := \theta_1 - \alpha\frac{\partial}{\partial\theta_1} J(\theta_0,\theta_1)
+\end{align}&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;The update rule each iteration then becomes:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;\begin{align}
+\theta_0 &amp;amp; := \theta_0 - \alpha\frac{1}{m} \sum_{i=1}^m (h_\theta(x^{(i)})-y^{(i)}) \\
+\theta_1 &amp;amp; := \theta_1 - \alpha\frac{1}{m} \sum_{i=1}^m (h_\theta(x^{(i)})-y^{(i)})x_1^{(i)} \\
+\end{align}&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;See &lt;a href=&#34;http://mccormickml.com/2014/03/04/gradient-descent-derivation/&#34;&gt;here&lt;/a&gt; for a more detailed explanation of how the update equations are derived.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def gradient_descent(X, y, alpha, iterations):
+    theta = np.zeros(2)
+    m = len(y)
+
+    for i in range(iterations):
+        t0 = theta[0] - (alpha / m) * np.sum(np.dot(X, theta) - y)
+        t1 = theta[1] - (alpha / m) * np.sum((np.dot(X, theta) - y) * X[:,1])
+        theta = np.array([t0, t1])
+
+    return theta
+
+iterations = 5000
+alpha = 0.1
+
+theta = gradient_descent(X, y, alpha, iterations)
+cost = compute_cost(X, y, theta)
+
+print(&amp;quot;theta:&amp;quot;, theta)
+print(&#39;cost:&#39;, compute_cost(X, y, theta))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;theta: [ 0.94588081  7.50171673]
+cost: 1.12758692584
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We can examine the values of $\theta$ chosen by the algorithm using a few different visualizations, first by plotting $h_\theta(x)$ against the input data.  The results show the expected correlation between temperature and rentals.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;plt.scatter(temps, rentals, marker=&#39;x&#39;, color=&#39;red&#39;)
+plt.xlabel(&#39;Normalized Temperature in C&#39;)
+plt.ylabel(&#39;Bike Rentals in 1000s&#39;)
+samples = np.linspace(min(temps), max(temps))
+plt.plot(samples, theta[0] + theta[1] * samples)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/ml-linear-regression//ml-linear-regression_14_1.png#center&#34; alt=&#34;png&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A surface plot is a better illustration of how gradient descent approaches a global minimum, plotting the values for $\theta$ against their associated cost.  This requires a bit more code than an implementation in Octave / MATLAB, largely due to how the input data is generated and fed to the surface plot function.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+
+Xs, Ys = np.meshgrid(np.linspace(-5, 5, 50), np.linspace(-40, 40, 50))
+Zs = np.array([compute_cost(X, y, [t0, t1]) for t0, t1 in zip(np.ravel(Xs), np.ravel(Ys))])
+Zs = np.reshape(Zs, Xs.shape)
+
+fig = plt.figure(figsize=(7,7))
+ax = fig.gca(projection=&amp;quot;3d&amp;quot;)
+ax.set_xlabel(r&#39;t0&#39;)
+ax.set_ylabel(r&#39;t1&#39;)
+ax.set_zlabel(r&#39;cost&#39;)
+ax.view_init(elev=25, azim=40)
+ax.plot_surface(Xs, Ys, Zs, cmap=cm.rainbow)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/ml-linear-regression//ml-linear-regression_16_1.png#center&#34; alt=&#34;png&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Finally, a countour plot reveals slices of that surface plot in 2D space, and can show the resulting $\theta$ values sitting exactly at the global minimum.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;ax = plt.figure().gca()
+ax.plot(theta[0], theta[1], &#39;r*&#39;)
+plt.contour(Xs, Ys, Zs, np.logspace(-3, 3, 15))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/ml-linear-regression//ml-linear-regression_18_1.png#center&#34; alt=&#34;png&#34; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;multiple-linear-regression&#34;&gt;Multiple Linear Regression&lt;/h1&gt;
+
+&lt;p&gt;First, we reload the data and add two more features, humidity and windspeed.&lt;/p&gt;
+
+&lt;p&gt;Before implementing gradient descent for multiple variables, we&amp;rsquo;ll also apply &lt;a href=&#34;https://en.wikipedia.org/wiki/Feature_scaling&#34;&gt;feature scaling&lt;/a&gt; to normalize feature values, preventing any one of them from disproportionately influencing the results, as well as helping gradient descent converge more quickly.  In this case, each feature value is adjusted by subtracting the mean and dividing the result by the standard deviation of all values for that feature:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;$$
+z = \frac{x - \mu}{\sigma}
+$$&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;More details on feature scaling and normalization can be found &lt;a href=&#34;http://sebastianraschka.com/Articles/2014_about_feature_scaling.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def feature_normalize(X):
+    n_features = X.shape[1]
+    means = np.array([np.mean(X[:,i]) for i in range(n_features)])
+    stddevs = np.array([np.std(X[:,i]) for i in range(n_features)])
+    normalized = (X - means) / stddevs
+
+    return normalized
+
+X = data.as_matrix(columns=[&#39;atemp&#39;, &#39;hum&#39;, &#39;windspeed&#39;])
+X = feature_normalize(X)
+X = np.column_stack((np.ones(len(X)), X))
+
+y = data[&#39;cnt&#39;].values / 1000
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The next step is to implement gradient descent for any number of features.  Fortunately, the update step generalizes easily, and can be vectorized to avoid iterating through $\theta_j$ values as might be suggested by the single variable implementation above:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;$$
+\theta_j := \theta_j - \alpha\frac{1}{m} \sum_{i=1}^m (h_\theta(x^{(i)})-y^{(i)})x_j^{(i)}
+$$&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def gradient_descent_multi(X, y, theta, alpha, iterations):
+    theta = np.zeros(X.shape[1])
+    m = len(X)
+
+    for i in range(iterations):
+        gradient = (1/m) * np.matmul(X.T, np.matmul(X, theta) - y)
+        theta = theta - alpha * gradient
+
+    return theta
+
+theta = gradient_descent_multi(X, y, theta, alpha, iterations)
+cost = compute_cost(X, y, theta)
+
+print(&#39;theta:&#39;, theta)
+print(&#39;cost&#39;, cost)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;theta: [ 4.50434884  1.22203893 -0.45083331 -0.34166068]
+cost 1.00587092471
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Unfortunately, it&amp;rsquo;s now more difficult to evaluate the results visually, but we can check them a totally different method of calculating the answer, the &lt;a href=&#34;http://eli.thegreenplace.net/2014/derivation-of-the-normal-equation-for-linear-regression/&#34;&gt;normal equation&lt;/a&gt;.  This solves directly for the solution without iteration specifying an $\alpha$ value, although it begins to perform worse than gradient descent with large (10,000+) numbers of features.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;$$
+\theta = (X^TX)^{-1}X^Ty
+$$&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from numpy.linalg import inv
+
+def normal_eq(X, y):
+    return inv(X.T.dot(X)).dot(X.T).dot(y)
+
+theta = normal_eq(X, y)
+cost = compute_cost(X, y, theta)
+
+print(&#39;theta:&#39;, theta)
+print(&#39;cost:&#39;, cost)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;theta: [ 4.50434884  1.22203893 -0.45083331 -0.34166068]
+cost: 1.00587092471
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The $\theta$ values and costs for each implementation are identical, so we can have a high degree of confidence they are correct.&lt;/p&gt;
+
+&lt;h2 id=&#34;linear-regression-in-tensorflow&#34;&gt;Linear Regression in Tensorflow&lt;/h2&gt;
+
+&lt;p&gt;Tensorflow offers significantly higher-level abstractions to work with, representing the algorithm as a computational graph.  It has a built-in gradient descent optimizer that can minimize the cost function without us having to define the gradient manually.&lt;/p&gt;
+
+&lt;p&gt;We&amp;rsquo;ll begin by reloading the data and adapting it to more Tensorflow-friendly data structures and terminology.  Features are still normalized as before, but the added column of 1s is absent: the constant is treated separately as a &lt;em&gt;bias&lt;/em&gt; variable, the previous $\theta$ values are now &lt;em&gt;weights&lt;/em&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import tensorflow as tf
+
+X = data.as_matrix(columns=[&#39;atemp&#39;, &#39;hum&#39;, &#39;windspeed&#39;])
+X = feature_normalize(X)
+y = data[&#39;cnt&#39;].values / 1000
+y = y.reshape((-1, 1))
+
+m = X.shape[0]
+n = X.shape[1]
+
+examples = tf.placeholder(tf.float32, [m,n])
+labels = tf.placeholder(tf.float32, [m,1])
+weights = tf.Variable(tf.zeros([n,1], dtype=np.float32), name=&#39;weight&#39;)
+bias = tf.Variable(tf.zeros([1], dtype=np.float32), name=&#39;bias&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The entire gradient descent occurs below in only three lines of code.  All that&amp;rsquo;s needed is to define the hypothesis and cost functions, and then a gradient descent optimizer to find the minimum.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;hypothesis = tf.add(tf.matmul(examples, weights), bias)
+cost = tf.reduce_sum(tf.square(hypothesis - y)) / (2 * m)
+optimizer = tf.train.GradientDescentOptimizer(alpha).minimize(cost)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The graph is now ready to use, and all the remains is to start up a session, run the optimizer iteratively, and check the results.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;with tf.Session() as sess:
+    init = tf.global_variables_initializer()
+    sess.run(init)
+
+    for i in range(1, iterations):
+        sess.run(optimizer, feed_dict={
+            examples: X,
+            labels: y
+        })
+
+    print(&#39;bias:&#39;, sess.run(bias))
+    print(&#39;weights:&#39;, sess.run(weights))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;bias: [ 4.50434685]
+weights: [[ 1.22203839]
+ [-0.45083305]
+ [-0.34166056]]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The bias and weight values are identical to the $\theta$ values calculated in both implementations previously, so the Tensorflow implementation of the algorithm looks correct.&lt;/p&gt;
+
+&lt;p&gt;You can find the IPython notebook for this post on &lt;a href=&#34;https://github.com/crsmithdev/notebooks/blob/master/ml-linear-regression/ml-linear-regression.ipynb&#34;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Hotel Gracery Shinjuku</title>
+      <link>https://crsmithdev.com/blog/hotel-gracery-shinjuku/</link>
+      <pubDate>Tue, 07 Jun 2016 21:00:11 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/blog/hotel-gracery-shinjuku/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/hotel-gracery.jpg&#34; alt=&#34;alt&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The Hotel Gracery is located in &lt;a href=&#34;https://en.wikipedia.org/wiki/Kabukich%C5%8D,_Tokyo&#34;&gt;Kabukichō, Tokyo&lt;/a&gt;, just northeast of Shinjuku station. It looks something like an Alienware &lt;a href=&#34;http://www.alienware.com/landings/desktops.aspx&#34;&gt;tower&lt;/a&gt;, especially when viewed from the street as pictured above. Notably, the cinema attached to the hotel features a &lt;a href=&#34;http://en.rocketnews24.com/2014/12/11/full-size-godzilla-head-to-terrorize-moviegoers-and-hotel-guests-in-tokyo-starting-next-spring/&#34;&gt;full-size Godzilla head&lt;/a&gt; which can be seen peeking over the rooftop.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;The hotel charges extra for ‘Godzilla-view’ rooms.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Yushima Tenman-gū</title>
+      <link>https://crsmithdev.com/blog/yushima-tenman-gu/</link>
+      <pubDate>Sun, 05 Jun 2016 21:00:11 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/blog/yushima-tenman-gu/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/yushima-shrine.jpg&#34; alt=&#34;alt&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Yushima_Tenman-g%C5%AB&#34;&gt;Yushima Tenman-gū&lt;/a&gt; is a small Shinto shrine in northern Tokyo I found after getting off at the wrong train station on the way to &lt;a href=&#34;https://en.wikipedia.org/wiki/Ueno_Park&#34;&gt;Ueno Park&lt;/a&gt;.  The building pictured above is actually not the main shrine itself, but one of the other buildings in the complex.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;From &lt;a href=&#34;https://en.wikipedia.org/wiki/Yushima_Tenman-g%C5%AB&#34;&gt;Wikipedia&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Yushima Tenman-gū Shrine (湯島天満宮) is a Shinto shrine in Tokyo, Japan devoted to Tenjin, the Kami of Learning. It is located in the Bunkyo ward of Tokyo, not far from the University of Tokyo, and is a frequent site of prospective students hoping to pass the entrance exams there in April. At this time, the temple receives many offerings of ema votives to petition the kami for success at exams.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I also ran into this content-looking little guy at the shrine:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/yushima-bull.jpg&#34; alt=&#34;alt&#34; /&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>The Mode Gakuen Cocoon Tower</title>
+      <link>https://crsmithdev.com/blog/mode-gakuen-cocoon-tower/</link>
+      <pubDate>Sat, 04 Jun 2016 11:47:20 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/blog/mode-gakuen-cocoon-tower/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/mode-gakuen.jpg&#34; alt=&#34;alt&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;One of my favorite buildings in Tokyo is the &lt;a href=&#34;https://en.wikipedia.org/wiki/Mode_Gakuen_Cocoon_Tower&#34;&gt;Mode Gakuen Cocoon Tower&lt;/a&gt;.  Located in Shinjuku, it&amp;rsquo;s one of the most striking buildings on the skyline.  The above is shot from an unusual angle, looking up from an opening in the pedestrian tunnel that leads west from the station.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;From &lt;a href=&#34;https://en.wikipedia.org/wiki/Mode_Gakuen_Cocoon_Tower&#34;&gt;Wikipedia&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Before selecting a design for its new Tokyo location, Mode Gakuen held a competition asking architects to submit design proposals for the building. The only condition was that the building could not be rectangular. Mode Gakuen received more than 150 proposals by approximately 50 architects. The winning proposal was a cocoon-like structure designed by Tange Associates. According to Tange Associates the building&amp;rsquo;s cocoon shape symbolizes a building that nurtures the students inside. White aluminum and dark blue glass exterior form the structure&amp;rsquo;s curved shell, which is criss-crossed by a web of white diagonal lines earning it the name &amp;ldquo;Cocoon Tower&amp;rdquo;. A Tange Associates spokesperson stated that their aim was to use the building to revitalize the surrounding area and to create a gateway between Shinjuku Station and the Shinjuku central business district. The building&amp;rsquo;s design earned the firm the Emporis.com 2008 Skyscraper of the year award.&lt;/p&gt;
+&lt;/blockquote&gt;</description>
+    </item>
+    
+    <item>
+      <title>Book Review: Cumulus</title>
+      <link>https://crsmithdev.com/blog/book-review-cumulus/</link>
+      <pubDate>Thu, 02 Jun 2016 17:02:42 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/blog/book-review-cumulus/</guid>
+      <description>
+
+&lt;p&gt;&lt;a href=&#34;https://www.amazon.com/Cumulus-Eliot-Peper-ebook/dp/B01E4L5L6S&#34;&gt;Cumulus&lt;/a&gt; is a new novel from Eliot Peper, set in an near-future Bay Area remade by severe economic inequality, ubiquitous surveillance and consolidation of corporate power.  While it works better as a commentary than as a novel, the dystopia it presents is a plausible evolution of current economic and social trends and worth a read by fans of the genre, or anyone interested in where another decade or so might take us.&lt;/p&gt;
+
+&lt;p&gt;The namesake of the book, the Cumulus corporation, is a vast AI-powered information aggregator that has embedded itself into every aspect of digital life.  Cumulus has absorbed many other companies to add to its growing collective, including concepts, if not names, that will be familiar: Fleet, a driverless future Uber, internet provider Bandwidth, cloud storage service Backend, and mercenary service Security amongst others.  Cumulus sucks in staggering amounts of real-time data from every device, service, media platform and subsidiary, weaving a complex, intricate and invasive intelligence portrait of anyone connected.  Think &lt;a href=&#34;http://qz.com/697923/heres-how-to-stop-facebook-from-listening-to-you-on-your-phone/&#34;&gt;Facebook listening to you on your phone microphone&lt;/a&gt; and take it to its most disturbing possible conclusion.&lt;/p&gt;
+
+&lt;p&gt;Concentration of power and computing into a corporate surveillance state has helped crystallize  economic stratification into two distinct classes:  much of San Francisco and various affluent enclaves of the East Bay have become Green Zones, where knowledge workers live and work in comfort and luxury, and anyone without the proper pass is liable to be ejected violently by Security.  The rest of the population lives outside in the Slums, the crumbling remains of everywhere else, where they scrape by on gig jobs or whatever else they can find.  The flow of tax money has been reduced to a trickle, leaving governments and even basic public services institutions barely functional if not completely absent.&lt;/p&gt;
+
+&lt;h1 id=&#34;the-story&#34;&gt;The Story&lt;/h1&gt;
+
+&lt;p&gt;Peper injects three main characters into this world:  Huian, the driven CEO of Cumulus, steering the ever-increasing growth and reach of her company even as her marriage dissolves; Graham, an ex-CIA field agent who tired of government service and came to San Francisco to run his own kind of intelligence operations; and Lilly, an anachronistic film photographer, scraping by as a freelancer doing jobs for Greenies while living in the Oakland slums, dreaming and saving for a day where she can afford a trip out of the country.  A failed acquisition attempt and a threatening lawsuit lead Huian to give Graham the go-ahead to &amp;lsquo;fix&amp;rsquo; them, just as a bad review from a job pushes Lilly to risk a trespass into the Green Zone to find a good vantage point to take some photos and clear her head.&lt;/p&gt;
+
+&lt;p&gt;As a novel, &lt;em&gt;Cumulus&lt;/em&gt; hooked me with its premise but left me wanting more at the end.  It&amp;rsquo;s a very short read, just over two hundred printed pages which makes it brief enough to finish in an  afternoon.  This felt like a missed opportunity, as there are so many aspects of the world that beg for some more exposition or history.  Character development is also uneven:  Lilly has a solid backstory and is a sound protagonist, but Huian and Graham felt more two-dimensional.  Huian works as a cold, calculating mind behind a classic dystopian mega-corporation, but the lack of depth made some of her evolution later in the book feel forced, either betraying an incongruous amount of naivete on her part, or a rushed and convenient turn so as to wrap the novel.&lt;/p&gt;
+
+&lt;p&gt;Graham is sickly fascinating, the product of a multi-generational family of intelligence operatives who is representative of the worst we&amp;rsquo;ve come to expect from that world.  Unfortunately, his motivations are difficult to discern, even through the end, and he seemed to be more of an archetype than a fleshed-out person.  Jarringly, at some points it feels that the characters, Graham in particular, cross over into being mouthpieces for Peper&amp;rsquo;s commentary on his own world.  These insights are appropriate, but feel forced into the characters rather than the product of their own development and discoveries.&lt;/p&gt;
+
+&lt;p&gt;Technically speaking, little in &lt;em&gt;Cumulus&lt;/em&gt; seems far-fetched, which makes the suspension of disbelief a minor one.  Every aspect of the technology &amp;ndash; the connectivity, AI, integration of untold streams of data &amp;ndash; seem just slightly out of reach today, attainable with just slightly better models, a little more bandwidth or a few years more time to develop them.  It&amp;rsquo;s the slick, instant and hyper-perfected version of what the intelligence community has been building silently for over a decade, wielded for better and worse by a corporation instead of spooks.  And while I found the technique Graham used to evade being caught by his own network ripe for obvious discovery, it also struck me as the type of hubristic oversight a near-omniscient corporate overlord could make.&lt;/p&gt;
+
+&lt;h1 id=&#34;the-future&#34;&gt;The Future&lt;/h1&gt;
+
+&lt;p&gt;Like the best of dystopias, the world of &lt;em&gt;Cumulus&lt;/em&gt; isn&amp;rsquo;t too difficult to imagine growing out of our own.  Technology aside, Green Zones and Slums sometimes feel only a few short years away without a meaningful course correction that has yet to appear.  Today, no one will toss you out of San Francisco for lack of a permit, but most anyone not involved in tech or already well-off would be unable to move in and live there today.  BART isn&amp;rsquo;t the complete disaster it becomes in &lt;em&gt;Cumulus&lt;/em&gt;, but it has clearly suffered like others across the country under our pathological lack of interest in &lt;a href=&#34;http://www.sfchronicle.com/bayarea/article/BART-gets-candid-in-Twitter-exchange-with-angry-6900683.php&#34;&gt;developing or maintaining&lt;/a&gt; public transit.  And general dissatisfaction with the police amidst rising property crime, combined with &lt;a href=&#34;http://www.sfgate.com/politics/article/SF-Mayor-Lee-points-at-judges-in-property-crime-7948231.php&#34;&gt;ineffective leadership from the local government&lt;/a&gt; seem to be ideal precursors to the wider rollout of private security forces in areas that can afford them.&lt;/p&gt;
+
+&lt;p&gt;In many ways &lt;em&gt;Cumulus&lt;/em&gt; reminded me of Margaret Atwood&amp;rsquo;s masterfully beautiful and sad apocalyptic novel &lt;a href=&#34;http://www.amazon.com/Oryx-Crake-Margaret-Atwood/dp/0385721676&#34;&gt;Oryx and Crake&lt;/a&gt;, which imagined a similar future.  The talented and gifted were kept safe in their intellectual playground compounds by dutiful CorpSeCorps forces, the rest of the population languishing in the plebelands: large, lawless zones of violence and decay containing the rest of the human population, or whatever was left of it, as few in the compounds where much of the story take place seem to actually know or care.  Atwood presents the different and much worse fate of the world right at the start of the novel, spinning the tale backwards, and it&amp;rsquo;s more of a nightmare of insanity and genetic engineering than a surveillance state.  But the core of stratification followed by physical separation is the same.&lt;/p&gt;
+
+&lt;p&gt;At one point in the book, Huian speaks of &amp;ldquo;optimizing&amp;rdquo; society such that the violence that erupts later would no longer be necessary, although much of that seems to be her own delusion, given that the optimizations presented thus far have resulted in some huge percentage of the population simply not being needed for, well, pretty much anything.  They don&amp;rsquo;t fit in the small but productive community of thinkers and builders, and they aren&amp;rsquo;t required as consumers for anything they produce, so they&amp;rsquo;re simply ejected from the economy and left to fend for themselves.&lt;/p&gt;
+
+&lt;p&gt;That&amp;rsquo;s the most disturbing part of all &amp;ndash; not that our future highways will be swarms of self-driving Fleets, that AI could stitch together aspects of our digital lives in ways both amazing and terrifying, or that private enterprise would replace the rotting appendages of an ever-less effective government &amp;ndash; but that it will be done in a way totally devoid of compassion or appreciation of human consequences.  It&amp;rsquo;s not one big optimization that suddenly cuts off a chunk of the population, but a million small ones, often made by smart, driven, well-intentioned disruptors that are genuinely working for a brighter and better future.  It&amp;rsquo;s too easy to not see, or pass off as another&amp;rsquo;s problem, the more difficult and uncomfortable effects of them.  As a species, we seem to have significant difficulty even perceiving, much less managing the karmically complex changes we&amp;rsquo;re increasingly capable of producing.&lt;/p&gt;
+
+&lt;p&gt;For me, the most difficult and rewarding part of reading &lt;em&gt;Cumulus&lt;/em&gt; was looking for myself in the mirror it holds up:  after all, I&amp;rsquo;d be somewhere in the San Francisco Green Zone, hacking away at those schools of Fleets as they swarm about the ancient, crumbling highways built in an America of a different age.  It&amp;rsquo;s not that the vision of highways full of self-driving vehicles is wrong: on the contrary, ending the era of individual automobiles would be a powerful legacy for my generation.  We just need to be wary of the optimizations of our own lives, careers and successes that align all too easily with those that scrub out whole classes of people from our economic and social calculus, leaving them to fend for themselves in the slums, the plebelands, or whatever else we might call them someday.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>About Me</title>
+      <link>https://crsmithdev.com/about/</link>
+      <pubDate>Tue, 31 May 2016 12:01:44 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/about/</guid>
+      <description>&lt;p&gt;Hi, I&amp;rsquo;m Chris Smith. I live in San Francisco, California and do software, startup and mindfulness things.&lt;/p&gt;
+
+&lt;p&gt;I&amp;rsquo;m an engineering manager at &lt;a href=&#34;https://www.uber.com/&#34;&gt;Uber&lt;/a&gt;, having joined the company as an engineer in 2014.  In my time at Uber, I&amp;rsquo;ve worked in the data engineering and developer experience organizations, where I&amp;rsquo;ve built real-time data infrastructure, microservices, developer frameworks and data visualization tools, contributing individually and leading teams at the technical and managerial levels.  Prior to Uber, I was a full-stack and operations engineer at &lt;a href=&#34;http://circa.com/&#34;&gt;Circa&lt;/a&gt;, and lead software developer at &lt;a href=&#34;https://www.gremlinsocial.com/&#34;&gt;Gremlin Social&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;My educational background in computer science consists of a B.S. (2010) and M.S. (2011) with an emphasis in distributed systems from &lt;a href=&#34;http://www.webster.edu/&#34;&gt;Webster University&lt;/a&gt;.  I also hold a B.A in psychology, completed in 2003.  Before college, I attended &lt;a href=&#34;https://www.priory.org/&#34;&gt;St. Louis Priory School&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Areas of my expertise and interest in the industry include:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Distributed systems and databases&lt;/li&gt;
+&lt;li&gt;Data engineering, infrastructure and real-time analytics&lt;/li&gt;
+&lt;li&gt;Architecture, frameworks and scalable engineering practices&lt;/li&gt;
+&lt;li&gt;Mentorship, management, personal and organizational growth&lt;/li&gt;
+&lt;li&gt;Machine learning and natural language processing&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I also develop and maintain several &lt;a href=&#34;https://crsmithdev.com/projects&#34;&gt;open-source software projects&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;I am a Buddhist and daily practitioner of meditation.  While at Uber, I founded and grew a cross-company meditation and mindfulness practice group, and research the effects of mindfulness in the workplace.  I have a particular interest in the intersection of mind and technology, and in how we can build software products with healthier iteraction patterns and more positive impacts on society and culture.&lt;/p&gt;
+
+&lt;p&gt;When not working, I can usually be found writing code, reading books, taking classes, meditating, practicing yoga, watching Netflix or playing computer games.  I gravitate towards history, science fiction, psychology and philosophy.  I also enjoy travelling whenever possible, recently taking a 3-month trip to Asia in 2016, visiting Japan, Thailand, Singapore and Malaysia.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Running Redis 2.6 on Docker</title>
+      <link>https://crsmithdev.com/blog/running-redis-26-on-docker/</link>
+      <pubDate>Sun, 15 Sep 2013 11:34:46 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/blog/running-redis-26-on-docker/</guid>
+      <description>&lt;h1 id=&#34;docker&#34;&gt;Docker&lt;/h1&gt;
+
+&lt;p&gt;With the end of my free tier eligibility looming on AWS, I took advantage of the &lt;a href=&#34;http://developer.rackspace.com/devtrial/&#34;&gt;Rackspace developer discount&lt;/a&gt; and set up a new account and personal server this weekend.  One of the technologies I&amp;rsquo;ve been most interested in recently is &lt;a href=&#34;http://www.docker.io&#34;&gt;Docker&lt;/a&gt;, a container engine for Linux which aims to be the intermodal shipping container for applications and their dependencies.  A brand-new box seemed like the perfect time to dig in to it.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;To get a sense of what Docker is and how it works, I&amp;rsquo;d recommend going through the &lt;a href=&#34;http://www.docker.io/gettingstarted/&#34;&gt;getting started&lt;/a&gt; tutorial as well as some of the examples in the &lt;a href=&#34;http://docs.docker.io/en/latest/&#34;&gt;documentation&lt;/a&gt;.  However, here&amp;rsquo;s a very brief rundown:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Docker uses &lt;a href=&#34;https://en.wikipedia.org/wiki/LXC&#34;&gt;LXC&lt;/a&gt; and a &lt;a href=&#34;https://en.wikipedia.org/wiki/Union_filesystem&#34;&gt;union file system&lt;/a&gt; (&lt;a href=&#34;https://en.wikipedia.org/wiki/Aufs&#34;&gt;AUFS&lt;/a&gt;) to run isolated containers (&lt;strong&gt;not&lt;/strong&gt; VMs).&lt;/li&gt;
+&lt;li&gt;Software and its dependencies are packaged into an &lt;strong&gt;image&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;Images are immutable and stateless.&lt;/li&gt;
+&lt;li&gt;Images can be committed in layers to form more complex images.&lt;/li&gt;
+&lt;li&gt;An image running a process is called a &lt;strong&gt;container&lt;/strong&gt;, which is stateful.&lt;/li&gt;
+&lt;li&gt;A container exists as running or stopped, and can be run interactively or in the background.&lt;/li&gt;
+&lt;li&gt;Images are lightweight, perhaps 100Mb for a Redis server running on Ubuntu.&lt;/li&gt;
+&lt;li&gt;Containers are not virtual machines, so they are lightening-fast to boot and lightweight on resources.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;One of the documentation examples describes setting up a &lt;a href=&#34;http://redis.io&#34;&gt;Redis&lt;/a&gt; service.  Following the example was straightforward, but I felt it was missing two things when I was finished.  First, it uses Redis 2.4, which is already quite out of date (as of this writing, Redis 2.8 is nearing release).  Plus, it felt awkward having to specify a lengthy command and config file each time the container started.&lt;/p&gt;
+
+&lt;h1 id=&#34;installing-redis-2-6&#34;&gt;Installing Redis 2.6&lt;/h1&gt;
+
+&lt;p&gt;The first thing to do is start a container from a base image, in this case the &lt;code&gt;ubuntu&lt;/code&gt; image pulled during setup:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo docker run -i -t ubuntu /bin/bash
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This results in a root shell on a new, running Ubuntu container.  A few things will be needed in order to download, build and test Redis:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;apt-get install wget build-essential tcl8.5
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To install Redis 2.6, it&amp;rsquo;s necessary to build it from source:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;wget get http://download.redis.io/releases/redis-2.6.16.tar.gz
+tar xvf redis-2.6.16.tar.gz
+cd redis-2.6.16
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Build it, run some tests and install once completed:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;make
+make test
+make install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Lastly, move the config file to a more standard location:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;mkdir /etc/redis
+mv redis.conf /etc/redis/redis.conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Verify the server is working by running the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;redis-server /etc/redis/redis.conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;run-commands-and-images&#34;&gt;Run commands and images&lt;/h1&gt;
+
+&lt;p&gt;In the example, the resulting container is committed to an image, and then run:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo docker commit &amp;lt;container_id&amp;gt; crsmithdev/redis
+sudo docker run -d -p 6379 crsmithdev/redis2.6 /usr/bin/redis-server /etc/redis/redis.conf
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is still a bit clunky &amp;mdash; why do &lt;code&gt;redis-server&lt;/code&gt; and the config file have to be specified each time it&amp;rsquo;s run?  Forunately, they can be built into the image itself:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo docker commit -run=&#39;{&amp;quot;Cmd&amp;quot;:[&amp;quot;/usr/local/bin/redis-server&amp;quot;, &amp;quot;/etc/redis/redis.conf&amp;quot;]}&#39; \
+    &amp;lt;container_id&amp;gt; crsmithdev/redis2.6
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That way, you can run the container like so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo docker run -d -p 6379:6379 crsmithdev/redis2.6
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Specifying -p 6379:6379 ensures that the server&amp;rsquo;s port 6379 is mapped to the container&amp;rsquo;s port 6379.  Otherwise, Docker will assign a random local server port in the 49000s, which is probably unwanted in most non-development environments.&lt;/p&gt;
+
+&lt;p&gt;Note that it is still possible to override the image-specified run command.  The following will open a shell using the image, instead of launching Redis:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo docker run -i -t crsmithdev/redis2.6 /bin/bash
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;handling-data&#34;&gt;Handling data&lt;/h1&gt;
+
+&lt;p&gt;One important point:  what about the data and log files that result from the Redis process?  Every time I run Redis from that image, I get a new container with fresh data.  That&amp;rsquo;s ideal for some situations, but less so for for others: in a production environment, it&amp;rsquo;s entirely possible I&amp;rsquo;d want to be able to start a new Redis container, but be able to load a dumpfile from a previous one.&lt;/p&gt;
+
+&lt;p&gt;Fortunately, you can share one or more volumes with the host server easily.  Modify &lt;code&gt;redis.conf&lt;/code&gt; on the container to specify a dumpfile location of your choice:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;dir /data/redis
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then, run the image specifying a mount point on the server:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo docker run -d -p 6379:6379 -v /mnt/redis:/data/redis:rw crsmithdev/redis2.6
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Connecting via &lt;code&gt;redis-cli&lt;/code&gt; and executing &lt;code&gt;SAVE&lt;/code&gt; should result in a &lt;code&gt;dump.rdb&lt;/code&gt; file in &lt;code&gt;/mnt/redis&lt;/code&gt;.  Redis will be logging to stdout unless specified otherwise, so the logs are viewable using a Docker command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo docker logs &amp;lt;container_d&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you specify a different logfile location in &lt;code&gt;redis.conf&lt;/code&gt;, it&amp;rsquo;s possible to add a second volume to the &lt;code&gt;run&lt;/code&gt; command.&lt;/p&gt;
+
+&lt;h1 id=&#34;fin&#34;&gt;Fin!&lt;/h1&gt;
+
+&lt;p&gt;And that&amp;rsquo;s it.  This image can then be downloaded and started, producing a running, fully-functional Redis server in literally a few seconds.&lt;/p&gt;
+
+&lt;p&gt;You can grab my image &lt;a href=&#34;https://index.docker.io/u/crsmithdev/redis2.6/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;UPDATE 9-15 - updated container run arguments, and added a bit about volumes.&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>A Blog Refresh with Bootstrap and Static</title>
+      <link>https://crsmithdev.com/blog/a-blog-refresh-with-bootstrap-and-static/</link>
+      <pubDate>Sun, 02 Jun 2013 11:34:28 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/blog/a-blog-refresh-with-bootstrap-and-static/</guid>
+      <description>&lt;p&gt;Earlier this year, I finally set up a blog on my domain, having owned but left it unused for over a year.  My needs were simple:  it was to be a completely static site, hostable on GitHub Pages or Dropbox, and the focus of the project was in &lt;strong&gt;no&lt;/strong&gt; way to be the technology or process of creating and maintaining it.  Despite the part of me that automatically geeked out at the opportunity to build my own completely custom blog generator from scratch, the point of doing it was to provide myself with a straightforward platform for &lt;em&gt;writing&lt;/em&gt;, not to go on a technical adventure in creating one.  Although I&amp;rsquo;ve only written two posts on it so far, the effort was successful: in short order, I&amp;rsquo;d set up &lt;a href=&#34;http://octopress.org&#34;&gt;Octopress&lt;/a&gt; and had it deploying to Pages.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;I found it usable but lacking in a few key ways, the most significant of which was that I was simply underwhelmed with the themes available for Octopress, and had little interest in building a new theme or heavily modifying an existing one.  Moreover, it felt very much like a monolithic framework, into a tiny corner of which were tucked the contents of my blog.  I realized that what I wanted was a simple engine that would handle the work of converting Markdown to HTML and stitching the results together with templates, but would otherwise stay out of the way as much as possible, impose little structure and even less of its own code on me, and give me total control over the design without relying on theming.&lt;/p&gt;
+
+&lt;p&gt;I was also eager to address a few specific issues:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;It was &lt;em&gt;only&lt;/em&gt; a blog, lacking even a bio page.&lt;/li&gt;
+&lt;li&gt;Responsiveness was questionable.&lt;/li&gt;
+&lt;li&gt;Syntax highlighting was not supported.&lt;/li&gt;
+&lt;li&gt;I wanted to add a simple display of recent GitHub activity.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Lastly, as Clojure is quickly eclipsing all others as my hacking language of choice, I was heavily biased towards finding a solution that was written in and used it.&lt;/p&gt;
+
+&lt;h1 id=&#34;components&#34;&gt;Components&lt;/h1&gt;
+
+&lt;p&gt;In the end, I selected the following:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://getbootstrap.com&#34;&gt;Bootstrap 3&lt;/a&gt; - newly released, rebuilt and responsive-first.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://bootswatch.com/flatly/&#34;&gt;Flatly&lt;/a&gt; theme from &lt;a href=&#34;http://bootswatch.com/&#34;&gt;Bootswatch&lt;/a&gt; - a flat, simple and readable theme for Bootstrap 3.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/nakkaya/static&#34;&gt;Static&lt;/a&gt; - a tiny, embeddable static site generator in Clojure.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://fortawesome.github.io/Font-Awesome/&#34;&gt;Font Awesome&lt;/a&gt; - high-quality icons.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://code.google.com/p/google-code-prettify/&#34;&gt;google-code-prettify&lt;/a&gt; - code syntax highlighting.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&#34;static&#34;&gt;Static&lt;/h1&gt;
+
+&lt;p&gt;Static is a very simple static site generator, with full documentation that spans about &lt;a href=&#34;http:/nakkaya.com/static.html&#34;&gt;two pages&lt;/a&gt;.  What&amp;rsquo;s most refreshing about Static (compared to Octropress, at least) is that it&amp;rsquo;s built as a separate project, and then the .jar is copied into the repo for the site that will use it.  This means that the only traces of it that end up in the blog project are the .jar itself, and a few, flexible conventions regarding directory structure.&lt;/p&gt;
+
+&lt;p&gt;Here&amp;rsquo;s all that&amp;rsquo;s needed to get started with Static:&lt;/p&gt;
+
+&lt;!--?prettify lang=sh--&gt;
+
+&lt;pre&gt;&lt;code&gt;git clone https://github.com/nakkaya/static.git
+cd static
+lein deps
+lein uberjar
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This results in a .jar named &lt;code&gt;static-app.jar&lt;/code&gt; in the &lt;code&gt;target&lt;/code&gt; directory, which can then be copied into a fresh repo for a site:&lt;/p&gt;
+
+&lt;!--?prettify lang=sh--&gt;
+
+&lt;pre&gt;&lt;code&gt;cd ..
+mkdir crsmithdev.com
+cd crsmithdev.com
+git init
+cp ../static/target/static-app.jar .
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;At minimum, this is the default structure of files and directories needed for a site:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;.
+|-- config.clj
+`-- resources
+    |-- posts
+    |-- public
+    |-- site
+    |-- templates
+        `-- default.clj
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A brief description of what all these are:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;config.clj&lt;/code&gt; - global site configuration options.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;posts&lt;/code&gt; - blog posts, in markdown or org-mode format.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;public&lt;/code&gt; - public site resources and directories (&lt;code&gt;js&lt;/code&gt;, &lt;code&gt;css&lt;/code&gt;, etc.), to be copied to the root of the generated site.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;site&lt;/code&gt; - Hiccup templates for the content of non-blog-post pages.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;templates&lt;/code&gt; - Full-page Hiccup templates.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;All that&amp;rsquo;s needed to build the site is this:&lt;/p&gt;
+
+&lt;!--?prettify lang=sh--&gt;
+
+&lt;pre&gt;&lt;code&gt;java -jar static-app.jar --build
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;--watch&lt;/code&gt; option can be used to rebuild automatically when a file changes.  When the site builds, something like the following should result:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[+] INFO: Using tmp location: /var/folders/r5/30xb2fj573b_s9_2f18y4s_00000gn/T/static/
+[+] INFO: Processing Public  0.011 secs
+[+] INFO: Processing Site  0.213 secs
+[+] INFO: Processing Posts  0.695 secs
+[+] INFO: Creating RSS  0.07 secs
+[+] INFO: Creating Tags  0.03 secs
+[+] INFO: Creating Sitemap  0.0040 secs
+[+] INFO: Creating Aliases  0.01 secs
+[+] INFO: Build took  1.034 secs
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;An &lt;code&gt;html&lt;/code&gt; directory will be created in the root of the site, containing all the generated HTML.  I found that pointing my local nginx at this folder was the most straightforward way to serve the site locally while working on it, although Static does offer a &lt;code&gt;--jetty&lt;/code&gt; option to serve it as well.  The contents of my &lt;code&gt;config.clj&lt;/code&gt; are as follows:&lt;/p&gt;
+
+&lt;!--?prettify lang=clj--&gt;
+
+&lt;pre&gt;&lt;code&gt;[:site-title &amp;quot;crsmithdev.com&amp;quot;
+ :site-description &amp;quot;crsmithdev.com&amp;quot;
+ :site-url &amp;quot;http://crsmithdev.com&amp;quot;
+ :in-dir &amp;quot;resources/&amp;quot;
+ :out-dir &amp;quot;html/&amp;quot;
+ :default-template &amp;quot;default.clj&amp;quot;
+ :encoding &amp;quot;UTF-8&amp;quot;
+ :blog-as-index false
+ :create-archives false
+ :atomic-build true]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;html-templating-with-hiccup&#34;&gt;HTML templating with Hiccup&lt;/h1&gt;
+
+&lt;p&gt;Static uses &lt;a href=&#34;https://github.com/weavejester/hiccup&#34;&gt;Hiccup&lt;/a&gt;, a great templating library for Clojure, to specify the structure of pages it generates.  Having never used it before, I instantly found it to be very natural and efficient &amp;mdash; the syntax is extremely minimal, vectors and maps are used for elements and their attributes, respectively, and it&amp;rsquo;s possible to embed Clojure code right along with element definitions.&lt;/p&gt;
+
+&lt;p&gt;Here&amp;rsquo;s what the first few lines of my default template look like:&lt;/p&gt;
+
+&lt;!--?prettify lang=clj--&gt;
+
+&lt;pre&gt;&lt;code&gt;[:html
+ {:xmlns &amp;quot;http://www.w3.org/1999/xhtml&amp;quot; :lang &amp;quot;en&amp;quot; :xml:lang &amp;quot;en&amp;quot;}
+ [:head
+  [:meta {:http-equiv &amp;quot;content-type&amp;quot; :content &amp;quot;text/html; charset=UTF-8&amp;quot;}]
+  [:meta {:name &amp;quot;description&amp;quot; :content (:description metadata)}]
+  [:meta {:name &amp;quot;keywords&amp;quot; :content (:tags metadata)}]
+  [:meta {:name &amp;quot;author&amp;quot; :content &amp;quot;Chris Smith&amp;quot;}]
+  [:meta {:name &amp;quot;viewport&amp;quot; :content &amp;quot;width=device-width, initial-scale=1.0&amp;quot;}]
+  [:link {:rel &amp;quot;icon&amp;quot; :href &amp;quot;/images/favicon.ico&amp;quot; :type &amp;quot;image/x-icon&amp;quot;}]
+  [:link {:rel &amp;quot;shortcut icon&amp;quot; :href &amp;quot;/images/favicon.ico&amp;quot; :type &amp;quot;image/x-icon&amp;quot;}]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Note the access of the &lt;code&gt;:description&lt;/code&gt; and &lt;code&gt;:tags&lt;/code&gt; from &lt;code&gt;metadata&lt;/code&gt;.  Static injects a few values into page rendering, specifically &lt;code&gt;metadata&lt;/code&gt; and &lt;code&gt;content&lt;/code&gt;.  &lt;code&gt;metadata&lt;/code&gt; provides some information about what kind of page is being rendered, as well as the metadata specified in the headers of blog posts, while &lt;code&gt;content&lt;/code&gt; is the actual Markdown or Hiccup-generated content that the template will include.  Because of this, it&amp;rsquo;s possible to specify different behaviors depending on what&amp;rsquo;s being rendered:&lt;/p&gt;
+
+&lt;!--?prettify lang=clj--&gt;
+
+&lt;pre&gt;&lt;code&gt;[:div.content
+ [:div.container
+  (if (= (:type metadata) :post)
+    [:div.row
+     [:div.col-md-12
+      content
+      [:div#disqus_thread]
+      [:script {:type &amp;quot;text/javascript&amp;quot;}
+       &amp;quot;// ... (disqus js)&amp;quot;]]]
+    content)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Above, if the page is a post, a simple Bootstrap grid is created, followed by the standard JS to include Disqus comments.  Note the terse syntax for specifying element classes:  this is actually one of two possible syntaxes to define classes and ids.  Below, these two forms are equivalent:&lt;/p&gt;
+
+&lt;!--?prettify lang=clj--&gt;
+
+&lt;pre&gt;&lt;code&gt;[:div {:class &amp;quot;col-md-12&amp;quot;} &amp;quot;...&amp;quot;]
+[:div.col-md-12 &amp;quot;...&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In the absence of a ready way to list blog post titles and dates, I found and adapted some code from the site of Static&amp;rsquo;s &lt;a href=&#34;http://nakkaya.com/&#34;&gt;author&lt;/a&gt;.  A number of functions are made available within templates, although they are largely undocumented:&lt;/p&gt;
+
+&lt;!--?prettify lang=clj--&gt;
+
+&lt;pre&gt;&lt;code&gt;[:div.row
+ [:div.col-md-6
+  [:h4 &amp;quot;Recent Blog Posts&amp;quot;]
+  (map #(let [f % url (static.core/post-url f)
+              [metadata _] (static.io/read-doc f)
+              date (static.core/parse-date
+                    &amp;quot;yyyy-MM-dd&amp;quot; &amp;quot;dd MMMM yyyy&amp;quot;
+                    (re-find #&amp;quot;\d*-\d*-\d*&amp;quot; (str f)))]
+     [:div
+      [:div [:a {:href url} (:title metadata)]
+      [:div date]]])
+     (take 5 (reverse (static.io/list-files :posts))))]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;bootstrap-3-font-awesome-and-theming&#34;&gt;Bootstrap 3, Font Awesome, and theming&lt;/h1&gt;
+
+&lt;p&gt;Fortunately, Bootstrap 3 was nearing release as I was beginning to work on the site, so I grabbed the RC2 version and went to work.  &lt;a href=&#34;http://bootswatch.com/&#34;&gt;Bootswatch&lt;/a&gt; provides a nice selection of attractive, free themes for Bootstrap 3, of which I picked &lt;a href=&#34;http://bootswatch.com/flatly/&#34;&gt;Flatly&lt;/a&gt;. &lt;a href=&#34;http://fortawesome.github.io/Font-Awesome/&#34;&gt;Font Awesome&lt;/a&gt; has high-quality icons for Twitter, GitHub and LinkedIn (amongst many, many others), making it an easy choice here.&lt;/p&gt;
+
+&lt;p&gt;There are plenty of great starting points / tutorials already out there for Bootstrap (I&amp;rsquo;d recommend this &lt;a href=&#34;http://getbootstrap.com/getting-started/#template&#34;&gt;starter template&lt;/a&gt;).  I did make some adjustments to the Flatly theme, though, with the goal of making the site a bit easier on the reader&amp;rsquo;s eyes and more suitable for text-dense pages:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Changed the standard font to &lt;strong&gt;Source Sans Pro&lt;/strong&gt; (from the default &lt;strong&gt;Lato&lt;/strong&gt;)&lt;/li&gt;
+&lt;li&gt;Changed the code font to &lt;strong&gt;Source Code Pro&lt;/strong&gt; (from the default &lt;strong&gt;Monaco&lt;/strong&gt;).&lt;/li&gt;
+&lt;li&gt;Increased line-height to 24px.&lt;/li&gt;
+&lt;li&gt;Narrowed the container max-width to 840px.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The fonts can be found at &lt;a href=&#34;http://www.google.com/fonts&#34;&gt;Google Fonts&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h1 id=&#34;github-activity&#34;&gt;Github Activity&lt;/h1&gt;
+
+&lt;p&gt;While there are some JS libraries to access the GitHub API, my needs were so simple that I was unwilling to introduce additional dependencies to just to parse a little bit of JSON and generate a few DOM elements.  For the same reason, while I ordinarily would be using libraries like &lt;a href=&#34;http://underscorejs.org&#34;&gt;underscore.js&lt;/a&gt; and &lt;a href=&#34;http://momentjs.org&#34;&gt;moment.js&lt;/a&gt; for dates, templating or even iteration, here I opted for vanilla JS.&lt;/p&gt;
+
+&lt;p&gt;The full code to retrieve, process and display my GitHub commits can be found &lt;a href=&#34;https://github.com/crsmithdev/crsmithdev.com/blob/master/resources/public/js/crsmithdev.js&#34;&gt;here&lt;/a&gt;.  I needed a function to retrieve some JSON from GitHub, transform some of that data into a list of DOM elements, and then append those elements to any containers matching a certain CSS selector:&lt;/p&gt;
+
+&lt;!--?prettify lang=js--&gt;
+
+&lt;pre&gt;&lt;code&gt;var activity = function(sel, n) {
+    var containers = $(sel);
+
+    if (containers.length &amp;gt; 0) {
+        $.ajax({
+            url: &#39;https://api.github.com/users/crsmithdev/events&#39;,
+            dataType: &#39;jsonp&#39;,
+            success: function (json) {
+                var elements = commits(json.data, n);
+                containers.append(elements);
+            }
+        });
+    }
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Parsing the JSON is straightforward, as every event that involves a commit will have a &lt;code&gt;payload.commit&lt;/code&gt; property containing an array of commits.  Using arrays and a native &lt;code&gt;.join()&lt;/code&gt; function should be preferred to string concatenation, in the absence of templating:&lt;/p&gt;
+
+&lt;!--?prettify lang=js--&gt;
+
+&lt;pre&gt;&lt;code&gt;var repo = event.repo.name.split(&#39;/&#39;)[1];
+var date = toDateString(event.created_at);
+
+for (var j = 0; j &amp;lt; event.payload.commits.length; ++j) {
+    var commit = event.payload.commits[j];
+
+    var arr = [&#39;&amp;lt;div&amp;gt;&amp;lt;div&amp;gt;&amp;lt;a href=https://github.com/&amp;quot;&#39;, event.repo.name, &#39;/commit/&#39;,
+        commit.sha, &#39;&amp;quot;&amp;gt;&#39;, commit.message, &#39;&amp;lt;/a&amp;gt; &amp;lt;span class=&amp;quot;text-muted&amp;quot;&amp;gt;&#39;, repo,
+        &#39;&amp;lt;/span&amp;gt;&amp;lt;/div&amp;gt;&#39;, &#39;&amp;lt;div&amp;gt;&#39;, date, &#39;&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;&#39;];
+
+    elements.push($(arr.join(&#39;&#39;)));
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Dates are handled with a simple function and an array of month names.  The GitHub API provides dates in ISO-8601 format (YYYY-MM-DDThh:mm:ssZ), so it&amp;rsquo;s easy to extract the year, month, and day:&lt;/p&gt;
+
+&lt;!--?prettify lang=js--&gt;
+
+&lt;pre&gt;&lt;code&gt;var months = [&#39;January&#39;, &#39;Febuary&#39;, &#39;March&#39;, &#39;April&#39;, &#39;May&#39;, &#39;June&#39;, &#39;July&#39;, &#39;August&#39;,
+    &#39;September&#39;, &#39;October&#39;, &#39;November&#39;, &#39;December&#39;];
+
+// ...
+
+var toDateString = function(date) {
+
+    try {
+        var parts = date.split(&#39;T&#39;)[0].split(&#39;-&#39;);
+        var month = months[parseInt(parts[1]) - 1];
+        return [parts[2], month, parts[0]].join(&#39; &#39;);
+    }
+    catch (e) {
+        return &#39;???&#39;;
+    }
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And of course, all this is wrapped in a module that exposes only one public method, and run when ready:&lt;/p&gt;
+
+&lt;!--?prettify lang=js--&gt;
+
+&lt;pre&gt;&lt;code&gt;$(function() {
+    ghActivity.activity(&#39;.gh-recent&#39;, 5);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;syntax-highlighting&#34;&gt;Syntax Highlighting&lt;/h1&gt;
+
+&lt;p&gt;Originally I attempted to use &lt;a href=&#34;http://softwaremaniacs.org/soft/highlight/en/&#34;&gt;highlight.js&lt;/a&gt;, but quickly ran into issues:  nearly all of the guesses it made about what kind of syntax was being presented were wrong, and it was difficult to override its default guessing behavior, especially given that I was writing the posts in Markdown, not raw HTML.  Fortunately, &lt;a href=&#34;https://code.google.com/p/google-code-prettify/&#34;&gt;google-code-prettify&lt;/a&gt; was a much more usable option, even though it does require an &lt;a href=&#34;https://code.google.com/p/google-code-prettify/source/browse/trunk/src/lang-clj.js&#34;&gt;extension&lt;/a&gt; to handle Clojure.&lt;/p&gt;
+
+&lt;p&gt;If I posts &lt;em&gt;were&lt;/em&gt; written HTML, using google-code-prettify would look something like this:&lt;/p&gt;
+
+&lt;!--?prettify lang=html--&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;pre class=&amp;quot;prettyprint lang-clj&amp;quot;&amp;gt;&amp;lt;code&amp;gt;
+   [:h3 &amp;quot;Interests &amp;amp; Areas of Expertise&amp;quot;]
+    [:ul
+     [:li &amp;quot;API design, development and scalability&amp;quot;]
+     [:li &amp;quot;Distributed systems and architecture&amp;quot;]
+     [:li &amp;quot;Functional programming&amp;quot;]
+     ; ...
+&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;But since posts are written in Markdown, that isn&amp;rsquo;t an option.  There&amp;rsquo;s no way to add a class to the auto-generated &lt;code&gt;&amp;lt;pre&amp;gt;&amp;lt;code&amp;gt;...&amp;lt;/code&amp;gt;&amp;lt;/pre&amp;gt;&lt;/code&gt; blocks, and although I could have used literal HTML instead, that brings with it some other issues (angle brackets in code then have to be manually escaped, for example).  Fortunately, google-code-prettify allows the use of directives in HTML comments preceding code blocks, meaning this works the same as the above:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;lt;!--?prettify lang=clj--&amp;gt;
+
+    [:h3 &amp;quot;Interests &amp;amp; Areas of Expertise&amp;quot;]
+     [:ul
+      [:li &amp;quot;API design, development and scalability&amp;quot;]
+      [:li &amp;quot;Distributed systems and architecture&amp;quot;]
+      [:li &amp;quot;Functional programming&amp;quot;]
+      ; ...
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;deployment&#34;&gt;Deployment&lt;/h1&gt;
+
+&lt;p&gt;Deployment to GitHub Pages was very straightforward.  I nuked my existing &lt;a href=&#34;https://github.com/crsmithdev/crsmithdev.github.com&#34;&gt;crsmithdev.github.com&lt;/a&gt; master and copied over all the files from the &lt;code&gt;html&lt;/code&gt; directory, being sure to add a CNAME file referencing my &lt;a href=&#34;http://crsmithdev.com&#34;&gt;crsmithdev.com&lt;/a&gt; domain so Pages would work currently under it.  One push and the site was up and running.&lt;/p&gt;
+
+&lt;h1 id=&#34;future-work&#34;&gt;Future work&lt;/h1&gt;
+
+&lt;p&gt;I&amp;rsquo;m much happier with the site now, but still see some areas for improvement:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Some optimizations could definitely improve load times.  I&amp;rsquo;ll likely write a future post about this.&lt;/li&gt;
+&lt;li&gt;I&amp;rsquo;d very much like to be able to partially render blog posts on the index page (a title and two paragraphs or so).&lt;/li&gt;
+&lt;li&gt;Simply put, I need to write more.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Of course, the last of these is the most difficult for me, which is often a sign that it&amp;rsquo;s the most important.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Building Better Email Habits with Mailbox</title>
+      <link>https://crsmithdev.com/blog/building-better-email-habits-with-mailbox/</link>
+      <pubDate>Tue, 26 Mar 2013 11:31:53 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/blog/building-better-email-habits-with-mailbox/</guid>
+      <description>&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
+
+&lt;p&gt;As my first-ever blog post, I&amp;rsquo;m presenting my recent experience with the recent email app, &lt;a href=&#34;http://mailboxapp.com&#34;&gt;Mailbox&lt;/a&gt;.  This is less about the app itself, however (or it recently being snapped up by Dropbox for $100 million), but more about how I used it to help me examine and improve my behavior when it comes to handling and communicating via email.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;mailbox&#34;&gt;Mailbox&lt;/h1&gt;
+
+&lt;p&gt;Briefly, Mailbox is an iPhone app that integrates aggressively with one or more of your email accounts (GMail only, for now), and through a gesture-focused UI presents four actions to be taken on any one email:  archive it, delete it, reschedule it for later, or send it to a list.  Of the four, rescheduling is the most interesting, as it yanks the email from your inbox at that moment and then returns it after a selectable interval.  The gestures and UI are slick, performance is good, and despite the significant wait to actually be able to USE the app (roughly 3 weeks in the queue), it has managed to become the default email application on my phone already.  5 stars from me.&lt;/p&gt;
+
+&lt;p&gt;But this is not an app review, it&amp;rsquo;s a behavioral one.  What&amp;rsquo;s immediately clear about the Mailbox experience is that it is entirely geared toward reaching and maintaining &amp;ldquo;inbox zero&amp;rdquo;.  The app badge indicates the total number of emails in your inbox, &lt;strong&gt;not&lt;/strong&gt; the number of unread ones.  By default, push notifications are enabled for &lt;strong&gt;all&lt;/strong&gt; emails (though this is configurable).  Clearing your way to zero rewards you with a peek at a nice, relaxing image, and the option to share the first time you accomplish it.  Clearly, a strongly opinionated design.&lt;/p&gt;
+
+&lt;h1 id=&#34;diving-in&#34;&gt;Diving in&lt;/h1&gt;
+
+&lt;p&gt;What hit me immediately upon using the app for the first time, however, looked more like this:  across two accounts, an app badge of 900+ and a steady snowfall of push notifications about incoming emails.  Obviously a broken state of affairs even in the absence of an opinionated email app, but also one that is effectively incompatible with Mailbox.  A reflexive response from me might be to defer trying out the app until I got around to cleaning up my inbox&amp;hellip;and then to defer cleaning my inbox until some undefined date and time that&amp;rsquo;s easy to forget and conveniently lets me continue doing things just as I have been.&lt;/p&gt;
+
+&lt;p&gt;I&amp;rsquo;ve been wanting to take a more active role in examining, managing and changing my habits and behavior patterns recently, so I took the opposite approach:  I sat down, cleaned up my inbox that night, tried the app, and decided to make an experiment out of it.  Instead of rejecting something that went against the grain of my well-worn and familiar behaviors, what if I tried to bend and change them instead, and used the app as a tool to do so?&lt;/p&gt;
+
+&lt;p&gt;Most importantly, I resolved to cast a critical eye on the process, and keep some notes so I could write about it.&lt;/p&gt;
+
+&lt;h1 id=&#34;behavior&#34;&gt;Behavior&lt;/h1&gt;
+
+&lt;p&gt;It took little introspection to quickly identify my typical pattern of managing email.  As with many things, it was clearly a sub-optimal pattern that I had grown well-accustomed to through years of extensive practice.  What follows is the cycle I would repeat every several months:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Allow emails to accrete with little or no management, cherry-picking important ones if they caught my eye amongst the vast majority which won&amp;rsquo;t actually (ever) be opened.&lt;/li&gt;
+&lt;li&gt;Mount a brief, intense and heroic campaign to hack through ALL of it at once, responding, sorting, labeling, deleting.&lt;/li&gt;
+&lt;li&gt;Enjoy the brief, fleeting Zen of inbox zero.  Resolve thoroughly that this battle was the last.  This time it will be different, really!&lt;/li&gt;
+&lt;li&gt;Maintain that state for a week or so.  Success!&lt;/li&gt;
+&lt;li&gt;Shrug it off for the weekend, come back to a few busy days at work.  Zero?  Maybe a hundred or so now.  Too many to wipe out in a literal spare minute or two, as it would if only done once daily.&lt;/li&gt;
+&lt;li&gt;Fall off the wagon.  Clear, or attempt to, a few times sporadically in the next few weeks.  The task is now awkwardly positioned as taking longer than a quick moment, but less than a sit-down-and-focus-on-it project.&lt;/li&gt;
+&lt;li&gt;Rediscover that it really just is easier to let it go at this point.&lt;/li&gt;
+&lt;li&gt;GOTO 1&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Let&amp;rsquo;s take a look specifically at what&amp;rsquo;s wrong with this:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;It reinforces a pattern of failure&lt;/strong&gt;:  Embedded in the cycle above is an attempt to fix the problem, but one that clearly doesn&amp;rsquo;t actually work.  Repeating it with the same approach and same tools thus reinforces failure as an integral part of it, and that&amp;rsquo;s not lost on me whenever I hit steps 2 and 3 again each time:  I already have a clear expectation of how things will probably turn out.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Reminders and indicators lose meaning&lt;/strong&gt;:  What&amp;rsquo;s an app badge count or push notification worth if their absence is no longer the normal state of things.  When you stop paying attention to these things, it erases any value they have.  This is akin to employing a monitoring and alert system on a server, but failing to set up and tune it properly, leaving you with spurious alerts that you would quickly develop a habit of ignoring.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Things get lost&lt;/strong&gt;:  When my inbox contains hundreds of read and unread items, I can&amp;rsquo;t glance at it and get an instant sense of what I need to respond to.  It becomes very likely that I will miss important items, and even more likely that when I decide to clean it up in bulk I&amp;rsquo;ll misfile, delete or otherwise overlook something that I shouldn&amp;rsquo;t.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;It becomes a low-grade stressor&lt;/strong&gt;:  Email is now a pile of unfinished tasks and questionably-relevant bits of information.  It is just another minor aspect of life that I feel I&amp;rsquo;ve lost control of.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&#34;getting-things-done&#34;&gt;Getting Things Done&lt;/h1&gt;
+
+&lt;p&gt;What really jumped out at me immediately upon using Mailbox was that it very closely parallels principles in David Allen&amp;rsquo;s &lt;a href=&#34;http://www.amazon.com/Getting-Things-Done-Stress-Free-Productivity/dp/B0012OMFHY/ref=zg_bs_2569_3&#34;&gt;Getting Things Done: The Art of Stress-Free Productivity&lt;/a&gt;.  Mailbox&amp;rsquo;s actions match Allen&amp;rsquo;s &amp;ldquo;do it, delegate it, defer it, drop it&amp;rdquo;, with a clear mapping:  do it &amp;rarr; archive, delegate it &amp;rarr; list, defer it &amp;rarr; reschedule, and drop it &amp;rarr; delete.  A quick search revealed a few others mentioning this as possible, partial inspiration for the approach the app takes.&lt;/p&gt;
+
+&lt;p&gt;Allen&amp;rsquo;s argument is that applying this methodology frees up mental space for higher-order goals and activities, whereas maintaining a constant cache of unfinished business (whether it be emails, todo list items, or anything else sufficiently minor but necessary) impedes our ability to relax and focus.  In the case of our inbox of tasks (in Allen&amp;rsquo;s case, including phone calls, messages, and other items demanding attention), that means doing everything possible to deal with incoming items immediately, whether that means handling them ourselves, delegating them on the spot to others who are more qualified to do so, judiciously deferring those which can&amp;rsquo;t be dealt with in the immediate moment, and dropping those which can be safely ignored.&lt;/p&gt;
+
+&lt;p&gt;The organizational system proposed in Getting Things Done now definitely appears to be a product of it&amp;rsquo;s time (originally published in 2002), and makes heavier use of paper and files.  However, Mailbox neatly uses gestures to map this process onto the fully paperless system of email, replacing filing into physical folders with flicks of the thumb.&lt;/p&gt;
+
+&lt;h1 id=&#34;using-mailbox&#34;&gt;Using Mailbox&lt;/h1&gt;
+
+&lt;p&gt;Getting started with Mailbox is easy: once you can use the app, clean out your inbox and start using it at zero.  The trick of it, of course, is maintaining zero.  Here are some of the things I learned in the process:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Cut down on the BACN&lt;/strong&gt;: &lt;a href=&#34;http://en.wikipedia.org/wiki/Bacn&#34;&gt;BACN&lt;/a&gt; (pronounced &amp;ldquo;bacon&amp;rdquo;) constituted a significant portion of my email.  I don&amp;rsquo;t really need to know when someone on &lt;a href=&#34;http://meetup.com&#34;&gt;meetup.com&lt;/a&gt; posts a comment to a group I&amp;rsquo;m part of.  I don&amp;rsquo;t need an automated email to let me know that I just made a Git commit at work.  Taking an active role in getting rid of these things significantly my volume of email.  It is entirely worth the extra minute or two to unsubscribe from a mailer or change your settings on an app to get rid of it.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Reduce it to 30-second task&lt;/strong&gt;:  I found that paying attention to my inbox was much easier and more natural when I did it in very frequent, very small bites.  It becomes something that can make positive use out of a any spare moment, whether it be waiting for a light to turn or a trip to the bathroom.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Keep notifications on&lt;/strong&gt;:  They&amp;rsquo;re likely to manage to annoy you into taking action.  Instead of turning them off, manage their frequency by getting rid of unwanted, automatic emails.  When a new email demands the same attention as a text message, it&amp;rsquo;s critical that most of them are meaningful.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Clean first, on your own&lt;/strong&gt;:  If, like me, you need to do some work to get to zero, do it manually in GMail.  It will be much quicker, and much easier on your thumbs.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Use lists sparingly&lt;/strong&gt;:  I treat them as temporary storage, mostly for newsletters that I &lt;strong&gt;do&lt;/strong&gt; want to read, or things that I can&amp;rsquo;t deal with quickly.  Remove items after a few days at most:  if you&amp;rsquo;re hanging onto it that long but not reading or acting on it, take a good look at why that&amp;rsquo;s the case and if it really makes sense.  Don&amp;rsquo;t let lists become holding tanks for a lot of unfinished business:  you&amp;rsquo;re shifting the problem elsewhere and letting bad habits continue.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Reschedule&lt;/strong&gt;:  This is actually a really good way to defer things meaningfully, especially if notifications are enabled for rescheduled messages.  The interruption of a quick reminder should encourage judicious use.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&#34;progress&#34;&gt;Progress&lt;/h1&gt;
+
+&lt;p&gt;After three weeks, I&amp;rsquo;ve maintained a steady state of inbox zero, and have significantly reduced my incoming email volume.  What&amp;rsquo;s surprised me the most is that by using the app as a tool for behavioral change and reinforcement, I&amp;rsquo;ve managed to trade a healthy dose of dysfunction and disorganization for a very small moment of extra effort throughout the day.  It feels like a bit of gamification without the annoyance and artificiality of rewards:  the reward is a stack of minor accomplishments, and seeing that repeated over time.&lt;/p&gt;
+
+&lt;p&gt;Would this have worked without Mailbox?  Absolutely, but having a tool made specifically for this problem makes it a lot easier to do.  Changing habits, even simple ones, can be surprisingly difficult.&lt;/p&gt;
+
+&lt;p&gt;I&amp;rsquo;d say this was a successful experiment so far, and one that has got me thinking about a few things:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;What other, similar domains can I apply this process to?&lt;/li&gt;
+&lt;li&gt;Are there apps that fit in those niches?  If not, why?&lt;/li&gt;
+&lt;li&gt;&amp;hellip;and perhaps most importantly, if there aren&amp;rsquo;t&amp;hellip;does that present an opportunity for me to build something?&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Thanks for reading.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Projects</title>
+      <link>https://crsmithdev.com/projects/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://crsmithdev.com/projects/</guid>
+      <description>
+
+&lt;h1 id=&#34;arrow-https-github-com-crsmithdev-arrow&#34;&gt;&lt;a href=&#34;https://github.com/crsmithdev/arrow&#34;&gt;Arrow&lt;/a&gt;&lt;/h1&gt;
+
+&lt;p&gt;Arrow is a simple, lightweight Python library, inspired by &lt;a href=&#34;https://github.com/timrwood/moment&#34;&gt;moment.js&lt;/a&gt; and &lt;a href=&#34;https://github.com/kennethreitz/requests&#34;&gt;requests&lt;/a&gt;, that provides a sensible, intelligent way of creating, manipulating, formatting and converting dates, times and timestamps.  Arrow is a drop-in replacement for Python date objects.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Fully implemented, drop-in replacement for datetime&lt;/li&gt;
+&lt;li&gt;Supports Python 2.6, 2.7, 3.3, 3.4 and 3.5&lt;/li&gt;
+&lt;li&gt;Time zone-aware &amp;amp; UTC by default&lt;/li&gt;
+&lt;li&gt;Provides super-simple creation options for many common input scenarios&lt;/li&gt;
+&lt;li&gt;Updated .replace method with support for relative offsets, including weeks&lt;/li&gt;
+&lt;li&gt;Formats and parses strings automatically&lt;/li&gt;
+&lt;li&gt;Partial support for ISO-8601&lt;/li&gt;
+&lt;li&gt;Timezone conversion&lt;/li&gt;
+&lt;li&gt;Timestamp available as a property&lt;/li&gt;
+&lt;li&gt;Generates time spans, ranges, floors and ceilings in timeframes from year to microsecond&lt;/li&gt;
+&lt;li&gt;Humanizes and supports a growing list of contributed locales&lt;/li&gt;
+&lt;li&gt;Extensible for your own Arrow-derived types&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&#34;hint-https-github-com-crsmithdev-hint&#34;&gt;&lt;a href=&#34;https://github.com/crsmithdev/hint&#34;&gt;Hint&lt;/a&gt;&lt;/h1&gt;
+
+&lt;p&gt;Hint is a simple mindfulness reminder for macOS.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;25 mindfulness-focused quotes delivered by notification&lt;/li&gt;
+&lt;li&gt;Configurable notification intervals from 10 minutes to 8 hours&lt;/li&gt;
+&lt;li&gt;Configurable notification sounds&lt;/li&gt;
+&lt;li&gt;Quote shuffle&lt;/li&gt;
+&lt;li&gt;Pause for preset intervals, or until resumed&lt;/li&gt;
+&lt;li&gt;Auto-launch on startup&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&#34;goenv-https-github-com-crsmithdev-goenv&#34;&gt;&lt;a href=&#34;https://github.com/crsmithdev/goenv&#34;&gt;Goenv&lt;/a&gt;&lt;/h1&gt;
+
+&lt;p&gt;Goenv is a Go package that provides virtualenv-like functionality for Go projects, isolating dependencies into workspaces for safer and simpler management.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Similar functionality to Python&amp;rsquo;s virtualenv and virtualenvwrapper.&lt;/li&gt;
+&lt;li&gt;Separates development directory from import path — e.g., develop in &lt;code&gt;~/myproject&lt;/code&gt;, but import from &lt;code&gt;github.com/me/myproject&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Isolates dependencies from other projects.&lt;/li&gt;
+&lt;li&gt;Does not interfere with any &lt;code&gt;go&lt;/code&gt; command functionality.&lt;/li&gt;
+&lt;li&gt;Written in Go, installable with &lt;code&gt;go get&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&#34;notebooks-https-github-com-crsmithdev-notebooks&#34;&gt;&lt;a href=&#34;https://github.com/crsmithdev/notebooks&#34;&gt;Notebooks&lt;/a&gt;&lt;/h1&gt;
+
+&lt;p&gt;My collection of IPython notebooks.&lt;/p&gt;
+
+&lt;h1 id=&#34;crsmithdev-com-https-github-com-crsmithdev-crsmithdev-com&#34;&gt;&lt;a href=&#34;https://github.com/crsmithdev/crsmithdev.com&#34;&gt;crsmithdev.com&lt;/a&gt;&lt;/h1&gt;
+
+&lt;p&gt;crsmithdev.com us built using &lt;a href=&#34;https://gohugo.io/&#34;&gt;Hugo&lt;/a&gt;, a static site generator written in Go.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

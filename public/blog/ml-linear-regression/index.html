@@ -1,0 +1,414 @@
+
+<!DOCTYPE html>
+<html lang="en-us">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="" name="keywords">
+<meta content="Linear Regression in Machine Learning - Chris Smith" property="og:title">
+
+<title>Linear Regression in Machine Learning | Chris Smith</title>
+
+<link rel="stylesheet" href="https://crsmithdev.com//css/style.css">
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lobster|Lato:400,700">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/github.min.css">
+
+
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+        <a class="nav-item" href="https://crsmithdev.com/"><h1 class="title3">Chris Smith</h1></a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://linkedin.com/in/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-linkedin"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://keybase.io/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-key"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="mailto:crsmithdev@gmail.com">
+            <span class="icon">
+              <i class="fa fa-envelope"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+     <nav class="nav">
+      <div class="nav-left">
+        <a class="nav-item" href="https://crsmithdev.com/"><h3 class="title2">Blog</h3></a>
+        <a class="nav-item" href="https://crsmithdev.com/projects"><h3 class="title2">Projects</h3></a>
+        <a class="nav-item" href="https://crsmithdev.com/about"><h3 class="title2">About</h3></a>
+      </div>
+    </nav>
+
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    
+    <h2 class="subtitle is-6">February 26, 2017</h2>
+    
+    <h1 class="title">Linear Regression in Machine Learning</h1>
+    
+    <div class="content">
+      
+
+<p>This is the first of a series of posts in which I&rsquo;ll be exploring concepts taught in Andrew Ng&rsquo;s <a href="https://www.coursera.org/learn/machine-learning">Introduction to Machine Learning</a> course on Coursera.  As a CS student, I enjoyed doing odd or extra things with my assignments — I found it added a greater challenge and allowed me to learn outside the scope of the class in a well-structured way.  So, as I progress through this course, I&rsquo;ll be posting another take on the coursework in Python, using a Jupyter notebook.</p>
+
+<p>Each post will begin with an implementation of the algorithm for the week, tracking closely to the requirements and terminology of the assignment, but trading Octave/MATLAB functions for standard Python data science tools, and then conclude by exploring what the same algorithm would look like built in <a href="https://www.tensorflow.org/">Tensorflow</a>.  I&rsquo;ll also be using different data sets, to make things a bit more interesting, and to avoid duplicating material from the course.</p>
+
+<p>The first programming assignment covers <a href="https://en.wikipedia.org/wiki/Linear_regression">linear regression</a>.  Linear regression attempts to fit a line of best fit to a data set, using one or more features as coefficients for a linear equation.  Here, I&rsquo;ll discuss:</p>
+
+<ul>
+<li>Loading, manipulating and plotting data using numpy and matplotlib</li>
+<li>The hypothesis and cost functions for linear regression</li>
+<li>Gradient descent with one variable and multiple variables</li>
+<li>Feature scaling and normalization</li>
+<li>Vectorization and the normal equation</li>
+<li>Linear regression and gradient descent in Tensorflow</li>
+</ul>
+
+<p>In this post, I&rsquo;m using the <a href="https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset">UCI Bike Sharing Data Set</a>.</p>
+
+<h1 id="loading-and-plotting-data">Loading and Plotting Data</h1>
+
+<p>For the first part, we&rsquo;ll be doing linear regression with one variable, and so we&rsquo;ll use only two fields from the daily data set: the normalized high temperature in C, and the total number of bike rentals.  The values for rentals are scaled by a factor of a thousand, given the  difference in magnitude between them and the normalized temperatures.</p>
+
+<pre><code class="language-python">import pandas as pd
+
+data = pd.read_csv(&quot;./data.csv&quot;)
+temps = data['atemp'].values
+rentals = data['cnt'].values / 1000
+</code></pre>
+
+<p>The plot reveals some degree of correlation between temperature and bike rentals, as one might guess.</p>
+
+<pre><code class="language-python">import matplotlib.pyplot as plt
+%matplotlib inline
+
+plt.scatter(temps, rentals, marker='x', color='red')
+plt.xlabel('Normalized Temperature in C')
+plt.ylabel('Bike Rentals in 1000s')
+</code></pre>
+
+<p><img src="/images/ml-linear-regression//ml-linear-regression_5_1.png#center" alt="png" /></p>
+
+<h1 id="simple-linear-regression">Simple Linear Regression</h1>
+
+<p>We&rsquo;ll start by implementing the <a href="https://en.wikipedia.org/wiki/Loss_function">cost function</a> for linear regression, specifically <a href="https://en.wikipedia.org/wiki/Mean_squared_error">mean squared error</a> (MSE).  Intuitively, MSE represents an aggregation of the distances between point&rsquo;s actual y value and what a hypothesis function $h_\theta(x)$ predicted it would be.  That hypothesis function and the cost function $J(\theta)$ are defined as</p>
+
+<p><code>\begin{align}
+h_\theta(x) &amp; = \theta_0 + \theta_1x_1 \\
+J(\theta) &amp; = \frac{1}{2m}\sum\limits_{i = 1}^{m}(h_\theta(x^{(i)}) - y^{(i)})^2
+\end{align}</code></p>
+
+<p>where $\theta$ is a vector of feature weights, $x^{(i)}$ is the ith training example, $y^{(i)}$ is that example&rsquo;s y value, and $x_j$ is the value for its jth feature.</p>
+
+<pre><code class="language-python">import numpy as np
+
+def compute_cost(X, y, theta):
+    return np.sum(np.square(np.matmul(X, theta) - y)) / (2 * len(y))
+</code></pre>
+
+<p>Before computing the cost with an initial guess for $\theta$, a column of 1s is prepended onto the input data.  This allows us to vectorize the cost function, as well as make it usable for multiple linear regression later.  This first value $\theta_0$ now behaves as a constant in the cost function.</p>
+
+<pre><code class="language-python">theta = np.zeros(2)
+X = np.column_stack((np.ones(len(temps)), temps))
+y = rentals
+cost = compute_cost(X, y, theta)
+
+print('theta:', theta)
+print('cost:', cost)
+</code></pre>
+
+<pre><code>theta: [ 0.  0.]
+cost: 12.0184064412
+</code></pre>
+
+<p>We&rsquo;ll now minimize the cost using the <a href="https://en.wikipedia.org/wiki/Gradient_descent">gradient descent</a> algorithm.  Intuitively, gradient descent takes small, linear hops down the slope of a function in each feature dimension, with the size of each hop determined by the partial derivative of the cost function with respect to that feature and a learning rate multiplier $\alpha$.  If tuned properly, the algorithm converges on a global minimum by iteratively adjusting feature weights $\theta$ of the cost function, as shown here for two feature dimensions:</p>
+
+<p><code>\begin{align}
+\theta_0 &amp; := \theta_0 - \alpha\frac{\partial}{\partial\theta_0} J(\theta_0,\theta_1) \\
+\theta_1 &amp; := \theta_1 - \alpha\frac{\partial}{\partial\theta_1} J(\theta_0,\theta_1)
+\end{align}</code></p>
+
+<p>The update rule each iteration then becomes:</p>
+
+<p><code>\begin{align}
+\theta_0 &amp; := \theta_0 - \alpha\frac{1}{m} \sum_{i=1}^m (h_\theta(x^{(i)})-y^{(i)}) \\
+\theta_1 &amp; := \theta_1 - \alpha\frac{1}{m} \sum_{i=1}^m (h_\theta(x^{(i)})-y^{(i)})x_1^{(i)} \\
+\end{align}</code></p>
+
+<p>See <a href="http://mccormickml.com/2014/03/04/gradient-descent-derivation/">here</a> for a more detailed explanation of how the update equations are derived.</p>
+
+<pre><code class="language-python">def gradient_descent(X, y, alpha, iterations):
+    theta = np.zeros(2)
+    m = len(y)
+
+    for i in range(iterations):
+        t0 = theta[0] - (alpha / m) * np.sum(np.dot(X, theta) - y)
+        t1 = theta[1] - (alpha / m) * np.sum((np.dot(X, theta) - y) * X[:,1])
+        theta = np.array([t0, t1])
+
+    return theta
+
+iterations = 5000
+alpha = 0.1
+
+theta = gradient_descent(X, y, alpha, iterations)
+cost = compute_cost(X, y, theta)
+
+print(&quot;theta:&quot;, theta)
+print('cost:', compute_cost(X, y, theta))
+</code></pre>
+
+<pre><code>theta: [ 0.94588081  7.50171673]
+cost: 1.12758692584
+</code></pre>
+
+<p>We can examine the values of $\theta$ chosen by the algorithm using a few different visualizations, first by plotting $h_\theta(x)$ against the input data.  The results show the expected correlation between temperature and rentals.</p>
+
+<pre><code class="language-python">plt.scatter(temps, rentals, marker='x', color='red')
+plt.xlabel('Normalized Temperature in C')
+plt.ylabel('Bike Rentals in 1000s')
+samples = np.linspace(min(temps), max(temps))
+plt.plot(samples, theta[0] + theta[1] * samples)
+</code></pre>
+
+<p><img src="/images/ml-linear-regression//ml-linear-regression_14_1.png#center" alt="png" /></p>
+
+<p>A surface plot is a better illustration of how gradient descent approaches a global minimum, plotting the values for $\theta$ against their associated cost.  This requires a bit more code than an implementation in Octave / MATLAB, largely due to how the input data is generated and fed to the surface plot function.</p>
+
+<pre><code class="language-python">from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+
+Xs, Ys = np.meshgrid(np.linspace(-5, 5, 50), np.linspace(-40, 40, 50))
+Zs = np.array([compute_cost(X, y, [t0, t1]) for t0, t1 in zip(np.ravel(Xs), np.ravel(Ys))])
+Zs = np.reshape(Zs, Xs.shape)
+
+fig = plt.figure(figsize=(7,7))
+ax = fig.gca(projection=&quot;3d&quot;)
+ax.set_xlabel(r't0')
+ax.set_ylabel(r't1')
+ax.set_zlabel(r'cost')
+ax.view_init(elev=25, azim=40)
+ax.plot_surface(Xs, Ys, Zs, cmap=cm.rainbow)
+</code></pre>
+
+<p><img src="/images/ml-linear-regression//ml-linear-regression_16_1.png#center" alt="png" /></p>
+
+<p>Finally, a countour plot reveals slices of that surface plot in 2D space, and can show the resulting $\theta$ values sitting exactly at the global minimum.</p>
+
+<pre><code class="language-python">ax = plt.figure().gca()
+ax.plot(theta[0], theta[1], 'r*')
+plt.contour(Xs, Ys, Zs, np.logspace(-3, 3, 15))
+</code></pre>
+
+<p><img src="/images/ml-linear-regression//ml-linear-regression_18_1.png#center" alt="png" /></p>
+
+<h1 id="multiple-linear-regression">Multiple Linear Regression</h1>
+
+<p>First, we reload the data and add two more features, humidity and windspeed.</p>
+
+<p>Before implementing gradient descent for multiple variables, we&rsquo;ll also apply <a href="https://en.wikipedia.org/wiki/Feature_scaling">feature scaling</a> to normalize feature values, preventing any one of them from disproportionately influencing the results, as well as helping gradient descent converge more quickly.  In this case, each feature value is adjusted by subtracting the mean and dividing the result by the standard deviation of all values for that feature:</p>
+
+<p><code>$$
+z = \frac{x - \mu}{\sigma}
+$$</code></p>
+
+<p>More details on feature scaling and normalization can be found <a href="http://sebastianraschka.com/Articles/2014_about_feature_scaling.html">here</a>.</p>
+
+<pre><code class="language-python">def feature_normalize(X):
+    n_features = X.shape[1]
+    means = np.array([np.mean(X[:,i]) for i in range(n_features)])
+    stddevs = np.array([np.std(X[:,i]) for i in range(n_features)])
+    normalized = (X - means) / stddevs
+
+    return normalized
+
+X = data.as_matrix(columns=['atemp', 'hum', 'windspeed'])
+X = feature_normalize(X)
+X = np.column_stack((np.ones(len(X)), X))
+
+y = data['cnt'].values / 1000
+</code></pre>
+
+<p>The next step is to implement gradient descent for any number of features.  Fortunately, the update step generalizes easily, and can be vectorized to avoid iterating through $\theta_j$ values as might be suggested by the single variable implementation above:</p>
+
+<p><code>$$
+\theta_j := \theta_j - \alpha\frac{1}{m} \sum_{i=1}^m (h_\theta(x^{(i)})-y^{(i)})x_j^{(i)}
+$$</code></p>
+
+<pre><code class="language-python">def gradient_descent_multi(X, y, theta, alpha, iterations):
+    theta = np.zeros(X.shape[1])
+    m = len(X)
+
+    for i in range(iterations):
+        gradient = (1/m) * np.matmul(X.T, np.matmul(X, theta) - y)
+        theta = theta - alpha * gradient
+
+    return theta
+
+theta = gradient_descent_multi(X, y, theta, alpha, iterations)
+cost = compute_cost(X, y, theta)
+
+print('theta:', theta)
+print('cost', cost)
+</code></pre>
+
+<pre><code>theta: [ 4.50434884  1.22203893 -0.45083331 -0.34166068]
+cost 1.00587092471
+</code></pre>
+
+<p>Unfortunately, it&rsquo;s now more difficult to evaluate the results visually, but we can check them a totally different method of calculating the answer, the <a href="http://eli.thegreenplace.net/2014/derivation-of-the-normal-equation-for-linear-regression/">normal equation</a>.  This solves directly for the solution without iteration specifying an $\alpha$ value, although it begins to perform worse than gradient descent with large (10,000+) numbers of features.</p>
+
+<p><code>$$
+\theta = (X^TX)^{-1}X^Ty
+$$</code></p>
+
+<pre><code class="language-python">from numpy.linalg import inv
+
+def normal_eq(X, y):
+    return inv(X.T.dot(X)).dot(X.T).dot(y)
+
+theta = normal_eq(X, y)
+cost = compute_cost(X, y, theta)
+
+print('theta:', theta)
+print('cost:', cost)
+</code></pre>
+
+<pre><code>theta: [ 4.50434884  1.22203893 -0.45083331 -0.34166068]
+cost: 1.00587092471
+</code></pre>
+
+<p>The $\theta$ values and costs for each implementation are identical, so we can have a high degree of confidence they are correct.</p>
+
+<h2 id="linear-regression-in-tensorflow">Linear Regression in Tensorflow</h2>
+
+<p>Tensorflow offers significantly higher-level abstractions to work with, representing the algorithm as a computational graph.  It has a built-in gradient descent optimizer that can minimize the cost function without us having to define the gradient manually.</p>
+
+<p>We&rsquo;ll begin by reloading the data and adapting it to more Tensorflow-friendly data structures and terminology.  Features are still normalized as before, but the added column of 1s is absent: the constant is treated separately as a <em>bias</em> variable, the previous $\theta$ values are now <em>weights</em>.</p>
+
+<pre><code class="language-python">import tensorflow as tf
+
+X = data.as_matrix(columns=['atemp', 'hum', 'windspeed'])
+X = feature_normalize(X)
+y = data['cnt'].values / 1000
+y = y.reshape((-1, 1))
+
+m = X.shape[0]
+n = X.shape[1]
+
+examples = tf.placeholder(tf.float32, [m,n])
+labels = tf.placeholder(tf.float32, [m,1])
+weights = tf.Variable(tf.zeros([n,1], dtype=np.float32), name='weight')
+bias = tf.Variable(tf.zeros([1], dtype=np.float32), name='bias')
+</code></pre>
+
+<p>The entire gradient descent occurs below in only three lines of code.  All that&rsquo;s needed is to define the hypothesis and cost functions, and then a gradient descent optimizer to find the minimum.</p>
+
+<pre><code class="language-python">hypothesis = tf.add(tf.matmul(examples, weights), bias)
+cost = tf.reduce_sum(tf.square(hypothesis - y)) / (2 * m)
+optimizer = tf.train.GradientDescentOptimizer(alpha).minimize(cost)
+</code></pre>
+
+<p>The graph is now ready to use, and all the remains is to start up a session, run the optimizer iteratively, and check the results.</p>
+
+<pre><code class="language-python">with tf.Session() as sess:
+    init = tf.global_variables_initializer()
+    sess.run(init)
+
+    for i in range(1, iterations):
+        sess.run(optimizer, feed_dict={
+            examples: X,
+            labels: y
+        })
+
+    print('bias:', sess.run(bias))
+    print('weights:', sess.run(weights))
+</code></pre>
+
+<pre><code>bias: [ 4.50434685]
+weights: [[ 1.22203839]
+ [-0.45083305]
+ [-0.34166056]]
+</code></pre>
+
+<p>The bias and weight values are identical to the $\theta$ values calculated in both implementations previously, so the Tensorflow implementation of the algorithm looks correct.</p>
+
+<p>You can find the IPython notebook for this post on <a href="https://github.com/crsmithdev/notebooks/blob/master/ml-linear-regression/ml-linear-regression.ipynb">GitHub</a>.</p>
+
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+          extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-40826256-2', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

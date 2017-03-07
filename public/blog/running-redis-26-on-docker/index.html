@@ -1,0 +1,238 @@
+
+<!DOCTYPE html>
+<html lang="en-us">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="" name="keywords">
+<meta content="Running Redis 2.6 on Docker - Chris Smith" property="og:title">
+
+<title>Running Redis 2.6 on Docker | Chris Smith</title>
+
+<link rel="stylesheet" href="https://crsmithdev.com//css/style.css">
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lobster|Lato:400,700">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/github.min.css">
+
+
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+        <a class="nav-item" href="https://crsmithdev.com/"><h1 class="title3">Chris Smith</h1></a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://linkedin.com/in/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-linkedin"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://keybase.io/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-key"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="mailto:crsmithdev@gmail.com">
+            <span class="icon">
+              <i class="fa fa-envelope"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+     <nav class="nav">
+      <div class="nav-left">
+        <a class="nav-item" href="https://crsmithdev.com/"><h3 class="title2">Blog</h3></a>
+        <a class="nav-item" href="https://crsmithdev.com/projects"><h3 class="title2">Projects</h3></a>
+        <a class="nav-item" href="https://crsmithdev.com/about"><h3 class="title2">About</h3></a>
+      </div>
+    </nav>
+
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    
+    <h2 class="subtitle is-6">September 15, 2013</h2>
+    
+    <h1 class="title">Running Redis 2.6 on Docker</h1>
+    
+    <div class="content">
+      <h1 id="docker">Docker</h1>
+
+<p>With the end of my free tier eligibility looming on AWS, I took advantage of the <a href="http://developer.rackspace.com/devtrial/">Rackspace developer discount</a> and set up a new account and personal server this weekend.  One of the technologies I&rsquo;ve been most interested in recently is <a href="http://www.docker.io">Docker</a>, a container engine for Linux which aims to be the intermodal shipping container for applications and their dependencies.  A brand-new box seemed like the perfect time to dig in to it.</p>
+
+<p></p>
+
+<p>To get a sense of what Docker is and how it works, I&rsquo;d recommend going through the <a href="http://www.docker.io/gettingstarted/">getting started</a> tutorial as well as some of the examples in the <a href="http://docs.docker.io/en/latest/">documentation</a>.  However, here&rsquo;s a very brief rundown:</p>
+
+<ul>
+<li>Docker uses <a href="https://en.wikipedia.org/wiki/LXC">LXC</a> and a <a href="https://en.wikipedia.org/wiki/Union_filesystem">union file system</a> (<a href="https://en.wikipedia.org/wiki/Aufs">AUFS</a>) to run isolated containers (<strong>not</strong> VMs).</li>
+<li>Software and its dependencies are packaged into an <strong>image</strong>.</li>
+<li>Images are immutable and stateless.</li>
+<li>Images can be committed in layers to form more complex images.</li>
+<li>An image running a process is called a <strong>container</strong>, which is stateful.</li>
+<li>A container exists as running or stopped, and can be run interactively or in the background.</li>
+<li>Images are lightweight, perhaps 100Mb for a Redis server running on Ubuntu.</li>
+<li>Containers are not virtual machines, so they are lightening-fast to boot and lightweight on resources.</li>
+</ul>
+
+<p>One of the documentation examples describes setting up a <a href="http://redis.io">Redis</a> service.  Following the example was straightforward, but I felt it was missing two things when I was finished.  First, it uses Redis 2.4, which is already quite out of date (as of this writing, Redis 2.8 is nearing release).  Plus, it felt awkward having to specify a lengthy command and config file each time the container started.</p>
+
+<h1 id="installing-redis-2-6">Installing Redis 2.6</h1>
+
+<p>The first thing to do is start a container from a base image, in this case the <code>ubuntu</code> image pulled during setup:</p>
+
+<pre><code>sudo docker run -i -t ubuntu /bin/bash
+</code></pre>
+
+<p>This results in a root shell on a new, running Ubuntu container.  A few things will be needed in order to download, build and test Redis:</p>
+
+<pre><code>apt-get install wget build-essential tcl8.5
+</code></pre>
+
+<p>To install Redis 2.6, it&rsquo;s necessary to build it from source:</p>
+
+<pre><code>wget get http://download.redis.io/releases/redis-2.6.16.tar.gz
+tar xvf redis-2.6.16.tar.gz
+cd redis-2.6.16
+</code></pre>
+
+<p>Build it, run some tests and install once completed:</p>
+
+<pre><code>make
+make test
+make install
+</code></pre>
+
+<p>Lastly, move the config file to a more standard location:</p>
+
+<pre><code>mkdir /etc/redis
+mv redis.conf /etc/redis/redis.conf
+</code></pre>
+
+<p>Verify the server is working by running the following:</p>
+
+<pre><code>redis-server /etc/redis/redis.conf
+</code></pre>
+
+<h1 id="run-commands-and-images">Run commands and images</h1>
+
+<p>In the example, the resulting container is committed to an image, and then run:</p>
+
+<pre><code>sudo docker commit &lt;container_id&gt; crsmithdev/redis
+sudo docker run -d -p 6379 crsmithdev/redis2.6 /usr/bin/redis-server /etc/redis/redis.conf
+</code></pre>
+
+<p>This is still a bit clunky &mdash; why do <code>redis-server</code> and the config file have to be specified each time it&rsquo;s run?  Forunately, they can be built into the image itself:</p>
+
+<pre><code>sudo docker commit -run='{&quot;Cmd&quot;:[&quot;/usr/local/bin/redis-server&quot;, &quot;/etc/redis/redis.conf&quot;]}' \
+    &lt;container_id&gt; crsmithdev/redis2.6
+</code></pre>
+
+<p>That way, you can run the container like so:</p>
+
+<pre><code>sudo docker run -d -p 6379:6379 crsmithdev/redis2.6
+</code></pre>
+
+<p>Specifying -p 6379:6379 ensures that the server&rsquo;s port 6379 is mapped to the container&rsquo;s port 6379.  Otherwise, Docker will assign a random local server port in the 49000s, which is probably unwanted in most non-development environments.</p>
+
+<p>Note that it is still possible to override the image-specified run command.  The following will open a shell using the image, instead of launching Redis:</p>
+
+<pre><code>sudo docker run -i -t crsmithdev/redis2.6 /bin/bash
+</code></pre>
+
+<h1 id="handling-data">Handling data</h1>
+
+<p>One important point:  what about the data and log files that result from the Redis process?  Every time I run Redis from that image, I get a new container with fresh data.  That&rsquo;s ideal for some situations, but less so for for others: in a production environment, it&rsquo;s entirely possible I&rsquo;d want to be able to start a new Redis container, but be able to load a dumpfile from a previous one.</p>
+
+<p>Fortunately, you can share one or more volumes with the host server easily.  Modify <code>redis.conf</code> on the container to specify a dumpfile location of your choice:</p>
+
+<pre><code>dir /data/redis
+</code></pre>
+
+<p>Then, run the image specifying a mount point on the server:</p>
+
+<pre><code>sudo docker run -d -p 6379:6379 -v /mnt/redis:/data/redis:rw crsmithdev/redis2.6
+</code></pre>
+
+<p>Connecting via <code>redis-cli</code> and executing <code>SAVE</code> should result in a <code>dump.rdb</code> file in <code>/mnt/redis</code>.  Redis will be logging to stdout unless specified otherwise, so the logs are viewable using a Docker command:</p>
+
+<pre><code>sudo docker logs &lt;container_d&gt;
+</code></pre>
+
+<p>If you specify a different logfile location in <code>redis.conf</code>, it&rsquo;s possible to add a second volume to the <code>run</code> command.</p>
+
+<h1 id="fin">Fin!</h1>
+
+<p>And that&rsquo;s it.  This image can then be downloaded and started, producing a running, fully-functional Redis server in literally a few seconds.</p>
+
+<p>You can grab my image <a href="https://index.docker.io/u/crsmithdev/redis2.6/">here</a>.</p>
+
+<p><strong>UPDATE 9-15 - updated container run arguments, and added a bit about volumes.</strong></p>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+          extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    }
+  });
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+  });
+</script>
+
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-40826256-2', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+

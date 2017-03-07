@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>travel on Chris Smith</title>
+    <link>https://crsmithdev.com/categories/travel/index.xml</link>
+    <description>Recent content in travel on Chris Smith</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <atom:link href="https://crsmithdev.com/categories/travel/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Linear Regression in Machine Learning</title>
+      <link>https://crsmithdev.com/blog/ml-linear-regression/</link>
+      <pubDate>Sun, 26 Feb 2017 21:00:11 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/blog/ml-linear-regression/</guid>
+      <description>
+
+&lt;p&gt;This is the first of a series of posts in which I&amp;rsquo;ll be exploring concepts taught in Andrew Ng&amp;rsquo;s &lt;a href=&#34;https://www.coursera.org/learn/machine-learning&#34;&gt;Introduction to Machine Learning&lt;/a&gt; course on Coursera.  As a CS student, I enjoyed doing odd or extra things with my assignments — I found it added a greater challenge and allowed me to learn outside the scope of the class in a well-structured way.  So, as I progress through this course, I&amp;rsquo;ll be posting another take on the coursework in Python, using a Jupyter notebook.&lt;/p&gt;
+
+&lt;p&gt;Each post will begin with an implementation of the algorithm for the week, tracking closely to the requirements and terminology of the assignment, but trading Octave/MATLAB functions for standard Python data science tools, and then conclude by exploring what the same algorithm would look like built in &lt;a href=&#34;https://www.tensorflow.org/&#34;&gt;Tensorflow&lt;/a&gt;.  I&amp;rsquo;ll also be using different data sets, to make things a bit more interesting, and to avoid duplicating material from the course.&lt;/p&gt;
+
+&lt;p&gt;The first programming assignment covers &lt;a href=&#34;https://en.wikipedia.org/wiki/Linear_regression&#34;&gt;linear regression&lt;/a&gt;.  Linear regression attempts to fit a line of best fit to a data set, using one or more features as coefficients for a linear equation.  Here, I&amp;rsquo;ll discuss:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Loading, manipulating and plotting data using numpy and matplotlib&lt;/li&gt;
+&lt;li&gt;The hypothesis and cost functions for linear regression&lt;/li&gt;
+&lt;li&gt;Gradient descent with one variable and multiple variables&lt;/li&gt;
+&lt;li&gt;Feature scaling and normalization&lt;/li&gt;
+&lt;li&gt;Vectorization and the normal equation&lt;/li&gt;
+&lt;li&gt;Linear regression and gradient descent in Tensorflow&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In this post, I&amp;rsquo;m using the &lt;a href=&#34;https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset&#34;&gt;UCI Bike Sharing Data Set&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h1 id=&#34;loading-and-plotting-data&#34;&gt;Loading and Plotting Data&lt;/h1&gt;
+
+&lt;p&gt;For the first part, we&amp;rsquo;ll be doing linear regression with one variable, and so we&amp;rsquo;ll use only two fields from the daily data set: the normalized high temperature in C, and the total number of bike rentals.  The values for rentals are scaled by a factor of a thousand, given the  difference in magnitude between them and the normalized temperatures.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import pandas as pd
+
+data = pd.read_csv(&amp;quot;./data.csv&amp;quot;)
+temps = data[&#39;atemp&#39;].values
+rentals = data[&#39;cnt&#39;].values / 1000
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The plot reveals some degree of correlation between temperature and bike rentals, as one might guess.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import matplotlib.pyplot as plt
+%matplotlib inline
+
+plt.scatter(temps, rentals, marker=&#39;x&#39;, color=&#39;red&#39;)
+plt.xlabel(&#39;Normalized Temperature in C&#39;)
+plt.ylabel(&#39;Bike Rentals in 1000s&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/ml-linear-regression//ml-linear-regression_5_1.png#center&#34; alt=&#34;png&#34; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;simple-linear-regression&#34;&gt;Simple Linear Regression&lt;/h1&gt;
+
+&lt;p&gt;We&amp;rsquo;ll start by implementing the &lt;a href=&#34;https://en.wikipedia.org/wiki/Loss_function&#34;&gt;cost function&lt;/a&gt; for linear regression, specifically &lt;a href=&#34;https://en.wikipedia.org/wiki/Mean_squared_error&#34;&gt;mean squared error&lt;/a&gt; (MSE).  Intuitively, MSE represents an aggregation of the distances between point&amp;rsquo;s actual y value and what a hypothesis function $h_\theta(x)$ predicted it would be.  That hypothesis function and the cost function $J(\theta)$ are defined as&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;\begin{align}
+h_\theta(x) &amp;amp; = \theta_0 + \theta_1x_1 \\
+J(\theta) &amp;amp; = \frac{1}{2m}\sum\limits_{i = 1}^{m}(h_\theta(x^{(i)}) - y^{(i)})^2
+\end{align}&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;where $\theta$ is a vector of feature weights, $x^{(i)}$ is the ith training example, $y^{(i)}$ is that example&amp;rsquo;s y value, and $x_j$ is the value for its jth feature.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import numpy as np
+
+def compute_cost(X, y, theta):
+    return np.sum(np.square(np.matmul(X, theta) - y)) / (2 * len(y))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Before computing the cost with an initial guess for $\theta$, a column of 1s is prepended onto the input data.  This allows us to vectorize the cost function, as well as make it usable for multiple linear regression later.  This first value $\theta_0$ now behaves as a constant in the cost function.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;theta = np.zeros(2)
+X = np.column_stack((np.ones(len(temps)), temps))
+y = rentals
+cost = compute_cost(X, y, theta)
+
+print(&#39;theta:&#39;, theta)
+print(&#39;cost:&#39;, cost)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;theta: [ 0.  0.]
+cost: 12.0184064412
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We&amp;rsquo;ll now minimize the cost using the &lt;a href=&#34;https://en.wikipedia.org/wiki/Gradient_descent&#34;&gt;gradient descent&lt;/a&gt; algorithm.  Intuitively, gradient descent takes small, linear hops down the slope of a function in each feature dimension, with the size of each hop determined by the partial derivative of the cost function with respect to that feature and a learning rate multiplier $\alpha$.  If tuned properly, the algorithm converges on a global minimum by iteratively adjusting feature weights $\theta$ of the cost function, as shown here for two feature dimensions:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;\begin{align}
+\theta_0 &amp;amp; := \theta_0 - \alpha\frac{\partial}{\partial\theta_0} J(\theta_0,\theta_1) \\
+\theta_1 &amp;amp; := \theta_1 - \alpha\frac{\partial}{\partial\theta_1} J(\theta_0,\theta_1)
+\end{align}&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;The update rule each iteration then becomes:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;\begin{align}
+\theta_0 &amp;amp; := \theta_0 - \alpha\frac{1}{m} \sum_{i=1}^m (h_\theta(x^{(i)})-y^{(i)}) \\
+\theta_1 &amp;amp; := \theta_1 - \alpha\frac{1}{m} \sum_{i=1}^m (h_\theta(x^{(i)})-y^{(i)})x_1^{(i)} \\
+\end{align}&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;See &lt;a href=&#34;http://mccormickml.com/2014/03/04/gradient-descent-derivation/&#34;&gt;here&lt;/a&gt; for a more detailed explanation of how the update equations are derived.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def gradient_descent(X, y, alpha, iterations):
+    theta = np.zeros(2)
+    m = len(y)
+
+    for i in range(iterations):
+        t0 = theta[0] - (alpha / m) * np.sum(np.dot(X, theta) - y)
+        t1 = theta[1] - (alpha / m) * np.sum((np.dot(X, theta) - y) * X[:,1])
+        theta = np.array([t0, t1])
+
+    return theta
+
+iterations = 5000
+alpha = 0.1
+
+theta = gradient_descent(X, y, alpha, iterations)
+cost = compute_cost(X, y, theta)
+
+print(&amp;quot;theta:&amp;quot;, theta)
+print(&#39;cost:&#39;, compute_cost(X, y, theta))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;theta: [ 0.94588081  7.50171673]
+cost: 1.12758692584
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We can examine the values of $\theta$ chosen by the algorithm using a few different visualizations, first by plotting $h_\theta(x)$ against the input data.  The results show the expected correlation between temperature and rentals.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;plt.scatter(temps, rentals, marker=&#39;x&#39;, color=&#39;red&#39;)
+plt.xlabel(&#39;Normalized Temperature in C&#39;)
+plt.ylabel(&#39;Bike Rentals in 1000s&#39;)
+samples = np.linspace(min(temps), max(temps))
+plt.plot(samples, theta[0] + theta[1] * samples)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/ml-linear-regression//ml-linear-regression_14_1.png#center&#34; alt=&#34;png&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A surface plot is a better illustration of how gradient descent approaches a global minimum, plotting the values for $\theta$ against their associated cost.  This requires a bit more code than an implementation in Octave / MATLAB, largely due to how the input data is generated and fed to the surface plot function.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+
+Xs, Ys = np.meshgrid(np.linspace(-5, 5, 50), np.linspace(-40, 40, 50))
+Zs = np.array([compute_cost(X, y, [t0, t1]) for t0, t1 in zip(np.ravel(Xs), np.ravel(Ys))])
+Zs = np.reshape(Zs, Xs.shape)
+
+fig = plt.figure(figsize=(7,7))
+ax = fig.gca(projection=&amp;quot;3d&amp;quot;)
+ax.set_xlabel(r&#39;t0&#39;)
+ax.set_ylabel(r&#39;t1&#39;)
+ax.set_zlabel(r&#39;cost&#39;)
+ax.view_init(elev=25, azim=40)
+ax.plot_surface(Xs, Ys, Zs, cmap=cm.rainbow)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/ml-linear-regression//ml-linear-regression_16_1.png#center&#34; alt=&#34;png&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Finally, a countour plot reveals slices of that surface plot in 2D space, and can show the resulting $\theta$ values sitting exactly at the global minimum.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;ax = plt.figure().gca()
+ax.plot(theta[0], theta[1], &#39;r*&#39;)
+plt.contour(Xs, Ys, Zs, np.logspace(-3, 3, 15))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/ml-linear-regression//ml-linear-regression_18_1.png#center&#34; alt=&#34;png&#34; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;multiple-linear-regression&#34;&gt;Multiple Linear Regression&lt;/h1&gt;
+
+&lt;p&gt;First, we reload the data and add two more features, humidity and windspeed.&lt;/p&gt;
+
+&lt;p&gt;Before implementing gradient descent for multiple variables, we&amp;rsquo;ll also apply &lt;a href=&#34;https://en.wikipedia.org/wiki/Feature_scaling&#34;&gt;feature scaling&lt;/a&gt; to normalize feature values, preventing any one of them from disproportionately influencing the results, as well as helping gradient descent converge more quickly.  In this case, each feature value is adjusted by subtracting the mean and dividing the result by the standard deviation of all values for that feature:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;$$
+z = \frac{x - \mu}{\sigma}
+$$&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;More details on feature scaling and normalization can be found &lt;a href=&#34;http://sebastianraschka.com/Articles/2014_about_feature_scaling.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def feature_normalize(X):
+    n_features = X.shape[1]
+    means = np.array([np.mean(X[:,i]) for i in range(n_features)])
+    stddevs = np.array([np.std(X[:,i]) for i in range(n_features)])
+    normalized = (X - means) / stddevs
+
+    return normalized
+
+X = data.as_matrix(columns=[&#39;atemp&#39;, &#39;hum&#39;, &#39;windspeed&#39;])
+X = feature_normalize(X)
+X = np.column_stack((np.ones(len(X)), X))
+
+y = data[&#39;cnt&#39;].values / 1000
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The next step is to implement gradient descent for any number of features.  Fortunately, the update step generalizes easily, and can be vectorized to avoid iterating through $\theta_j$ values as might be suggested by the single variable implementation above:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;$$
+\theta_j := \theta_j - \alpha\frac{1}{m} \sum_{i=1}^m (h_\theta(x^{(i)})-y^{(i)})x_j^{(i)}
+$$&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;def gradient_descent_multi(X, y, theta, alpha, iterations):
+    theta = np.zeros(X.shape[1])
+    m = len(X)
+
+    for i in range(iterations):
+        gradient = (1/m) * np.matmul(X.T, np.matmul(X, theta) - y)
+        theta = theta - alpha * gradient
+
+    return theta
+
+theta = gradient_descent_multi(X, y, theta, alpha, iterations)
+cost = compute_cost(X, y, theta)
+
+print(&#39;theta:&#39;, theta)
+print(&#39;cost&#39;, cost)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;theta: [ 4.50434884  1.22203893 -0.45083331 -0.34166068]
+cost 1.00587092471
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Unfortunately, it&amp;rsquo;s now more difficult to evaluate the results visually, but we can check them a totally different method of calculating the answer, the &lt;a href=&#34;http://eli.thegreenplace.net/2014/derivation-of-the-normal-equation-for-linear-regression/&#34;&gt;normal equation&lt;/a&gt;.  This solves directly for the solution without iteration specifying an $\alpha$ value, although it begins to perform worse than gradient descent with large (10,000+) numbers of features.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;$$
+\theta = (X^TX)^{-1}X^Ty
+$$&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;from numpy.linalg import inv
+
+def normal_eq(X, y):
+    return inv(X.T.dot(X)).dot(X.T).dot(y)
+
+theta = normal_eq(X, y)
+cost = compute_cost(X, y, theta)
+
+print(&#39;theta:&#39;, theta)
+print(&#39;cost:&#39;, cost)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;theta: [ 4.50434884  1.22203893 -0.45083331 -0.34166068]
+cost: 1.00587092471
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The $\theta$ values and costs for each implementation are identical, so we can have a high degree of confidence they are correct.&lt;/p&gt;
+
+&lt;h2 id=&#34;linear-regression-in-tensorflow&#34;&gt;Linear Regression in Tensorflow&lt;/h2&gt;
+
+&lt;p&gt;Tensorflow offers significantly higher-level abstractions to work with, representing the algorithm as a computational graph.  It has a built-in gradient descent optimizer that can minimize the cost function without us having to define the gradient manually.&lt;/p&gt;
+
+&lt;p&gt;We&amp;rsquo;ll begin by reloading the data and adapting it to more Tensorflow-friendly data structures and terminology.  Features are still normalized as before, but the added column of 1s is absent: the constant is treated separately as a &lt;em&gt;bias&lt;/em&gt; variable, the previous $\theta$ values are now &lt;em&gt;weights&lt;/em&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;import tensorflow as tf
+
+X = data.as_matrix(columns=[&#39;atemp&#39;, &#39;hum&#39;, &#39;windspeed&#39;])
+X = feature_normalize(X)
+y = data[&#39;cnt&#39;].values / 1000
+y = y.reshape((-1, 1))
+
+m = X.shape[0]
+n = X.shape[1]
+
+examples = tf.placeholder(tf.float32, [m,n])
+labels = tf.placeholder(tf.float32, [m,1])
+weights = tf.Variable(tf.zeros([n,1], dtype=np.float32), name=&#39;weight&#39;)
+bias = tf.Variable(tf.zeros([1], dtype=np.float32), name=&#39;bias&#39;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The entire gradient descent occurs below in only three lines of code.  All that&amp;rsquo;s needed is to define the hypothesis and cost functions, and then a gradient descent optimizer to find the minimum.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;hypothesis = tf.add(tf.matmul(examples, weights), bias)
+cost = tf.reduce_sum(tf.square(hypothesis - y)) / (2 * m)
+optimizer = tf.train.GradientDescentOptimizer(alpha).minimize(cost)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The graph is now ready to use, and all the remains is to start up a session, run the optimizer iteratively, and check the results.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;with tf.Session() as sess:
+    init = tf.global_variables_initializer()
+    sess.run(init)
+
+    for i in range(1, iterations):
+        sess.run(optimizer, feed_dict={
+            examples: X,
+            labels: y
+        })
+
+    print(&#39;bias:&#39;, sess.run(bias))
+    print(&#39;weights:&#39;, sess.run(weights))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;bias: [ 4.50434685]
+weights: [[ 1.22203839]
+ [-0.45083305]
+ [-0.34166056]]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The bias and weight values are identical to the $\theta$ values calculated in both implementations previously, so the Tensorflow implementation of the algorithm looks correct.&lt;/p&gt;
+
+&lt;p&gt;You can find the IPython notebook for this post on &lt;a href=&#34;https://github.com/crsmithdev/notebooks/blob/master/ml-linear-regression/ml-linear-regression.ipynb&#34;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Hotel Gracery Shinjuku</title>
+      <link>https://crsmithdev.com/blog/hotel-gracery-shinjuku/</link>
+      <pubDate>Tue, 07 Jun 2016 21:00:11 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/blog/hotel-gracery-shinjuku/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/hotel-gracery.jpg&#34; alt=&#34;alt&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The Hotel Gracery is located in &lt;a href=&#34;https://en.wikipedia.org/wiki/Kabukich%C5%8D,_Tokyo&#34;&gt;Kabukichō, Tokyo&lt;/a&gt;, just northeast of Shinjuku station. It looks something like an Alienware &lt;a href=&#34;http://www.alienware.com/landings/desktops.aspx&#34;&gt;tower&lt;/a&gt;, especially when viewed from the street as pictured above. Notably, the cinema attached to the hotel features a &lt;a href=&#34;http://en.rocketnews24.com/2014/12/11/full-size-godzilla-head-to-terrorize-moviegoers-and-hotel-guests-in-tokyo-starting-next-spring/&#34;&gt;full-size Godzilla head&lt;/a&gt; which can be seen peeking over the rooftop.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;The hotel charges extra for ‘Godzilla-view’ rooms.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Yushima Tenman-gū</title>
+      <link>https://crsmithdev.com/blog/yushima-tenman-gu/</link>
+      <pubDate>Sun, 05 Jun 2016 21:00:11 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/blog/yushima-tenman-gu/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/yushima-shrine.jpg&#34; alt=&#34;alt&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Yushima_Tenman-g%C5%AB&#34;&gt;Yushima Tenman-gū&lt;/a&gt; is a small Shinto shrine in northern Tokyo I found after getting off at the wrong train station on the way to &lt;a href=&#34;https://en.wikipedia.org/wiki/Ueno_Park&#34;&gt;Ueno Park&lt;/a&gt;.  The building pictured above is actually not the main shrine itself, but one of the other buildings in the complex.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;From &lt;a href=&#34;https://en.wikipedia.org/wiki/Yushima_Tenman-g%C5%AB&#34;&gt;Wikipedia&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Yushima Tenman-gū Shrine (湯島天満宮) is a Shinto shrine in Tokyo, Japan devoted to Tenjin, the Kami of Learning. It is located in the Bunkyo ward of Tokyo, not far from the University of Tokyo, and is a frequent site of prospective students hoping to pass the entrance exams there in April. At this time, the temple receives many offerings of ema votives to petition the kami for success at exams.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I also ran into this content-looking little guy at the shrine:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/yushima-bull.jpg&#34; alt=&#34;alt&#34; /&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>The Mode Gakuen Cocoon Tower</title>
+      <link>https://crsmithdev.com/blog/mode-gakuen-cocoon-tower/</link>
+      <pubDate>Sat, 04 Jun 2016 11:47:20 +0700</pubDate>
+      
+      <guid>https://crsmithdev.com/blog/mode-gakuen-cocoon-tower/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;https://crsmithdev.com/images/mode-gakuen.jpg&#34; alt=&#34;alt&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;One of my favorite buildings in Tokyo is the &lt;a href=&#34;https://en.wikipedia.org/wiki/Mode_Gakuen_Cocoon_Tower&#34;&gt;Mode Gakuen Cocoon Tower&lt;/a&gt;.  Located in Shinjuku, it&amp;rsquo;s one of the most striking buildings on the skyline.  The above is shot from an unusual angle, looking up from an opening in the pedestrian tunnel that leads west from the station.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;
+
+&lt;p&gt;From &lt;a href=&#34;https://en.wikipedia.org/wiki/Mode_Gakuen_Cocoon_Tower&#34;&gt;Wikipedia&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Before selecting a design for its new Tokyo location, Mode Gakuen held a competition asking architects to submit design proposals for the building. The only condition was that the building could not be rectangular. Mode Gakuen received more than 150 proposals by approximately 50 architects. The winning proposal was a cocoon-like structure designed by Tange Associates. According to Tange Associates the building&amp;rsquo;s cocoon shape symbolizes a building that nurtures the students inside. White aluminum and dark blue glass exterior form the structure&amp;rsquo;s curved shell, which is criss-crossed by a web of white diagonal lines earning it the name &amp;ldquo;Cocoon Tower&amp;rdquo;. A Tange Associates spokesperson stated that their aim was to use the building to revitalize the surrounding area and to create a gateway between Shinjuku Station and the Shinjuku central business district. The building&amp;rsquo;s design earned the firm the Emporis.com 2008 Skyscraper of the year award.&lt;/p&gt;
+&lt;/blockquote&gt;</description>
+    </item>
+    
+  </channel>
+</rss>
