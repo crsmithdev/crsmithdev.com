@@ -2,7 +2,6 @@
 date = "2013-06-02T11:34:28+07:00"
 type = "post"
 title = "A Blog Refresh with Bootstrap and Static"
-categories = ["code"]
 
 +++
 

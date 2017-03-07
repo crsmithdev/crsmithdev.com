@@ -1,6 +1,6 @@
 +++
 date = "2017-03-06T21:00:11+07:00"
-title = "Logistic Regression in Machine Learning"
+title = "Logistic Regression"
 type = "post"
 
 +++

@@ -1,8 +1,7 @@
 +++
 date = "2017-02-26T21:00:11+07:00"
-title = "Linear Regression in Machine Learning"
+title = "Linear Regression"
 type = "post"
-categories = ["travel", "photography"]
 
 +++
 

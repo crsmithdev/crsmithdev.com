@@ -2,7 +2,6 @@
 date = "2016-06-05T21:00:11+07:00"
 title = "Yushima Tenman-gū"
 type = "post"
-categories = ["travel", "photography"]
 featuredImage = "/images/yushima-shrine.jpg"
 
 +++

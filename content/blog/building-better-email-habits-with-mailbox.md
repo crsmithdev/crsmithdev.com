@@ -2,7 +2,6 @@
 date = "2013-03-26T11:31:53+07:00"
 type = "post"
 title = "Building Better Email Habits with Mailbox"
-categories = ["habits"]
 
 +++
 

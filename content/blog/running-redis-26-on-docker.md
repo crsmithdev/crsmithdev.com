@@ -2,7 +2,6 @@
 date = "2013-09-15T11:34:46+07:00"
 type = "post"
 title = "Running Redis 2.6 on Docker"
-categories = ["code"]
 
 +++
 

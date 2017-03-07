@@ -78,28 +78,4 @@
     <priority>0</priority>
   </url>
   
-  <url>
-    <loc>https://crsmithdev.com/categories/code/</loc>
-    <lastmod>2013-09-15T11:34:46+07:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://crsmithdev.com/categories/habits/</loc>
-    <lastmod>2013-03-26T11:31:53+07:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://crsmithdev.com/categories/photography/</loc>
-    <lastmod>2017-02-26T21:00:11+07:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://crsmithdev.com/categories/travel/</loc>
-    <lastmod>2017-02-26T21:00:11+07:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
 </urlset>

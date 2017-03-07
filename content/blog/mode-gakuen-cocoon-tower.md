@@ -2,7 +2,6 @@
 date = "2016-06-04T11:47:20+07:00"
 title = "The Mode Gakuen Cocoon Tower"
 type = "post"
-categories = ["photography", "travel"]
 featuredImage = "/images/mode-gakuen.jpg"
 
 +++

@@ -10,7 +10,7 @@
     <atom:link href="https://crsmithdev.com/blog/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>Logistic Regression in Machine Learning</title>
+      <title>Logistic Regression</title>
       <link>https://crsmithdev.com/blog/ml-logistic-regression/</link>
       <pubDate>Mon, 06 Mar 2017 21:00:11 +0700</pubDate>
       
@@ -466,7 +466,7 @@ recall: 0.951178451178
     </item>
     
     <item>
-      <title>Linear Regression in Machine Learning</title>
+      <title>Linear Regression</title>
       <link>https://crsmithdev.com/blog/ml-linear-regression/</link>
       <pubDate>Sun, 26 Feb 2017 21:00:11 +0700</pubDate>
       

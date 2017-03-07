@@ -2,7 +2,6 @@
 date = "2016-06-07T21:00:11+07:00"
 title = "Hotel Gracery Shinjuku"
 type = "post"
-categories = ["travel", "photography"]
 featuredImage = "/images/hotel-gracery.jpg"
 
 +++
