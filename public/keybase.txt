@@ -1,0 +1,75 @@
+==================================================================
+https://keybase.io/crsmithdev
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of https://crsmithdev.com
+  * I am crsmithdev (https://keybase.io/crsmithdev) on keybase.
+  * I have a public key with fingerprint 6B6A ADB1 DB4D BF03 2160  1C10 B817 BC46 5551 A19E
+
+To do so, I am signing this object:
+
+{
+    "body": {
+        "key": {
+            "eldest_kid": "010160c017a1050bff1462246468dfffad7787ef59149f73c1a47dbf4115ff4598a10a",
+            "fingerprint": "6b6aadb1db4dbf0321601c10b817bc465551a19e",
+            "host": "keybase.io",
+            "key_id": "b817bc465551a19e",
+            "kid": "010160c017a1050bff1462246468dfffad7787ef59149f73c1a47dbf4115ff4598a10a",
+            "uid": "f6bed2ab48ae690853db260241132c19",
+            "username": "crsmithdev"
+        },
+        "revoke": {
+            "sig_ids": [
+                "80fcb240283e898754bd072afc64770c1604179b1c7407376e6771f67cc1612f0f"
+            ]
+        },
+        "service": {
+            "hostname": "crsmithdev.com",
+            "protocol": "https:"
+        },
+        "type": "web_service_binding",
+        "version": 1
+    },
+    "ctime": 1488860383,
+    "expire_in": 157680000,
+    "prev": "7e94c6a31c00a4e62f609ed70d8e6e05d4e59f831173ea10f056c751331b87b5",
+    "seqno": 8,
+    "tag": "signature"
+}
+
+which yields the signature:
+
+-----BEGIN PGP MESSAGE-----
+Version: Keybase OpenPGP v2.0.64
+Comment: https://keybase.io/crypto
+
+yMJvAnicrVJdaBRHHL808etEiYIiRlsZhFY4ZGZ3dmb22qCgrai0gqXS0IRzZnbm
+bo25ve7uJaankNLiQykV+mClpdLGh7Z+NJiUYEsJJvgBRkNJU4oacipaKygYW5sI
+Yjsb2qf2sfMyzPx/X///zJkFtal0za4dT+5ur/31Yc3w4FQ59foArlaACLxOkK2A
+VjWzqd2eiuJcq++BLIAIIgIlRJQj6EChNcLEsjDBhHlaa+5RyqjSjouwq6ktEcfU
+Exoj5GiNHZcZHgcZoP1iXoWl0C/GRpYIwrknkCewAUPbMiZIIigYokJi4jgO4shV
+hlgIooRhwgkeqbV+YO7MITcT7z/w/3Pu8oycJkJ5FheYcUVcyBzbExaBloHblkRu
+AoxUWORtyqBlGLX5ccFT7WBfBoSqPWhVyWQjP29iRyD7BmBQS2FhaDFbMZdRBwsP
+UotrSTClUJrwGFFXIEkxpDYlilCKNKHSlJCloQYtRtt4tvtyRjyZ07/818qgzWQr
+hUEcyGC3qRXiuBRlk1xxZykBdyiR+1smJ/yiZ97JMNpVGPlBEWSRQcrYT3QRZowR
+aDM7A9Sekh+qnJ8gHEoYNCvxMS1nAVUuloTbSELIsSKWJtBVHoUeU0RBx8PKcTWz
+EaK2MnPW0CGSOsi2kWBUOCBp7M1iALLMxOR5I2lGV+RxOVRg39Dp5rpUTTo1e9ZT
+yf9NpefV//OrW9JzU93T3zete35849ZDz9RUjk1UP93Vd2rTgYnMZLlr+TdvNfU8
+gN1vzzlydPCXuhe74meXvnR0mt3ob2mo/Faf6hi59vQrIwf3N1zrb258lFlWudJx
+4OXvtmzd/jAzPHr6QrF/7PaKwvmzKy6WD6366rVjonH85uWBj4fe/Xp07FbvTwX3
+SUN12+b3atOT0z3VJX80HtmYX9154qPu/d9eHHj1/vXN9XvqZM+fky80n7yz8h29
+cPXV3hO9+ezhxT+3jF6HW+Z/smrss/fnPV5275yzbeRD8iW/HT63d9alwT7388PW
+5TUTXX1L+j5YcHx8eGlqfP3O3xtnj+6obph/sKlr6IdNAC86v2Fq6seF6ou/AHu5
+YhY=
+=Ib27
+-----END PGP MESSAGE-----
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/crsmithdev
+
+==================================================================
