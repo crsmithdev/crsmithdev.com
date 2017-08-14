@@ -10,10 +10,10 @@
 <title>Running Redis 2.6 on Docker | Chris Smith</title>
 
 <link rel="stylesheet" href="https://crsmithdev.com//css/style.css">
-<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lobster|Lato:400,700">
+<link href="https://fonts.googleapis.com/css?family=Roboto+Slab|Inconsolata|Source+Serif+Pro" rel="stylesheet">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/github.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/atom-one-light.min.css">
 
 
 
@@ -81,14 +81,14 @@
     <div class="content">
       <h1 id="docker">Docker</h1>
 
-<p>With the end of my free tier eligibility looming on AWS, I took advantage of the <a href="http://developer.rackspace.com/devtrial/">Rackspace developer discount</a> and set up a new account and personal server this weekend.  One of the technologies I&rsquo;ve been most interested in recently is <a href="http://www.docker.io">Docker</a>, a container engine for Linux which aims to be the intermodal shipping container for applications and their dependencies.  A brand-new box seemed like the perfect time to dig in to it.</p>
+<p>With the end of my free tier eligibility looming on AWS, I took advantage of the <a href="http://developer.rackspace.com/devtrial/" target="_blank">Rackspace developer discount</a> and set up a new account and personal server this weekend.  One of the technologies I&rsquo;ve been most interested in recently is <a href="http://www.docker.io" target="_blank">Docker</a>, a container engine for Linux which aims to be the intermodal shipping container for applications and their dependencies.  A brand-new box seemed like the perfect time to dig in to it.</p>
 
 <p></p>
 
-<p>To get a sense of what Docker is and how it works, I&rsquo;d recommend going through the <a href="http://www.docker.io/gettingstarted/">getting started</a> tutorial as well as some of the examples in the <a href="http://docs.docker.io/en/latest/">documentation</a>.  However, here&rsquo;s a very brief rundown:</p>
+<p>To get a sense of what Docker is and how it works, I&rsquo;d recommend going through the <a href="http://www.docker.io/gettingstarted/" target="_blank">getting started</a> tutorial as well as some of the examples in the <a href="http://docs.docker.io/en/latest/" target="_blank">documentation</a>.  However, here&rsquo;s a very brief rundown:</p>
 
 <ul>
-<li>Docker uses <a href="https://en.wikipedia.org/wiki/LXC">LXC</a> and a <a href="https://en.wikipedia.org/wiki/Union_filesystem">union file system</a> (<a href="https://en.wikipedia.org/wiki/Aufs">AUFS</a>) to run isolated containers (<strong>not</strong> VMs).</li>
+<li>Docker uses <a href="https://en.wikipedia.org/wiki/LXC" target="_blank">LXC</a> and a <a href="https://en.wikipedia.org/wiki/Union_filesystem" target="_blank">union file system</a> (<a href="https://en.wikipedia.org/wiki/Aufs" target="_blank">AUFS</a>) to run isolated containers (<strong>not</strong> VMs).</li>
 <li>Software and its dependencies are packaged into an <strong>image</strong>.</li>
 <li>Images are immutable and stateless.</li>
 <li>Images can be committed in layers to form more complex images.</li>
@@ -98,7 +98,7 @@
 <li>Containers are not virtual machines, so they are lightening-fast to boot and lightweight on resources.</li>
 </ul>
 
-<p>One of the documentation examples describes setting up a <a href="http://redis.io">Redis</a> service.  Following the example was straightforward, but I felt it was missing two things when I was finished.  First, it uses Redis 2.4, which is already quite out of date (as of this writing, Redis 2.8 is nearing release).  Plus, it felt awkward having to specify a lengthy command and config file each time the container started.</p>
+<p>One of the documentation examples describes setting up a <a href="http://redis.io" target="_blank">Redis</a> service.  Following the example was straightforward, but I felt it was missing two things when I was finished.  First, it uses Redis 2.4, which is already quite out of date (as of this writing, Redis 2.8 is nearing release).  Plus, it felt awkward having to specify a lengthy command and config file each time the container started.</p>
 
 <h1 id="installing-redis-2-6">Installing Redis 2.6</h1>
 
@@ -188,7 +188,7 @@ sudo docker run -d -p 6379 crsmithdev/redis2.6 /usr/bin/redis-server /etc/redis/
 
 <p>And that&rsquo;s it.  This image can then be downloaded and started, producing a running, fully-functional Redis server in literally a few seconds.</p>
 
-<p>You can grab my image <a href="https://index.docker.io/u/crsmithdev/redis2.6/">here</a>.</p>
+<p>You can grab my image <a href="https://index.docker.io/u/crsmithdev/redis2.6/" target="_blank">here</a>.</p>
 
 <p><strong>UPDATE 9-15 - updated container run arguments, and added a bit about volumes.</strong></p>
     </div>
@@ -204,7 +204,7 @@ sudo docker run -d -p 6379 crsmithdev/redis2.6 /usr/bin/redis-server /etc/redis/
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/languages/python.min.js"></script>
 
 <script>hljs.initHighlightingOnLoad();</script>
-<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
     tex2jax: {
@@ -215,12 +215,6 @@ sudo docker run -d -p 6379 crsmithdev/redis2.6 /usr/bin/redis-server /etc/redis/
       skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
       TeX: { equationNumbers: { autoNumber: "AMS" },
           extensions: ["AMSmath.js", "AMSsymbols.js"] }
-    }
-  });
-  MathJax.Hub.Queue(function() {
-    var all = MathJax.Hub.getAllJax(), i;
-    for(i = 0; i < all.length; i += 1) {
-        all[i].SourceElement().parentNode.className += ' has-jax';
     }
   });
 </script>

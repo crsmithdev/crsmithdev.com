@@ -10,10 +10,10 @@
 <title>A Blog Refresh with Bootstrap and Static | Chris Smith</title>
 
 <link rel="stylesheet" href="https://crsmithdev.com//css/style.css">
-<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lobster|Lato:400,700">
+<link href="https://fonts.googleapis.com/css?family=Roboto+Slab|Inconsolata|Source+Serif+Pro" rel="stylesheet">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/github.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/atom-one-light.min.css">
 
 
 
@@ -79,7 +79,7 @@
     <h1 class="title">A Blog Refresh with Bootstrap and Static</h1>
     
     <div class="content">
-      <p>Earlier this year, I finally set up a blog on my domain, having owned but left it unused for over a year.  My needs were simple:  it was to be a completely static site, hostable on GitHub Pages or Dropbox, and the focus of the project was in <strong>no</strong> way to be the technology or process of creating and maintaining it.  Despite the part of me that automatically geeked out at the opportunity to build my own completely custom blog generator from scratch, the point of doing it was to provide myself with a straightforward platform for <em>writing</em>, not to go on a technical adventure in creating one.  Although I&rsquo;ve only written two posts on it so far, the effort was successful: in short order, I&rsquo;d set up <a href="http://octopress.org">Octopress</a> and had it deploying to Pages.</p>
+      <p>Earlier this year, I finally set up a blog on my domain, having owned but left it unused for over a year.  My needs were simple:  it was to be a completely static site, hostable on GitHub Pages or Dropbox, and the focus of the project was in <strong>no</strong> way to be the technology or process of creating and maintaining it.  Despite the part of me that automatically geeked out at the opportunity to build my own completely custom blog generator from scratch, the point of doing it was to provide myself with a straightforward platform for <em>writing</em>, not to go on a technical adventure in creating one.  Although I&rsquo;ve only written two posts on it so far, the effort was successful: in short order, I&rsquo;d set up <a href="http://octopress.org" target="_blank">Octopress</a> and had it deploying to Pages.</p>
 
 <p></p>
 
@@ -101,16 +101,16 @@
 <p>In the end, I selected the following:</p>
 
 <ul>
-<li><a href="http://getbootstrap.com">Bootstrap 3</a> - newly released, rebuilt and responsive-first.</li>
-<li><a href="http://bootswatch.com/flatly/">Flatly</a> theme from <a href="http://bootswatch.com/">Bootswatch</a> - a flat, simple and readable theme for Bootstrap 3.</li>
-<li><a href="https://github.com/nakkaya/static">Static</a> - a tiny, embeddable static site generator in Clojure.</li>
-<li><a href="http://fortawesome.github.io/Font-Awesome/">Font Awesome</a> - high-quality icons.</li>
-<li><a href="https://code.google.com/p/google-code-prettify/">google-code-prettify</a> - code syntax highlighting.</li>
+<li><a href="http://getbootstrap.com" target="_blank">Bootstrap 3</a> - newly released, rebuilt and responsive-first.</li>
+<li><a href="http://bootswatch.com/flatly/" target="_blank">Flatly</a> theme from <a href="http://bootswatch.com/" target="_blank">Bootswatch</a> - a flat, simple and readable theme for Bootstrap 3.</li>
+<li><a href="https://github.com/nakkaya/static" target="_blank">Static</a> - a tiny, embeddable static site generator in Clojure.</li>
+<li><a href="http://fortawesome.github.io/Font-Awesome/" target="_blank">Font Awesome</a> - high-quality icons.</li>
+<li><a href="https://code.google.com/p/google-code-prettify/" target="_blank">google-code-prettify</a> - code syntax highlighting.</li>
 </ul>
 
 <h1 id="static">Static</h1>
 
-<p>Static is a very simple static site generator, with full documentation that spans about <a href="http:/nakkaya.com/static.html">two pages</a>.  What&rsquo;s most refreshing about Static (compared to Octropress, at least) is that it&rsquo;s built as a separate project, and then the .jar is copied into the repo for the site that will use it.  This means that the only traces of it that end up in the blog project are the .jar itself, and a few, flexible conventions regarding directory structure.</p>
+<p>Static is a very simple static site generator, with full documentation that spans about <a href="http:/nakkaya.com/static.html" target="_blank">two pages</a>.  What&rsquo;s most refreshing about Static (compared to Octropress, at least) is that it&rsquo;s built as a separate project, and then the .jar is copied into the repo for the site that will use it.  This means that the only traces of it that end up in the blog project are the .jar itself, and a few, flexible conventions regarding directory structure.</p>
 
 <p>Here&rsquo;s all that&rsquo;s needed to get started with Static:</p>
 
@@ -193,7 +193,7 @@ cp ../static/target/static-app.jar .
 
 <h1 id="html-templating-with-hiccup">HTML templating with Hiccup</h1>
 
-<p>Static uses <a href="https://github.com/weavejester/hiccup">Hiccup</a>, a great templating library for Clojure, to specify the structure of pages it generates.  Having never used it before, I instantly found it to be very natural and efficient &mdash; the syntax is extremely minimal, vectors and maps are used for elements and their attributes, respectively, and it&rsquo;s possible to embed Clojure code right along with element definitions.</p>
+<p>Static uses <a href="https://github.com/weavejester/hiccup" target="_blank">Hiccup</a>, a great templating library for Clojure, to specify the structure of pages it generates.  Having never used it before, I instantly found it to be very natural and efficient &mdash; the syntax is extremely minimal, vectors and maps are used for elements and their attributes, respectively, and it&rsquo;s possible to embed Clojure code right along with element definitions.</p>
 
 <p>Here&rsquo;s what the first few lines of my default template look like:</p>
 
@@ -235,7 +235,7 @@ cp ../static/target/static-app.jar .
 [:div.col-md-12 &quot;...&quot;]
 </code></pre>
 
-<p>In the absence of a ready way to list blog post titles and dates, I found and adapted some code from the site of Static&rsquo;s <a href="http://nakkaya.com/">author</a>.  A number of functions are made available within templates, although they are largely undocumented:</p>
+<p>In the absence of a ready way to list blog post titles and dates, I found and adapted some code from the site of Static&rsquo;s <a href="http://nakkaya.com/" target="_blank">author</a>.  A number of functions are made available within templates, although they are largely undocumented:</p>
 
 <!--?prettify lang=clj-->
 
@@ -255,9 +255,9 @@ cp ../static/target/static-app.jar .
 
 <h1 id="bootstrap-3-font-awesome-and-theming">Bootstrap 3, Font Awesome, and theming</h1>
 
-<p>Fortunately, Bootstrap 3 was nearing release as I was beginning to work on the site, so I grabbed the RC2 version and went to work.  <a href="http://bootswatch.com/">Bootswatch</a> provides a nice selection of attractive, free themes for Bootstrap 3, of which I picked <a href="http://bootswatch.com/flatly/">Flatly</a>. <a href="http://fortawesome.github.io/Font-Awesome/">Font Awesome</a> has high-quality icons for Twitter, GitHub and LinkedIn (amongst many, many others), making it an easy choice here.</p>
+<p>Fortunately, Bootstrap 3 was nearing release as I was beginning to work on the site, so I grabbed the RC2 version and went to work.  <a href="http://bootswatch.com/" target="_blank">Bootswatch</a> provides a nice selection of attractive, free themes for Bootstrap 3, of which I picked <a href="http://bootswatch.com/flatly/" target="_blank">Flatly</a>. <a href="http://fortawesome.github.io/Font-Awesome/" target="_blank">Font Awesome</a> has high-quality icons for Twitter, GitHub and LinkedIn (amongst many, many others), making it an easy choice here.</p>
 
-<p>There are plenty of great starting points / tutorials already out there for Bootstrap (I&rsquo;d recommend this <a href="http://getbootstrap.com/getting-started/#template">starter template</a>).  I did make some adjustments to the Flatly theme, though, with the goal of making the site a bit easier on the reader&rsquo;s eyes and more suitable for text-dense pages:</p>
+<p>There are plenty of great starting points / tutorials already out there for Bootstrap (I&rsquo;d recommend this <a href="http://getbootstrap.com/getting-started/#template" target="_blank">starter template</a>).  I did make some adjustments to the Flatly theme, though, with the goal of making the site a bit easier on the reader&rsquo;s eyes and more suitable for text-dense pages:</p>
 
 <ul>
 <li>Changed the standard font to <strong>Source Sans Pro</strong> (from the default <strong>Lato</strong>)</li>
@@ -266,13 +266,13 @@ cp ../static/target/static-app.jar .
 <li>Narrowed the container max-width to 840px.</li>
 </ul>
 
-<p>The fonts can be found at <a href="http://www.google.com/fonts">Google Fonts</a>.</p>
+<p>The fonts can be found at <a href="http://www.google.com/fonts" target="_blank">Google Fonts</a>.</p>
 
 <h1 id="github-activity">Github Activity</h1>
 
-<p>While there are some JS libraries to access the GitHub API, my needs were so simple that I was unwilling to introduce additional dependencies to just to parse a little bit of JSON and generate a few DOM elements.  For the same reason, while I ordinarily would be using libraries like <a href="http://underscorejs.org">underscore.js</a> and <a href="http://momentjs.org">moment.js</a> for dates, templating or even iteration, here I opted for vanilla JS.</p>
+<p>While there are some JS libraries to access the GitHub API, my needs were so simple that I was unwilling to introduce additional dependencies to just to parse a little bit of JSON and generate a few DOM elements.  For the same reason, while I ordinarily would be using libraries like <a href="http://underscorejs.org" target="_blank">underscore.js</a> and <a href="http://momentjs.org" target="_blank">moment.js</a> for dates, templating or even iteration, here I opted for vanilla JS.</p>
 
-<p>The full code to retrieve, process and display my GitHub commits can be found <a href="https://github.com/crsmithdev/crsmithdev.com/blob/master/resources/public/js/crsmithdev.js">here</a>.  I needed a function to retrieve some JSON from GitHub, transform some of that data into a list of DOM elements, and then append those elements to any containers matching a certain CSS selector:</p>
+<p>The full code to retrieve, process and display my GitHub commits can be found <a href="https://github.com/crsmithdev/crsmithdev.com/blob/master/resources/public/js/crsmithdev.js" target="_blank">here</a>.  I needed a function to retrieve some JSON from GitHub, transform some of that data into a list of DOM elements, and then append those elements to any containers matching a certain CSS selector:</p>
 
 <!--?prettify lang=js-->
 
@@ -343,7 +343,7 @@ var toDateString = function(date) {
 
 <h1 id="syntax-highlighting">Syntax Highlighting</h1>
 
-<p>Originally I attempted to use <a href="http://softwaremaniacs.org/soft/highlight/en/">highlight.js</a>, but quickly ran into issues:  nearly all of the guesses it made about what kind of syntax was being presented were wrong, and it was difficult to override its default guessing behavior, especially given that I was writing the posts in Markdown, not raw HTML.  Fortunately, <a href="https://code.google.com/p/google-code-prettify/">google-code-prettify</a> was a much more usable option, even though it does require an <a href="https://code.google.com/p/google-code-prettify/source/browse/trunk/src/lang-clj.js">extension</a> to handle Clojure.</p>
+<p>Originally I attempted to use <a href="http://softwaremaniacs.org/soft/highlight/en/" target="_blank">highlight.js</a>, but quickly ran into issues:  nearly all of the guesses it made about what kind of syntax was being presented were wrong, and it was difficult to override its default guessing behavior, especially given that I was writing the posts in Markdown, not raw HTML.  Fortunately, <a href="https://code.google.com/p/google-code-prettify/" target="_blank">google-code-prettify</a> was a much more usable option, even though it does require an <a href="https://code.google.com/p/google-code-prettify/source/browse/trunk/src/lang-clj.js" target="_blank">extension</a> to handle Clojure.</p>
 
 <p>If I posts <em>were</em> written HTML, using google-code-prettify would look something like this:</p>
 
@@ -373,7 +373,7 @@ var toDateString = function(date) {
 
 <h1 id="deployment">Deployment</h1>
 
-<p>Deployment to GitHub Pages was very straightforward.  I nuked my existing <a href="https://github.com/crsmithdev/crsmithdev.github.com">crsmithdev.github.com</a> master and copied over all the files from the <code>html</code> directory, being sure to add a CNAME file referencing my <a href="http://crsmithdev.com">crsmithdev.com</a> domain so Pages would work currently under it.  One push and the site was up and running.</p>
+<p>Deployment to GitHub Pages was very straightforward.  I nuked my existing <a href="https://github.com/crsmithdev/crsmithdev.github.com" target="_blank">crsmithdev.github.com</a> master and copied over all the files from the <code>html</code> directory, being sure to add a CNAME file referencing my <a href="http://crsmithdev.com" target="_blank">crsmithdev.com</a> domain so Pages would work currently under it.  One push and the site was up and running.</p>
 
 <h1 id="future-work">Future work</h1>
 
@@ -399,7 +399,7 @@ var toDateString = function(date) {
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/languages/python.min.js"></script>
 
 <script>hljs.initHighlightingOnLoad();</script>
-<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
     tex2jax: {
@@ -410,12 +410,6 @@ var toDateString = function(date) {
       skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
       TeX: { equationNumbers: { autoNumber: "AMS" },
           extensions: ["AMSmath.js", "AMSsymbols.js"] }
-    }
-  });
-  MathJax.Hub.Queue(function() {
-    var all = MathJax.Hub.getAllJax(), i;
-    for(i = 0; i < all.length; i += 1) {
-        all[i].SourceElement().parentNode.className += ' has-jax';
     }
   });
 </script>

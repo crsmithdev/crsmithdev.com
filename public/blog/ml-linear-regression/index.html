@@ -10,10 +10,10 @@
 <title>Linear Regression | Chris Smith</title>
 
 <link rel="stylesheet" href="https://crsmithdev.com//css/style.css">
-<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lobster|Lato:400,700">
+<link href="https://fonts.googleapis.com/css?family=Roboto+Slab|Inconsolata|Source+Serif+Pro" rel="stylesheet">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/github.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/atom-one-light.min.css">
 
 
 
@@ -81,11 +81,11 @@
     <div class="content">
       
 
-<p>This is the first of a series of posts in which I&rsquo;ll be exploring concepts taught in Andrew Ng&rsquo;s <a href="https://www.coursera.org/learn/machine-learning">Introduction to Machine Learning</a> course on Coursera.  As a CS student, I enjoyed doing odd or extra things with my assignments — I found it added a greater challenge and allowed me to learn outside the scope of the class in a well-structured way.  So, as I progress through this course, I&rsquo;ll be posting another take on the coursework in Python, using a Jupyter notebook.</p>
+<p>This is the first of a series of posts in which I&rsquo;ll be exploring concepts taught in Andrew Ng&rsquo;s <a href="https://www.coursera.org/learn/machine-learning" target="_blank">Introduction to Machine Learning</a> course on Coursera.  As a CS student, I enjoyed doing odd or extra things with my assignments — I found it added a greater challenge and allowed me to learn outside the scope of the class in a well-structured way.  So, as I progress through this course, I&rsquo;ll be posting another take on the coursework in Python, using a Jupyter notebook.</p>
 
-<p>Each post will begin with an implementation of the algorithm for the week, tracking closely to the requirements and terminology of the assignment, but trading Octave/MATLAB functions for standard Python data science tools, and then conclude by exploring what the same algorithm would look like built in <a href="https://www.tensorflow.org/">Tensorflow</a>.  I&rsquo;ll also be using different data sets, to make things a bit more interesting, and to avoid duplicating material from the course.</p>
+<p>Each post will begin with an implementation of the algorithm for the week, tracking closely to the requirements and terminology of the assignment, but trading Octave/MATLAB functions for standard Python data science tools, and then conclude by exploring what the same algorithm would look like built in <a href="https://www.tensorflow.org/" target="_blank">Tensorflow</a>.  I&rsquo;ll also be using different data sets, to make things a bit more interesting, and to avoid duplicating material from the course.</p>
 
-<p>The first programming assignment covers <a href="https://en.wikipedia.org/wiki/Linear_regression">linear regression</a>.  Linear regression attempts to fit a line of best fit to a data set, using one or more features as coefficients for a linear equation.  Here, I&rsquo;ll discuss:</p>
+<p>The first programming assignment covers <a href="https://en.wikipedia.org/wiki/Linear_regression" target="_blank">linear regression</a>.  Linear regression attempts to fit a line of best fit to a data set, using one or more features as coefficients for a linear equation.  Here, I&rsquo;ll discuss:</p>
 
 <ul>
 <li>Loading, manipulating and plotting data using numpy and matplotlib</li>
@@ -96,7 +96,7 @@
 <li>Linear regression and gradient descent in Tensorflow</li>
 </ul>
 
-<p>In this post, I&rsquo;m using the <a href="https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset">UCI Bike Sharing Data Set</a>.</p>
+<p>In this post, I&rsquo;m using the <a href="https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset" target="_blank">UCI Bike Sharing Data Set</a>.</p>
 
 <h1 id="loading-and-plotting-data">Loading and Plotting Data</h1>
 
@@ -123,7 +123,7 @@ plt.ylabel('Bike Rentals in 1000s')
 
 <h1 id="simple-linear-regression">Simple Linear Regression</h1>
 
-<p>We&rsquo;ll start by implementing the <a href="https://en.wikipedia.org/wiki/Loss_function">cost function</a> for linear regression, specifically <a href="https://en.wikipedia.org/wiki/Mean_squared_error">mean squared error</a> (MSE).  Intuitively, MSE represents an aggregation of the distances between point&rsquo;s actual y value and what a hypothesis function $h_\theta(x)$ predicted it would be.  That hypothesis function and the cost function $J(\theta)$ are defined as</p>
+<p>We&rsquo;ll start by implementing the <a href="https://en.wikipedia.org/wiki/Loss_function" target="_blank">cost function</a> for linear regression, specifically <a href="https://en.wikipedia.org/wiki/Mean_squared_error" target="_blank">mean squared error</a> (MSE).  Intuitively, MSE represents an aggregation of the distances between point&rsquo;s actual y value and what a hypothesis function $h_\theta(x)$ predicted it would be.  That hypothesis function and the cost function $J(\theta)$ are defined as</p>
 
 <p><code>\begin{align}
 h_\theta(x) &amp; = \theta_0 + \theta_1x_1 \\
@@ -153,7 +153,7 @@ print('cost:', cost)
 cost: 12.0184064412
 </code></pre>
 
-<p>We&rsquo;ll now minimize the cost using the <a href="https://en.wikipedia.org/wiki/Gradient_descent">gradient descent</a> algorithm.  Intuitively, gradient descent takes small, linear hops down the slope of a function in each feature dimension, with the size of each hop determined by the partial derivative of the cost function with respect to that feature and a learning rate multiplier $\alpha$.  If tuned properly, the algorithm converges on a global minimum by iteratively adjusting feature weights $\theta$ of the cost function, as shown here for two feature dimensions:</p>
+<p>We&rsquo;ll now minimize the cost using the <a href="https://en.wikipedia.org/wiki/Gradient_descent" target="_blank">gradient descent</a> algorithm.  Intuitively, gradient descent takes small, linear hops down the slope of a function in each feature dimension, with the size of each hop determined by the partial derivative of the cost function with respect to that feature and a learning rate multiplier $\alpha$.  If tuned properly, the algorithm converges on a global minimum by iteratively adjusting feature weights $\theta$ of the cost function, as shown here for two feature dimensions:</p>
 
 <p><code>\begin{align}
 \theta_0 &amp; := \theta_0 - \alpha\frac{\partial}{\partial\theta_0} J(\theta_0,\theta_1) \\
@@ -167,7 +167,7 @@ cost: 12.0184064412
 \theta_1 &amp; := \theta_1 - \alpha\frac{1}{m} \sum_{i=1}^m (h_\theta(x^{(i)})-y^{(i)})x_1^{(i)} \\
 \end{align}</code></p>
 
-<p>See <a href="http://mccormickml.com/2014/03/04/gradient-descent-derivation/">here</a> for a more detailed explanation of how the update equations are derived.</p>
+<p>See <a href="http://mccormickml.com/2014/03/04/gradient-descent-derivation/" target="_blank">here</a> for a more detailed explanation of how the update equations are derived.</p>
 
 <pre><code class="language-python">def gradient_descent(X, y, alpha, iterations):
     theta = np.zeros(2)
@@ -238,13 +238,13 @@ plt.contour(Xs, Ys, Zs, np.logspace(-3, 3, 15))
 
 <p>First, we reload the data and add two more features, humidity and windspeed.</p>
 
-<p>Before implementing gradient descent for multiple variables, we&rsquo;ll also apply <a href="https://en.wikipedia.org/wiki/Feature_scaling">feature scaling</a> to normalize feature values, preventing any one of them from disproportionately influencing the results, as well as helping gradient descent converge more quickly.  In this case, each feature value is adjusted by subtracting the mean and dividing the result by the standard deviation of all values for that feature:</p>
+<p>Before implementing gradient descent for multiple variables, we&rsquo;ll also apply <a href="https://en.wikipedia.org/wiki/Feature_scaling" target="_blank">feature scaling</a> to normalize feature values, preventing any one of them from disproportionately influencing the results, as well as helping gradient descent converge more quickly.  In this case, each feature value is adjusted by subtracting the mean and dividing the result by the standard deviation of all values for that feature:</p>
 
 <p><code>$$
 z = \frac{x - \mu}{\sigma}
 $$</code></p>
 
-<p>More details on feature scaling and normalization can be found <a href="http://sebastianraschka.com/Articles/2014_about_feature_scaling.html">here</a>.</p>
+<p>More details on feature scaling and normalization can be found <a href="http://sebastianraschka.com/Articles/2014_about_feature_scaling.html" target="_blank">here</a>.</p>
 
 <pre><code class="language-python">def feature_normalize(X):
     n_features = X.shape[1]
@@ -288,7 +288,7 @@ print('cost', cost)
 cost 1.00587092471
 </code></pre>
 
-<p>Unfortunately, it&rsquo;s now more difficult to evaluate the results visually, but we can check them a totally different method of calculating the answer, the <a href="http://eli.thegreenplace.net/2014/derivation-of-the-normal-equation-for-linear-regression/">normal equation</a>.  This solves directly for the solution without iteration specifying an $\alpha$ value, although it begins to perform worse than gradient descent with large (10,000+) numbers of features.</p>
+<p>Unfortunately, it&rsquo;s now more difficult to evaluate the results visually, but we can check them a totally different method of calculating the answer, the <a href="http://eli.thegreenplace.net/2014/derivation-of-the-normal-equation-for-linear-regression/" target="_blank">normal equation</a>.  This solves directly for the solution without iteration specifying an $\alpha$ value, although it begins to perform worse than gradient descent with large (10,000+) numbers of features.</p>
 
 <p><code>$$
 \theta = (X^TX)^{-1}X^Ty
@@ -365,7 +365,7 @@ weights: [[ 1.22203839]
 
 <p>The bias and weight values are identical to the $\theta$ values calculated in both implementations previously, so the Tensorflow implementation of the algorithm looks correct.</p>
 
-<p>You can find the IPython notebook for this post on <a href="https://github.com/crsmithdev/notebooks/blob/master/ml-linear-regression/ml-linear-regression.ipynb">GitHub</a>.</p>
+<p>You can find the IPython notebook for this post on <a href="https://github.com/crsmithdev/notebooks/blob/master/ml-linear-regression/ml-linear-regression.ipynb" target="_blank">GitHub</a>.</p>
 
     </div>
   </div>
@@ -380,7 +380,7 @@ weights: [[ 1.22203839]
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/languages/python.min.js"></script>
 
 <script>hljs.initHighlightingOnLoad();</script>
-<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
     tex2jax: {
@@ -391,12 +391,6 @@ weights: [[ 1.22203839]
       skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
       TeX: { equationNumbers: { autoNumber: "AMS" },
           extensions: ["AMSmath.js", "AMSsymbols.js"] }
-    }
-  });
-  MathJax.Hub.Queue(function() {
-    var all = MathJax.Hub.getAllJax(), i;
-    for(i = 0; i < all.length; i += 1) {
-        all[i].SourceElement().parentNode.className += ' has-jax';
     }
   });
 </script>
