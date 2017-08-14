@@ -40,19 +40,20 @@ print('binarized:', example)
 print('1s vs all:', example[:,0])
 ```
 
-    original: [3 1 2 2 3 1 1 3 2 3]
-    binarized: [[0 0 1]
-     [1 0 0]
-     [0 1 0]
-     [0 1 0]
-     [0 0 1]
-     [1 0 0]
-     [1 0 0]
-     [0 0 1]
-     [0 1 0]
-     [0 0 1]]
-    1s vs all: [0 1 0 0 0 1 1 0 0 0]
-
+```shell
+original: [3 1 2 2 3 1 1 3 2 3]
+binarized: [[0 0 1]
+    [1 0 0]
+    [0 1 0]
+    [0 1 0]
+    [0 0 1]
+    [1 0 0]
+    [1 0 0]
+    [0 0 1]
+    [0 1 0]
+    [0 0 1]]
+1s vs all: [0 1 0 0 0 1 1 0 0 0]
+```
 
 I also split the data into training and testing sets before going further.  A simple way to do this is with the `train_test_split` function from scikit-learn, which allows me to specify a percentage (here 25%) to sample randomly from the data set and partition away for testing.
 

@@ -6,6 +6,9 @@ preserveTaxonomyNames = true
 paginate = 3
 googleAnalytics = "UA-40826256-2"
 
+[blackfriday]
+hrefTargetBlank = true
+
 [[params.social]]
 url = "https://github.com/crsmithdev"
 fa_icon = "fa-github"
@@ -27,5 +30,5 @@ url = "mailto:crsmithdev@gmail.com"
 fa_icon = "fa-envelope"
 
 [params.highlight]
-style = "github"
+style = "atom-one-light"
 languages = ["python"]
