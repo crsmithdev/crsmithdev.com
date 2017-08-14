@@ -1,0 +1,432 @@
+
+<!DOCTYPE html>
+<html lang="en-us">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta content="" name="keywords">
+<meta content="Word Embeddings in the Pāli Canon - Chris Smith" property="og:title">
+
+<title>Word Embeddings in the Pāli Canon | Chris Smith</title>
+
+<link rel="stylesheet" href="https://crsmithdev.com//css/style.css">
+<link href="https://fonts.googleapis.com/css?family=Roboto+Slab|Inconsolata|Source+Serif+Pro" rel="stylesheet">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/atom-one-light.min.css">
+
+
+
+
+<section class="section">
+  <div class="container">
+    <nav class="nav">
+      <div class="nav-left">
+        <a class="nav-item" href="https://crsmithdev.com/"><h1 class="title3">Chris Smith</h1></a>
+      </div>
+      <div class="nav-right">
+        <nav class="nav-item level is-mobile">
+          
+          <a class="level-item" href="https://github.com/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-github"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://twitter.com/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-twitter"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://linkedin.com/in/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-linkedin"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="https://keybase.io/crsmithdev">
+            <span class="icon">
+              <i class="fa fa-key"></i>
+            </span>
+          </a>
+          
+          <a class="level-item" href="mailto:crsmithdev@gmail.com">
+            <span class="icon">
+              <i class="fa fa-envelope"></i>
+            </span>
+          </a>
+          
+        </nav>
+      </div>
+    </nav>
+     <nav class="nav">
+      <div class="nav-left">
+        <a class="nav-item" href="https://crsmithdev.com/"><h3 class="title2">Blog</h3></a>
+        <a class="nav-item" href="https://crsmithdev.com/projects"><h3 class="title2">Projects</h3></a>
+        <a class="nav-item" href="https://crsmithdev.com/about"><h3 class="title2">About</h3></a>
+      </div>
+    </nav>
+
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    
+    <h2 class="subtitle is-6">August 14, 2017</h2>
+    
+    <h1 class="title">Word Embeddings in the Pāli Canon</h1>
+    
+    <div class="content">
+      
+
+<p><a href="https://commons.wikimedia.org/wiki/File:Gal_Viharaya_02.jpg" target="_blank"><img src="/images/word-embeddings-pali-canon/buddha.jpg#center" alt="png" /></a></p>
+
+<p>Is there a point where Buddhism and artificial intelligence could converge? Yes, there are already some <a href="https://bswa.org/teaching/robots-artificial-intelligence-buddhism/" target="_blank">perspectives</a> on how a religion so grounded in the human conscious experience would regard a hypothetical sentient machine; one can only wonder how such an alien intelligence would itself consider introspective practices created by and for our own organic minds. A more practical starting point might be using machine learning to help us <em>understand</em> Buddhism, especially those of us in parts of the world to which it has only been introduced within the past few generations. There are many good high-level introductory <a href="https://www.amazon.com/dp/B003OYIG00/ref=dp-kindle-redirect?_encoding=UTF8&amp;btkr=1" target="_blank">resources</a>, but more serious students must navigate a massive amount of scripture and philosophy, full of terms and concepts that are notoriously difficult to translate well into Western languages, without the benefit of a long-term cultural context.</p>
+
+<p>In this post, I&rsquo;m implementing the <a href="https://arxiv.org/abs/1301.3781" target="_blank">word2vec</a> architecture with <a href="https://www.tensorflow.org/" target="_blank">Tensorflow</a> and using it to learn <a href="https://blog.acolyer.org/2016/04/21/the-amazing-power-of-word-vectors/" target="_blank">word embeddings</a> for a large subset of the <a href="https://en.wikipedia.org/wiki/P%C4%81li_Canon" target="_blank">Pāli Canon</a>, the oldest collection of Buddhist scriptures. I&rsquo;ll show results comparable to the <a href="https://code.google.com/archive/p/word2vec/" target="_blank">original implementation</a>, and along the way will highlight some interesting structure that emerges from the text.</p>
+
+<h1 id="the-pāli-canon">The Pāli Canon</h1>
+
+<p>The <a href="https://en.wikipedia.org/wiki/P%C4%81li_Canon" target="_blank">Pāli Canon</a> is the portrayal of Buddhist philosophy closest to the original teachings of <a href="https://en.wikipedia.org/wiki/Gautama_Buddha" target="_blank">Gautama Buddha</a>, who lived between the 4th and 6th centuries BCE. After generations of oral transmission by monks, it was committed to writing in the Pāli language in 29 BCE, complete with its distinctively lyrical, repetitive style that made it ideal for memorization and chanting. In addition to elucidating the foundations of Buddhist thought, text in the Pāli Canon reveals insights into a wide cross section of life in India at the end of the <a href="https://en.wikipedia.org/wiki/Vedic_period" target="_blank">Vedic period</a>, a time of significant social, political, philosophical and religious change.</p>
+
+<p>Specifically, I am examing one the <a href="https://en.wikipedia.org/wiki/Tripi%E1%B9%ADaka" target="_blank">three divisions</a> of the Pāli Canon called the <a href="https://en.wikipedia.org/wiki/Sutta_Pitaka" target="_blank">Sutta Pitaka</a>. The Sutta Pitaka is a collection of <em>suttas</em> (or <em>sutras</em>), which are typically discourses, poetry and other short writings. They are usually delivered by the Buddha himself and include sermons, instructions and training for monks, debates with other religious thinkers of the era, and conversations with a whole galaxy of people, from homeless wanderers to kings and celestial beings.</p>
+
+<p>Though only a portion of the Canon, the Sutta Pitaka is of significant length, with authoritative English translations of just <a href="https://www.amazon.com/Bhikkhu-Bodhi/e/B001JXB7VI" target="_blank">four</a> of the five books coming to over 6,000 pages. There is no chronological ordering of suttas between or within books, so systematic study requires some <a href="http://bodhimonastery.org/a-systematic-study-of-the-majjhima-nikaya.html" target="_blank">expert guidance</a> to sequence. Only a loose grouping by theme or intended audience can be found in some places.</p>
+
+<p>A large subset of the Sutta Pitaka is available from <a href="http://www.accesstoinsight.org/" target="_blank">Access to Insight</a> (ATI), an online archive of <a href="http://www.accesstoinsight.org/theravada.html" target="_blank">Theravada</a> Buddhism, which conveniently provides a whole-website download.</p>
+
+<h1 id="word-embeddings">Word Embeddings</h1>
+
+<p>The machine learning model used here is an implementation of <a href="https://en.wikipedia.org/wiki/Word2vec" target="_blank">word2vec</a>. Word2vec generates <a href="https://colah.github.io/posts/2014-07-NLP-RNNs-Representations/" target="_blank">word embeddings</a>, which map words to feature vectors such that words appearing in similar contexts are close neighbors in the vector space. Before word embeddings were widely used, features for words in <a href="https://en.wikipedia.org/wiki/Natural_language_processing" target="_blank">natural language processing</a> (NLP) typically had much higher dimensionality: one feature per word for many thousands or tens of thousands of words, as opposed to a denser vector space of a few hundred dimensions. Per-word features were often extremely sparse and were lost important contextual information that word embeddings preserve. Although <a href="http://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf" target="_blank">introduced</a> over a decade ago, recent improvements in quality and training speed have recently made them one of the most powerful NLP tools in use today.</p>
+
+<p>Word embeddings are often learned for use as features in other learning algorithms but have some interesting properties that make them useful on their own. Analysis of a word vector&rsquo;s nearest neighbors can reveal information about the structure and content of a corpus, and the spatial qualities of that structure can mirror real linguistic and conceptual relationships. For example, one of the <a href="https://arxiv.org/pdf/1301.3781.pdf" target="_blank">word2vec papers</a> demonstrates that simple algebraic operations on embeddings can represent analogies:  the vector <em>king</em> - <em>man</em> + <em>woman</em> is very close to the vector for <em>queen</em>.</p>
+
+<p>The <a href="https://code.google.com/archive/p/word2vec/" target="_blank">C implementation</a> of Word2vec provides hyperparameters for feature generation and learning. Features are generated using either a <a href="https://en.wikipedia.org/wiki/Bag-of-words_model#CBOW" target="_blank">continuous bag-of-words</a> (CBOW) or <a href="https://en.wikipedia.org/wiki/N-gram#Skip-gram" target="_blank">skip-gram</a> model. These can be understood as inverses of each other: in CBOW, words within a context window predict a target word, whereas skip-grams predict context words from a target.</p>
+
+<p>Word2vec is also computationally efficient. Instead of computing probabilities for every word in the vocabulary at every training step, it uses one of several techniques for <a href="http://ruder.io/word-embeddings-softmax/index.html#samplingbasedapproaches" target="_blank">sampling</a>. This significantly reduces what would otherwise be a prohibitively long and resource-intensive training process in many cases.</p>
+
+<h1 id="text-processing">Text Processing</h1>
+
+<p>I extracted sentences from 859 sutta translations from the ATI <a href="http://www.accesstoinsight.org/tech/download/bulk.html" target="_blank">archive</a>. Each was first parsed from HTML using <a href="https://www.crummy.com/software/BeautifulSoup/" target="_blank">Beautiful Soup</a>, then processed by a series of regexes and filters. Overall the data set has a few unique features:</p>
+
+<ul>
+<li>Many words, including words for core concepts, are left untranslated from Pāli because accurate single or even multi-word translations for them in English are awkward or impossible. Additionally, many words like <a href="https://en.wikipedia.org/wiki/Dhy%C4%81na_in_Buddhism" target="_blank">jhāna</a> have accents applied inconsistently depending on the text and translator, and so all accented characters have been converted for consistency.</li>
+<li>Hyphenated words, like <em>neither-perception-nor-nonperception</em> are common, also because of difficulties in translation. These are preserved and considered single words.</li>
+<li>Some suttas, particularly those that are more well-known, have multiple different translations. Rather than pick and choose, I thought it was meaningful that they had additional representation and extracted text from each of them.</li>
+</ul>
+
+<p>Below is a section of text from the <a href="http://www.accesstoinsight.org/Tipiṭaka/mn/mn.010.than.html" target="_blank">Satipatthana Sutta</a> after initial extraction. This sutta, which describes foundational practices for meditation, is one of the most well-known in the Canon.</p>
+
+<blockquote>
+<p>The Blessed One said this: &ldquo;This is the direct path for the purification of beings, for the overcoming of sorrow and lamentation, for the disappearance of pain and distress, for the attainment of the right method, and for the realization of Unbinding – in other words, the four frames of reference. Which four?</p>
+
+<p>&ldquo;There is the case where a monk remains focused on the body in and of itself – ardent, alert, and mindful – putting aside greed and distress with reference to the world. He remains focused on feelings&hellip; mind&hellip; mental qualities in and of themselves – ardent, alert, and mindful – putting aside greed and distress with reference to the world.</p>
+
+<p>&ldquo;And how does a monk remain focused on the body in and of itself?</p>
+
+<p>&ldquo;There is the case where a monk – having gone to the wilderness, to the shade of a tree, or to an empty building – sits down folding his legs crosswise, holding his body erect and setting mindfulness to the fore. Always mindful, he breathes in; mindful he breathes out.</p>
+</blockquote>
+
+<p>Next, I tokenized each sutta into sentences and words using <a href="http://www.nltk.org/" target="_blank">NLTK</a>. Tokens were then <a href="https://en.wikipedia.org/wiki/Stemming" target="_blank">stemmed</a> to reduce noise in the vocabulary from plurals, possessives and other non-base forms of a word. There are many simple <a href="https://tartarus.org/martin/PorterStemmer/" target="_blank">algorithms</a> for stemming, but they have the unfortunate side effect of aggressively mutilating words into roots that are often not words themselves. Instead, I used NLTK&rsquo;s <a href="https://wordnet.princeton.edu/" target="_blank">WordNet</a> stemmer, which <a href="https://nlp.stanford.edu/IR-book/html/htmledition/stemming-and-lemmatization-1.html" target="_blank">lemmatizes</a> words into base dictionary forms.</p>
+
+<p>This requires <a href="https://en.wikipedia.org/wiki/Part-of-speech_tagging" target="_blank">part-of-speech</a> tagging the text. Overall, results from the WordNet lemmatizer were significantly more legible than those from any other NLTK stemmer, at the cost of some accuracy, likely because of the injection of a large number of non-English words and some differences between the text and what the POS tagger had been trained on.</p>
+
+<pre><code class="language-python">lemmatizer = nltk.stem.WordNetLemmatizer()
+
+words = nltk.word_tokenize(sentence)
+words = [w.lower() for w in words if len(w) &gt; 0]
+
+# pos tag + wordnet lemmatize
+tagged = nltk.pos_tag(words)
+tagged = [(t[0], convert_tag(t[1])) for t in tagged]
+words = [lemmatizer.lemmatize(t[0], pos=t[1]) for t in tagged]
+
+# remove any remaining artifacts
+words = [w for w in words if len(w) &gt; 1 or w in {'a', 'i', 'o'}]
+words = [w for w in words if re.match(r'^[a-z/-]+$', w)]
+</code></pre>
+
+<p>Sentences were then written one line at a time to a single training file. The extracted text from the Satipatthana Sutta became:</p>
+
+<blockquote>
+<p>the blessed one say this this be the direct path for the purification of being for the overcoming of sorrow and lamentation for the disappearance of pain and distress for the attainment of the right method and for the realization of unbind in other word the four frame of reference
+<br>
+which four
+<br>
+there be the case where a monk remain focus on the body in and of itself ardent alert and mindful put aside greed and distress with reference to the world
+<br>
+he remain focus on feeling mind mental quality in and of themselves ardent alert and mindful put aside greed and distress with reference to the world
+<br>
+and how do a monk remain focus on the body in and of itself
+<br>
+there be the case where a monk have go to the wilderness to the shade of a tree or to an empty building sit down fold his leg crosswise hold his body erect and set mindfulness to the fore
+<br>
+always mindful he breathe in mindful he breathe out</p>
+</blockquote>
+
+<p>The data set contained 39,714 sentences, with 9368 unique and 707,528 total words.</p>
+
+<h1 id="word-vector-model">Word Vector Model</h1>
+
+<p>My starting point was the Tensorflow tutorial for <a href="https://www.tensorflow.org/tutorials/word2vec" target="_blank">Vector Representations of Words</a>. This tutorial introduces word embeddings, implements a basic word2vec architecture and applies it to a simplified version of the <a href="http://mattmahoney.net/dc/textdata" target="_blank">enwik8</a> corpus. At over 250 thousand unique and 17 million total words, it is also a significantly larger data set than the Pāli corpus. This particular version of the data set had already been preprocessed and reduced to one continuous stream of words without sentence or document breaks.</p>
+
+<p>I first reformatted the Pāli text in the same way and ran it directly through the tutorial code. With no objective test data by which to measure the results, I evaluated them in two ways: by selecting a list of words for which I&rsquo;d search for closest neighbors and judge their quality, and using the <a href="http://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html" target="_blank">t-SNE</a> visualizer from scikit-learn to generate a 2D projection of the vector space, where similar vectors would be grouped together on a plane.</p>
+
+<p>Initially, the embeddings generated were good enough to be interesting, but only for very simple categorical associations, like colors and numbers. Unsure if this was as good as I could expect with a comparatively small dataset, I also ran a <a href="https://github.com/danielfrg/word2vec" target="_blank">python wrapper</a> for word2vec on the data set. The reference implementation produced vectors with significantly better neighbors, for both general words and categories as well as more Buddhism-specific concepts.</p>
+
+<p>One obvious change was to alter feature extraction to generate skip-grams only within sentences. Words in a sentence are more likely to be related and contextually meaningful. Word2vec also filters out words occurring too infrequently in the text and provides a threshold parameter, below which words are completely removed from the corpus. This has the side effect of widening context windows, as it moves words into proximity that were more distant previously.</p>
+
+<pre><code class="language-python"># count all words
+for sentence in sentences:
+    self.counter.update(sentence)
+
+# filter out words &lt; threshold from vocabulary
+top_words = [w for w in self.counter.most_common() if w[1] &gt;= self.threshold]
+self.counter = collections.Counter(dict(top_words))
+
+# ids in descending order by frequency
+self.dictionary = {c[0]: i for i, c in enumerate(self.counter.most_common())}
+self.reverse_dictionary = dict(
+    zip(self.dictionary.values(), self.dictionary.keys()))
+
+encoded = []
+
+# encode word -&gt; id, build vocabulary
+for sentence in sentences:
+    selected = [w for w in sentence if w in self.counter]
+    encoded.append([self.dictionary[w] for w in selected])
+    self.vocabulary.update(selected)
+    self.total_words += len(selected)
+
+self.sentences = encoded
+</code></pre>
+
+<p>Two sampling strategies are applied in word2vec when generating skip-grams. First, frequent words are aggressively downsampled, with an effect similar to filtering out stopwords (very common words like <em>the</em>, <em>and</em>, <em>is</em>, etc. that add little to no meaningful information to a sentence), but with the added benefits of not requiring a stopword list, and of subsampling words that aren&rsquo;t stopwords but appear frequently anyway. This subsampling is also done before context windows are applied, further widening them.</p>
+
+<p>Context windows are also dynamically adjusted, with the size at the time of skip-gram generation sampled between one and the input parameter for window size. This weights words that occur in close proximity more heavily than those at a distance, as they are more likely to fall within the sampled window.</p>
+
+<pre><code class="language-python">selected = []
+
+for word_id in sentence:
+
+    word = self.reverse_dictionary[word_id]
+
+    # subsample frequent words
+    frequency = self.counter[word] / self.total_words
+    sample_prob = (math.sqrt(frequency / self.sample) + 1) * (
+        self.sample / frequency)
+
+    if np.random.sample() &gt; sample_prob:
+        continue
+
+    selected.append(word_id)
+
+sentence = selected
+skipgrams = []
+
+for i, word_id in enumerate(selected):
+
+    # sample context window between 1 and window size
+    window = np.random.randint(low=1, high=self.window + 1)
+    start = max(i - window, 0)
+    end = min(i + window, len(selected) - 1)
+
+    # add all context words
+    for j in range(start, end + 1):
+        if j == i:
+            continue
+
+        skipgrams.append((word_id, selected[j]))
+
+</code></pre>
+
+<p>The Tensorflow model code used here is similar to that of the tutorial, with some modifications:</p>
+
+<ul>
+<li>I used a different loss function, <a href="https://www.tensorflow.org/versions/r0.12/api_docs/python/nn/candidate_sampling#sampled_softmax_loss" target="_blank">sampled softmax</a> instead of <a href="https://www.tensorflow.org/versions/r0.12/api_docs/python/nn/candidate_sampling#nce_loss" target="_blank">noise-contrastive estimation</a>. This is largely due to observably better results and convergence with sampled softmax, which may be related to the comparatively small size of the dataset.</li>
+<li>I did not allow the loss function to use the default <a href="https://www.tensorflow.org/versions/r0.12/api_docs/python/nn/candidate_sampling#log_uniform_candidate_sampler" target="_blank">log uniform candidate sampler</a>, instead opting for the <a href="https://www.tensorflow.org/api_docs/python/tf/nn/learned_unigram_candidate_sampler" target="_blank">learned unigram candidate sampler</a>. Note that the default sampler assumes a <a href="https://en.wikipedia.org/wiki/Zipf%27s_law" target="_blank">Zipfian</a> distribution in the input examples, which is effectively smoothed out by the subsampling during feature generation, so using it would be effectively double-subsampling the data. It&rsquo;s also possible to remove subsampling entirely and rely on the candidate sampler; in practice, I found the approach used here yielded better results.</li>
+</ul>
+
+<pre><code class="language-python">init = 1.0 / math.sqrt(self.embedding_size)  # weight initialization
+
+# input training examples &amp; labels
+self._train_examples = tf.placeholder(tf.int64, shape=[None], name='inputs')
+self._train_labels = tf.placeholder(tf.int64, shape=[None, 1], name='labels')
+
+# word vector embeddings
+embeddings = tf.Variable(
+    tf.random_uniform([self.vocabulary_size, self.embedding_size], -init, init),
+    name='embeddings')
+train_embeddings = tf.nn.embedding_lookup(embeddings, self._train_examples)
+
+# softmax weights + bias
+softmax_weights = tf.Variable(
+    tf.truncated_normal([self.vocabulary_size, self.embedding_size], stddev=init),
+    name='softmax_weights')
+softmax_bias = tf.Variable(tf.zeros([self.vocabulary_size]), name='softmax_bias')
+
+# don't use default log uniform sampler, distribution has been changed by subsampling
+candidates, true_expected, sampled_expected = tf.nn.learned_unigram_candidate_sampler(
+    true_classes=self._train_labels,
+    num_true=1,
+    num_sampled=self.n_sampled,
+    unique=True,
+    range_max=self.vocabulary_size,
+    name='sampler')
+
+# sampled softmax loss
+self._loss = tf.reduce_mean(
+    tf.nn.sampled_softmax_loss(
+        weights=softmax_weights,
+        biases=softmax_bias,
+        labels=self._train_labels,
+        inputs=train_embeddings,
+        num_sampled=self.n_sampled,
+        num_classes=self.vocabulary_size,
+        sampled_values=(candidates, true_expected, sampled_expected)))
+
+self._optimizer = tf.train.GradientDescentOptimizer(self.learning_rate).minimize(
+    self._loss)
+self._loss_summary = tf.summary.scalar('loss', self._loss)
+
+# inputs for nearest N
+self._nearest_to = tf.placeholder(tf.int64)
+
+# cosine similarity for nearest N
+self._normalized_embeddings = tf.nn.l2_normalize(embeddings, 1)
+target_embedding = tf.gather(self._normalized_embeddings, self._nearest_to)
+self._distance = tf.matmul(
+    target_embedding, self._normalized_embeddings, transpose_b=True)
+</code></pre>
+
+<h1 id="exploring-nearest-neighbors">Exploring Nearest Neighbors</h1>
+
+<p>Below is a t-SNE plot of the most frequent 1000 words in the Pāli corpus.  It&rsquo;s very large, so click through the thumbnail for the full version.</p>
+
+<p><a href="/images/word-embeddings-pali-canon/tsne.png"><img src="/images/word-embeddings-pali-canon/tsne-thumbnail.png#center" alt="png" /></a></p>
+
+<p>The words in the first target set below have little to no specific meanings in Buddhism and are a check on the basic capabilities of the model. These words, including colors, numbers, body parts, familial relations and directions, are in most cases positioned close to other words that are within the same category or are have clear conceptual relationships.</p>
+
+<pre><code class="language-shell">north -&gt; south, west, east, city, sky, countryside, gate, sol
+skin -&gt; tendon, teeth, nail, marrow, sweat, blood, flesh, grass
+leg -&gt; crosswise, fold, erect, shoulder, abash, rod, round, nail
+blue -&gt; yellow, red, white, feature, color, wild, lotus, skilled
+five -&gt; three, ten, nine, eleven, twenty, seven, four, eight
+cow -&gt; grass, dry, hillside, butcher, wet, bird, bathman, glen
+day -&gt; night, half, month, year, forward, spend, two, seven
+mother -&gt; father, child, brother, sister, wife, majesty, kinsman, relative
+sword -&gt; spear, cow, goat, knife, shield, bed, cover, garland
+</code></pre>
+
+<p>Next, the neighbors nearest to <em>king</em> are names of specific rulers and kingdoms. <a href="https://en.wikipedia.org/wiki/Pasenadi" target="_blank">Pasenadi</a> was the ruler of the kingdom of <a href="https://en.wikipedia.org/wiki/Kosala" target="_blank">Kosala</a>, <a href="https://en.wikipedia.org/wiki/Ajatashatru" target="_blank">Ajātasattu</a> the king of rival kingdom <a href="https://en.wikipedia.org/wiki/Magadha" target="_blank">Magadha</a>. A mythological sovereign is mentioned as well: <a href="https://en.wikipedia.org/wiki/%C5%9Aakra_(Buddhism)" target="_blank">Sakka</a> is the ruler of one of the heavenly realms in Buddhist cosmology, populated by celestial beings known as <a href="https://en.wikipedia.org/wiki/Deva_(Buddhism)" target="_blank">devas</a>.</p>
+
+<pre><code class="language-shell">king -&gt; kosala, pasenadi, yama, minister, ajatasattu, deva, magadha, sakka
+</code></pre>
+
+<p><em>Buddha</em>, <em>Dhamma</em> (or <em>Dharma</em> in other Buddhist traditions) and <em>Sangha</em> are the <a href="https://en.wikipedia.org/wiki/Refuge_(Buddhism)" target="_blank">Three Refuges</a> in Buddhism. Buddha refers to the historical Gautama Buddha (as well as <a href="https://en.wikipedia.org/wiki/List_of_Buddhas" target="_blank">other Buddhas</a> referenced in various texts and traditions), Dhamma is a difficult-to-translate term that covers both the teachings of the Buddha as well as an overall system of cosmic truth and order, and Sangha is the monastic community. As expected, these terms are very close to each other in vector space, and each has nearest neighbors that are conceptually related. Several words refer to learning and teaching, and the <a href="https://en.wikipedia.org/wiki/Vinaya" target="_blank">Vinaya</a>, the code of conduct for monks and nuns, appears with two.</p>
+
+<pre><code class="language-shell">dhamma -&gt; sangha, teaching, buddha, meaning, goal, taught, statement, confidence
+buddha -&gt; sangha, vinaya, taught, well-taught, well-expounded, study, brief, rama
+sangha -&gt; buddha, well-taught, taught, well-expounded, recollect, approving, dhamma, vinaya
+</code></pre>
+
+<p>The t-SNE plot reveals them in close proximity:</p>
+
+<p><img src="/images/word-embeddings-pali-canon/dhamma.png#center" alt="png" /></p>
+
+<p><em>Gotama</em> is the Pāli spelling for Gautama found in the suttas; <a href="https://en.wikipedia.org/wiki/Ananda" target="_blank">Ananda</a> was his cousin, disciple, and personal attendant. Ananda was reputed to have performed prodigious feats of memorization and was the initial oral chronicler of the Buddha&rsquo;s teachings. He mentioned by name more than any other disciple in the text by a significant margin and his name is a close vector to <em>gotama</em>. Also near <em>gotama</em> are several honorifics frequently applied in conversation with him, and near both are the names of other important disciples, including <a href="https://en.wikipedia.org/wiki/Sariputta" target="_blank">Sariputta</a>, <a href="https://en.wikipedia.org/wiki/Maudgalyayana" target="_blank">Moggallāna</a>, <a href="https://en.wikipedia.org/wiki/Katyayana_(Buddhist)" target="_blank">Kaccāna</a> and <a href="http://www.accesstoinsight.org/tipitaka/mn/mn.082.than.html" target="_blank">Raṭṭhapāla</a>.</p>
+
+<pre><code class="language-shell">gotama -&gt; master, magnificent, sir, bharadvaja, u, ratthapala, kaccana, ananda
+ananda -&gt; sariputta, samiddhi, udayin, maha, cunda, headman, kaccana, moggallana
+</code></pre>
+
+<p>These figures are all positioned closely on the t-SNE plot, which also includes <em>maha</em> and <em>kassapa</em>, referring to <a href="https://en.wikipedia.org/wiki/Mah%C4%81k%C4%81%C5%9Byapa" target="_blank">Mahākassapa</a>, a key follower who assumed leadership after the Buddha&rsquo;s death.</p>
+
+<p><img src="/images/word-embeddings-pali-canon/people.png#center" alt="png" /></p>
+
+<p>I also evaluated words related to the <a href="https://en.wikipedia.org/wiki/Noble_Eightfold_Path" target="_blank">Eightfold Path</a>. The Eightfold Path includes <em>right view</em>, <em>right resolve</em>, <em>right speech</em>, <em>right conduct</em>, <em>right livelihood</em>, <em>right effort</em>, <em>right mindfulness</em> and <em>right concentration</em>. Suttas often include opposing terms (like <em>wrong view</em>) when contrasting behaviors that are and are not representative of these qualities. Below, the vectors for elements of the Path strongly relate them to descriptive terms used for each. In particular, <em>speech</em> is near words for different kinds of wrong speech (<em>divisive</em>, <em>chatter</em>, <em>false</em>, <em>abusive</em> and <em>idle</em>), and <em>mindfulness</em> is near words that are used frequently when describing mindfulness and meditation (<em>in-and-out</em>, <em>breathing</em>, <em>concentration</em>, <em>effort</em>, and <em>persistence</em>).</p>
+
+<pre><code class="language-shell">eightfold -&gt; path, forerunner, precisely, considers, namely, cultivate, undertook, non-emptiness
+right -&gt; undertook, wrong, livelihood, resolve, effort, disappointed, under, eightfold
+wrong -&gt; livelihood, undertook, influence, resolve, right, lowly, view, art
+view -&gt; undertook, wrong, resolve, doctrine, eightfold, hold, influence, path
+resolve -&gt; livelihood, undertook, influence, effort, wrong, action, view, memory
+speech -&gt; divisive, chatter, false, abusive, livelihood, misconduct, influence, idle
+action -&gt; resolve, undertook, livelihood, influence, consequence, verbal, deed, course
+livelihood -&gt; undertook, wrong, resolve, lowly, influence, art, effort, speech
+effort -&gt; livelihood, resolve, undertook, diligence, influence, endeavor, strive, alertness
+mindfulness -&gt; in-and-out, breathing, concentration, cultivate, effort, immerse, persistence, livelihood
+</code></pre>
+
+<p>Most of these are positioned together by t-SNE as well, although some have other stronger associations with concepts and terms beyond the Eightfold Path, resulting in them appearing elsewhere.</p>
+
+<p><img src="/images/word-embeddings-pali-canon/eightfold.png#center" alt="png" /></p>
+
+<p>One of the most obvious concentrations of word associations in the results is the one for sensory terms. This includes the names of sense organs, senses themselves, and properties of objects related to the sensory experience. The phrase <em>cognizable via</em> is commonly used when describing senses and makes an appearance in the associations as well.</p>
+
+<pre><code class="language-shell">eye -&gt; intellect, nose, ear, ear-element, form, tongue, unsuitable, sound
+ear -&gt; nose, aromas, aroma, tongue, via, flavor, soggy, cognizable
+smell -&gt; aroma, odor, taste, flavor, nose, tactile, via, sensation
+sound -&gt; flavor, smell, cognizable, nose, taste, aroma, aromas, via
+sensation -&gt; tactile, tongue, flavor, nose, taste, via, cognizable, odor
+</code></pre>
+
+<p>They are almost stacked on top of each other in the t-SNE plot:</p>
+
+<p><img src="/images/word-embeddings-pali-canon/senses.png#center" alt="png" /></p>
+
+<h1 id="conclusion">Conclusion</h1>
+
+<p>I&rsquo;m pleased with the results of this project. After some research, I was able to generate high-quality word embeddings on a uniquely special-purpose data set that, to my knowledge, has not been the subject for machine learning analysis before.  I believe the following might help even further improve the quality and usefulness of results:</p>
+
+<ul>
+<li>Using a larger subset of the Pāli Canon, from a single source or translator.  As mentioned, the text included in the corpus here is at best 40-50% of the total Sutta Pitaka alone, and the various translators often use significantly different vocabulary.</li>
+<li>Applying more nuanced and finely-tuned preprocessing that handles non-English words, an unusually high amount of repetition and elisions. For example, <a href="https://github.com/tensorflow/models/tree/master/syntaxnet" target="_blank">SyntaxNet</a> might improve POS tagging and stemming performance.</li>
+<li>Employing techniques from a more advanced word embedding model like <a href="https://nlp.stanford.edu/projects/glove/" target="_blank">GloVe</a>, which is specifically focused on spatial relationships and can perform better than word2vec on analogies.</li>
+</ul>
+
+<p>I continue to be impressed by how easy it is to build and iterate on powerful machine learning models in Tensorflow. The embeddings generated here, while interesting enough on their own, will be useful as features for subsequent work, which I&rsquo;ll continue in a future post.</p>
+
+<p>You can find the code for this post on <a href="https://github.com/crsmithdev/canon" target="_blank">Github</a>.</p>
+
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/languages/python.min.js"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+      TeX: { equationNumbers: { autoNumber: "AMS" },
+          extensions: ["AMSmath.js", "AMSsymbols.js"] }
+    }
+  });
+</script>
+
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'UA-40826256-2', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+
