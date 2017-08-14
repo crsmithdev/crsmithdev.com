@@ -2,7 +2,6 @@
 title = "Word Embeddings in the Pāli Canon"
 date = 2017-08-14T09:09:05-07:00
 type = "post"
-draft = true
 +++
 
 [![png](/images/word-embeddings-pali-canon/buddha.jpg#center)](https://commons.wikimedia.org/wiki/File:Gal_Viharaya_02.jpg)
