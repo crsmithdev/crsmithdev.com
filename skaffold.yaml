@@ -1,0 +1,9 @@
+apiVersion: skaffold/v1beta3
+kind: Config
+build:
+  artifacts:
+  - image: crsmithdev/blog
+deploy:
+  kubectl:
+    manifests:
+      - deployment.yaml
