@@ -1,25 +1,25 @@
 :root {
-  --bg: #f7f4ee; --text: #3d3a34; --head: #1b1a17; --muted: #857f72;
-  --accent: #8a2b1f; --hover: rgba(60, 50, 30, .045); --pill: rgba(138, 43, 31, .08);
+  --bg: #f7f5f9; --text: #3d3a34; --head: #1b1a17; --muted: #857f72;
+  --accent: #5b3fa0; --hover: rgba(60, 50, 30, .045); --pill: rgba(91, 63, 160, .08);
   --rule: rgba(60, 50, 30, .18);
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #171614; --text: #b9b3a8; --head: #ede8df; --muted: #7f796f;
-    --accent: #e09a7b; --hover: rgba(237, 232, 223, .045); --pill: rgba(224, 154, 123, .1);
+    --bg: #161419; --text: #b9b3a8; --head: #ede8df; --muted: #7f796f;
+    --accent: #b8a2f0; --hover: rgba(237, 232, 223, .045); --pill: rgba(184, 162, 240, .1);
     --rule: rgba(237, 232, 223, .16);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #171614; --text: #b9b3a8; --head: #ede8df; --muted: #7f796f;
-  --accent: #e09a7b; --hover: rgba(237, 232, 223, .045); --pill: rgba(224, 154, 123, .1);
+  --bg: #161419; --text: #b9b3a8; --head: #ede8df; --muted: #7f796f;
+  --accent: #b8a2f0; --hover: rgba(237, 232, 223, .045); --pill: rgba(184, 162, 240, .1);
   --rule: rgba(237, 232, 223, .16);
   color-scheme: dark;
 }
 
-/* Type roles. The type panel sets these. */
+/* Type roles. */
 :root {
   --name-font: "Merriweather", serif; --name-scale: 1; --name-weight: 500;
   --heading-font: "Merriweather", serif; --heading-scale: 1.05; --heading-weight: 500;
