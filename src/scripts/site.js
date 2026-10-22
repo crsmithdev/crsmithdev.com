@@ -1,7 +1,12 @@
 const root = document.documentElement;
 const themeButton = document.getElementById("theme");
 const isDark = () => root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-const showTheme = () => themeButton.textContent = isDark() ? "Light" : "Dark";
+const showTheme = () => {
+  const dark = isDark();
+  themeButton.querySelector(".sun").toggleAttribute("hidden", !dark);
+  themeButton.querySelector(".moon").toggleAttribute("hidden", dark);
+  themeButton.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+};
 showTheme();
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", showTheme);
 themeButton.addEventListener("click", () => {
