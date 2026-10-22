@@ -37,3 +37,7 @@ A new post:
 ```
 hugo new content blog/my-post.md
 ```
+
+## Deploy
+
+Every push to `master` builds the site and deploys it to GitHub Pages at `crsmith.dev` (`.github/workflows/pages.yml`).
