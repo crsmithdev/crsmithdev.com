@@ -121,6 +121,8 @@ section > h2 { margin: 0 0 1.25rem; color: var(--muted); }
 .post h1 { font-size: 1.5em; } .post h2 { font-size: 1.3em; } .post h3 { font-size: 1.1em; }
 .post p, .post ul, .post ol, .post blockquote, .post pre, .post table { margin: 0 0 1.2rem; }
 .post img { display: block; max-width: 100%; height: auto; margin: 2rem auto; border-radius: 4px; }
+.post figure.chart { margin: 2rem 0; }
+.post figcaption { color: var(--muted); font-size: .85em; margin-top: .6rem; }
 .post blockquote { border-left: 2px solid var(--rule); padding-left: 1.2rem; color: var(--muted); font-style: italic; margin-left: 0; }
 .post table { border-collapse: collapse; font-size: .9em; display: block; overflow-x: auto; }
 .post th, .post td { border-bottom: 1px solid var(--rule); padding: .35rem .7rem; text-align: left; }
