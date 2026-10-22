@@ -1,0 +1,11 @@
+---
+import { year, type Post } from "../posts";
+
+interface Props { posts: Post[] }
+const { posts } = Astro.props;
+---
+<ul class="list">
+  {posts.map(post => (
+  <li class="item"><div class="when label">{year(post)}</div><div><h3><a class="cover" href={`/blog/${post.id}/`}></a>{post.data.title}</h3></div></li>
+  ))}
+</ul>

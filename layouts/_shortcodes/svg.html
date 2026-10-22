@@ -1,4 +1,0 @@
-{{- /* Inline an SVG from the page bundle, so that it takes the page's colours. */ -}}
-{{- with .Page.Resources.Get (.Get 0) -}}
-<figure class="chart">{{ .Content | safeHTML }}{{ with $.Get 1 }}<figcaption>{{ . }}</figcaption>{{ end }}</figure>
-{{- else -}}{{ errorf "svg: no resource %q in %s" (.Get 0) .Page.File.Path }}{{- end -}}

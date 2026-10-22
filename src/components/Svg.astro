@@ -1,0 +1,6 @@
+---
+// Inlines an SVG so that it takes the page's colours.
+interface Props { svg: string; caption?: string }
+const { svg, caption } = Astro.props;
+---
+<figure class="chart"><Fragment set:html={svg} />{caption && <figcaption>{caption}</figcaption>}</figure>

@@ -1,41 +1,48 @@
 # crsmith.dev
 
-The personal site of Chris Smith, built with [Hugo](https://gohugo.io/) 0.167.0.
+The personal site of Chris Smith, built with [Astro](https://astro.build/) 7.
 
 ## Run
 
 ```
-hugo server
+npm install
+npm run dev
 ```
 
-The server shows a type panel at the bottom right. The panel changes the fonts in your browser only. Copy its settings into the `:root` type variables in `assets/css/site.css` to keep them. Production builds leave the panel out.
+The dev server shows drafts and posts dated in the future. Production builds leave them out.
 
 ## Build
 
 ```
-hugo --gc --minify
+npm run build
 ```
 
-The output is in `public/`.
+The output is in `dist/`. `npm run preview` serves it.
 
 ## Content
 
 | File | What it holds |
 |---|---|
-| `hugo.toml` | Name, role line, tagline, contact links |
-| `content/_index.md` | The About text |
-| `content/projects/*.md` | One project each: `title`, `link`, `weight` and the text |
-| `content/projects/_index.md` | The paragraph after the project list |
-| `content/experience/*.md` | One job each: `title`, `when`, `small`, `weight` and the text |
-| `content/experience/_index.md` | The paragraphs after the job list |
-| `content/blog/*.md` | Posts |
+| `src/site.ts` | Name, role line, tagline, description, contact links |
+| `src/content/sections/about.md` | The About text |
+| `src/content/projects/*.md` | One project each: `title`, `link`, `weight` and the text |
+| `src/content/sections/projects.md` | The paragraph after the project list |
+| `src/content/experience/*.md` | One job each: `title`, `when`, `small`, `weight` and the text |
+| `src/content/sections/experience.md` | The paragraphs after the job list |
+| `src/content/blog/*.md` | Posts |
+| `src/content/blog/<slug>/index.mdx` | Posts with components or files beside them |
 
-`weight` sets the order. `small = true` shows a job in the compact style.
+`weight` sets the order. `small: true` shows a job in the compact style.
 
-A new post:
+A post has `title`, `date` (with its offset, for example `"2026-09-21T21:00:00-07:00"`) and optionally `draft: true`. The text before `<!--more-->` is the summary for the feeds and the meta description. Without it, the summary is the first paragraphs up to 70 words.
 
-```
-hugo new content blog/my-post.md
+In MDX, `Svg` inlines an SVG so that it takes the page's colours:
+
+```mdx
+import Svg from "../../../components/Svg.astro";
+import chart from "./chart.svg?raw";
+
+<Svg svg={chart} caption="What the chart shows." />
 ```
 
 ## Deploy

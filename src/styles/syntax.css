@@ -1,0 +1,13 @@
+/* Code highlighting: Shiki github-light-default and github-dark-default, set in astro.config.mjs. */
+.astro-code { background-color: #f7f7f7; }
+/* Lines take their height from the code font, as with Chroma's flex lines. */
+.astro-code code { display: block; }
+.astro-code, .astro-code span { color: var(--shiki-light); font-style: var(--shiki-light-font-style); font-weight: var(--shiki-light-font-weight); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .astro-code { background-color: var(--shiki-dark-bg); }
+  :root:not([data-theme="light"]) .astro-code,
+  :root:not([data-theme="light"]) .astro-code span { color: var(--shiki-dark); font-style: var(--shiki-dark-font-style); font-weight: var(--shiki-dark-font-weight); }
+}
+:root[data-theme="dark"] .astro-code { background-color: var(--shiki-dark-bg); }
+:root[data-theme="dark"] .astro-code,
+:root[data-theme="dark"] .astro-code span { color: var(--shiki-dark); font-style: var(--shiki-dark-font-style); font-weight: var(--shiki-dark-font-weight); }

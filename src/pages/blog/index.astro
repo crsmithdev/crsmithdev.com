@@ -1,0 +1,15 @@
+---
+import Base from "../../layouts/Base.astro";
+import PageTop from "../../components/PageTop.astro";
+import PostList from "../../components/PostList.astro";
+import { getPosts } from "../../posts";
+
+const posts = await getPosts();
+---
+<Base title="Writing">
+<div class="page writing">
+  <PageTop />
+  <h1 class="page-title">Writing</h1>
+  <PostList posts={posts} />
+</div>
+</Base>

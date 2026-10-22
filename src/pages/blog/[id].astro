@@ -1,0 +1,24 @@
+---
+import { render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import PageTop from "../../components/PageTop.astro";
+import { day, description, getPosts, type Post } from "../../posts";
+
+export async function getStaticPaths() {
+  return (await getPosts()).map(post => ({ params: { id: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props as { post: Post };
+const { Content } = await render(post);
+---
+<Base title={post.data.title} description={await description(post)}>
+<div class="page">
+  <PageTop />
+  <article class="post prose">
+    <p class="when label">{day(post)}</p>
+    <h1 class="page-title">{post.data.title}</h1>
+    <Content />
+  </article>
+  <footer class="page-foot label"><a href="/#writing">← All writing</a></footer>
+</div>
+</Base>

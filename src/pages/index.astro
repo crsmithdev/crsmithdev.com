@@ -1,0 +1,90 @@
+---
+import { getCollection, getEntry, render } from "astro:content";
+import Base from "../layouts/Base.astro";
+import Links from "../components/Links.astro";
+import PostList from "../components/PostList.astro";
+import { getPosts } from "../posts";
+import { site } from "../site";
+
+const section = async (id: string) => {
+  const entry = (await getEntry("sections", id))!;
+  return { title: entry.data.title, Content: (await render(entry)).Content };
+};
+const withContent = async <T extends Parameters<typeof render>[0]>(entries: T[]) =>
+  Promise.all(entries.map(async entry => ({ entry, Content: (await render(entry)).Content })));
+
+const About = (await section("about")).Content;
+const projects = await section("projects");
+const experience = await section("experience");
+const projectItems = await withContent((await getCollection("projects")).sort((a, b) => a.data.weight - b.data.weight));
+const jobItems = await withContent((await getCollection("experience")).sort((a, b) => a.data.weight - b.data.weight));
+const posts = await getPosts();
+---
+<Base path="/">
+<div class="wrap">
+  <header class="side">
+    <div>
+      <h1 class="name"><a href="/">{site.title}</a></h1>
+      <p class="role">{site.role.map((line, i) => <>{i > 0 && <br />}{line}</>)}</p>
+      <p class="tagline">{site.tagline}</p>
+      <nav class="sections" aria-label="Sections">
+        <ul>
+          <li><a class="label" href="#about">About</a></li>
+          <li><a class="label" href="#projects">Projects</a></li>
+          <li><a class="label" href="#experience">Experience</a></li>
+          <li><a class="label" href="#writing">Writing</a></li>
+          <li><a class="label" href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+    <Links />
+  </header>
+
+  <main class="content">
+    <section id="about" class="prose">
+      <h2 class="label">About</h2>
+      <About />
+    </section>
+
+    <section id="projects">
+      <h2 class="label">{projects.title}</h2>
+      <ul class="list">
+        {projectItems.map(({ entry, Content }) => (
+        <li class="item"><div>
+          <h3><a class="cover" href={entry.data.link}></a>{entry.data.title} <span class="arrow">↗</span></h3>
+          <Content />
+        </div></li>
+        ))}
+      </ul>
+      <div class="prose outro"><projects.Content /></div>
+    </section>
+
+    <section id="experience">
+      <h2 class="label">{experience.title}</h2>
+      <ol class="list">
+        {jobItems.map(({ entry, Content }) => (
+        <li class={entry.data.small ? "item small" : "item"}>
+          <div class="when label">{entry.data.when}</div>
+          <div><h3>{entry.data.title}</h3><Content /></div>
+        </li>
+        ))}
+      </ol>
+      <div class="prose outro"><experience.Content /></div>
+    </section>
+
+    <section id="writing" class="writing">
+      <h2 class="label">Writing</h2>
+      <PostList posts={posts} />
+    </section>
+
+    <section id="contact" class="prose">
+      <h2 class="label">Contact</h2>
+      <dl class="contact">
+        <dt class="label">GitHub</dt><dd><a href={site.github}>{site.github.replace("https://", "")}</a></dd>
+        <dt class="label">LinkedIn</dt><dd><a href={site.linkedin}>{site.linkedin.replace("https://www.", "")}</a></dd>
+        <dt class="label">Email</dt><dd><a href={`mailto:${site.email}`}>{site.email}</a></dd>
+      </dl>
+    </section>
+  </main>
+</div>
+</Base>
