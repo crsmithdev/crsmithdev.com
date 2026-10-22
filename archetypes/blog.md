@@ -1,6 +1,5 @@
 +++
-title = "{{ replace .TranslationBaseName "-" " " | title }}"
+title = "{{ replace .File.ContentBaseName "-" " " | title }}"
 date = {{ .Date }}
-type = "post"
 draft = true
 +++

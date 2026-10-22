@@ -1,0 +1,18 @@
+baseURL = "https://crsmith.dev/"
+locale = "en-us"
+title = "Chris Smith"
+disableKinds = ["taxonomy", "term"]
+
+[params]
+  role = "Engineer in the San Francisco Bay Area"
+  tagline = "AI agents, infrastructure, distributed systems and data, and where AI meets the mind."
+  description = "Chris Smith builds software around AI agents, infrastructure, distributed systems and data."
+  github = "https://github.com/crsmithdev"
+  linkedin = "https://www.linkedin.com/in/crsmithdev"
+  email = "crsmithdev@gmail.com"
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[markup.highlight]
+  noClasses = false

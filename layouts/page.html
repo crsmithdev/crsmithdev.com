@@ -1,0 +1,11 @@
+{{ define "main" }}
+<div class="page">
+  {{ partial "page-top.html" . }}
+  <article class="post prose">
+    <p class="when label">{{ .Date.Format "2 January 2006" }}</p>
+    <h1 class="page-title">{{ .Title }}</h1>
+    {{ .Content }}
+  </article>
+  <footer class="page-foot label"><a href="/#writing">← All writing</a></footer>
+</div>
+{{ end }}

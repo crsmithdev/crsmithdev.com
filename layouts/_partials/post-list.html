@@ -1,0 +1,5 @@
+<ul class="list">
+  {{ range .ByDate.Reverse }}
+  <li class="item"><div class="when label">{{ .Date.Format "2006" }}</div><div><h3><a class="cover" href="{{ .RelPermalink }}"></a>{{ .Title }}</h3></div></li>
+  {{ end }}
+</ul>
