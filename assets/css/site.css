@@ -54,7 +54,7 @@ a { color: inherit; text-decoration: none; }
 
 .name { font-family: var(--name-font); font-weight: var(--name-weight); color: var(--head);
   font-size: calc(clamp(2.6rem, 5vw, 3.6rem) * var(--name-scale)); line-height: 1.05; margin: 0; letter-spacing: -.01em; }
-.role { font-family: var(--name-font); color: var(--head); font-size: 1.35rem; margin: .7rem 0 0; font-style: italic; font-weight: 400; }
+.role { font-family: var(--name-font); color: var(--head); font-size: 1.35rem; margin: .7rem 0 0; font-style: italic; font-weight: 400; text-wrap: balance; }
 .tagline { max-width: 22rem; margin: 1rem 0 0; }
 
 nav.sections ul { list-style: none; padding: 0; margin: 4rem 0 0; }
