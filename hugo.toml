@@ -4,7 +4,7 @@ title = "Chris Smith"
 disableKinds = ["taxonomy", "term"]
 
 [params]
-  role = "Building infrastructure, AI\u00A0tools and engineering teams"
+  role = "Infrastructure, AI\u00A0tools and teams"
   tagline = "San Francisco Bay Area"
   description = "Chris Smith builds software around AI agents, infrastructure, distributed systems and data."
   github = "https://github.com/crsmithdev"
