@@ -3,7 +3,7 @@
   <header class="side">
     <div>
       <h1 class="name"><a href="/">{{ site.Title }}</a></h1>
-      <p class="role">{{ site.Params.role }}</p>
+      <p class="role">{{ range $i, $line := site.Params.role }}{{ if $i }}<br>{{ end }}{{ $line }}{{ end }}</p>
       <p class="tagline">{{ site.Params.tagline }}</p>
       <nav class="sections" aria-label="Sections">
         <ul>
