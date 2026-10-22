@@ -6,7 +6,7 @@ type = "post"
 
 [airbench](https://github.com/KellerJordan/cifar10-airbench) trains a small convnet to 94% test accuracy on CIFAR-10 in about 2.6 seconds on an A100. Here I reproduce it, collect timing data from a *real-time attack* (RTA) run, which speedrunners use for the wall clock from start to finish, to see how the infrastructure performs, and look at which tricks in airbench matter the most.
 
-This is a straightforward warm-up post, as it's been a bit since I've published anything; more complex stuff to come.
+I haven't published any writing for a bit, so this is a straightforward warm-up for future posts on more complex and interesting topics.
 
 The code and raw results are in [speedrun-rta](https://github.com/crsmithdev/speedrun-rta).
 
