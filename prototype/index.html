@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chris Smith</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>
+:root {
+  --bg: #f7f4ee; --text: #3d3a34; --head: #1b1a17; --muted: #857f72;
+  --accent: #8a2b1f; --hover: rgba(60, 50, 30, .045); --pill: rgba(138, 43, 31, .08);
+  --rule: rgba(60, 50, 30, .18);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #171614; --text: #b9b3a8; --head: #ede8df; --muted: #7f796f;
+    --accent: #e09a7b; --hover: rgba(237, 232, 223, .045); --pill: rgba(224, 154, 123, .1);
+    --rule: rgba(237, 232, 223, .16);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #171614; --text: #b9b3a8; --head: #ede8df; --muted: #7f796f;
+  --accent: #e09a7b; --hover: rgba(237, 232, 223, .045); --pill: rgba(224, 154, 123, .1);
+  --rule: rgba(237, 232, 223, .16);
+  color-scheme: dark;
+}
+
+/* Type roles. The type panel sets these. */
+:root {
+  --name-font: "Merriweather", serif; --name-scale: 1; --name-weight: 500;
+  --heading-font: "Merriweather", serif; --heading-scale: 1.05; --heading-weight: 500;
+  --body-font: "Geist", sans-serif; --body-scale: .85; --body-weight: 400;
+  --label-font: "Onest", sans-serif; --label-scale: 1.22; --label-weight: 500;
+  --label-case: uppercase; --label-caps: normal; --label-track: .12em;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: clamp(16px, calc(.55vw + 8px), 22px); }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: var(--body-font); font-size: calc(1.2rem * var(--body-scale)); font-weight: var(--body-weight); line-height: 1.6;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  font-feature-settings: "kern", "liga", "onum";
+  transition: background .3s, color .3s;
+}
+a { color: inherit; text-decoration: none; }
+.prose a { color: var(--head); text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: .18em; }
+.prose a:hover { color: var(--accent); text-decoration-color: currentColor; }
+.label { font-family: var(--label-font); text-transform: var(--label-case); font-variant-caps: var(--label-caps);
+  letter-spacing: var(--label-track); font-size: calc(.72rem * var(--label-scale)); font-weight: var(--label-weight); }
+
+.wrap { position: relative; z-index: 1; max-width: 80rem; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 1024px) {
+  .wrap { display: flex; gap: 4rem; padding: 0 6rem; }
+  header { position: sticky; top: 0; height: 100vh; width: 46%; display: flex; flex-direction: column;
+    justify-content: space-between; padding: 6rem 0; }
+  main { width: 54%; padding: 6rem 0; }
+}
+@media (max-width: 1023px) { header { padding: 4rem 0 2rem; } main { padding-bottom: 4rem; } nav.sections { display: none; } }
+
+h1 { font-family: var(--name-font); font-weight: var(--name-weight); color: var(--head);
+  font-size: calc(clamp(2.6rem, 5vw, 3.6rem) * var(--name-scale)); line-height: 1.05; margin: 0; letter-spacing: -.01em; }
+.role { font-family: var(--name-font); color: var(--head); font-size: 1.35rem; margin: .7rem 0 0; font-style: italic; font-weight: 400; }
+.tagline { max-width: 22rem; margin: 1rem 0 0; }
+
+nav.sections ul { list-style: none; padding: 0; margin: 4rem 0 0; }
+nav.sections a { display: inline-block; padding: .4rem 0; color: var(--muted); transition: color .2s; }
+nav.sections a:hover, nav.sections a.active { color: var(--head); }
+
+.social { display: flex; gap: 1.4rem; margin-top: 2rem; }
+.social a, .social button { color: var(--muted); }
+.social a:hover, .social button:hover { color: var(--head); }
+.social button { background: none; border: 0; padding: 0; cursor: pointer; border-left: 1px solid var(--rule); padding-left: 1.4rem; }
+
+section { margin-bottom: 4.5rem; scroll-margin-top: 6rem; }
+section > h2 { margin: 0 0 1.25rem; color: var(--muted); }
+#about > h2 { display: none; }
+.prose p { margin: 0 0 1.1rem; }
+
+.list { list-style: none; padding: 0; margin: 0; }
+.list:hover .item { opacity: .55; }
+.list .item:hover { opacity: 1; }
+.item { position: relative; display: grid; gap: .3rem 1.5rem; padding: 1.25rem; margin: 0 -1.25rem 1rem;
+  border-radius: 6px; transition: background .2s, opacity .2s; }
+@media (min-width: 640px) { .item { grid-template-columns: 9rem 1fr; } }
+.item:hover { background: var(--hover); }
+.item > div:only-child { grid-column: 1 / -1; }
+.item.small { padding-top: .7rem; padding-bottom: .7rem; margin-bottom: .3rem; }
+.item.small h3 { font-size: calc(1.08em * var(--heading-scale)); }
+.item.small p { margin-top: .15rem; }
+.item .when { color: var(--muted); padding-top: .3rem; }
+.item h3 { margin: 0; color: var(--head); font-family: var(--heading-font); font-weight: var(--heading-weight); font-size: calc(1.22em * var(--heading-scale)); line-height: 1.3; }
+.item h3 .org { font-style: italic; font-weight: 400; }
+.item a.cover { position: absolute; inset: 0; }
+.item:hover h3 { color: var(--accent); }
+.item h3 .arrow { display: inline-block; transition: transform .2s; font-family: var(--label-font); font-size: .8em; }
+.item:hover h3 .arrow { transform: translate(3px, -3px); }
+.item p { margin: .4rem 0 0; font-size: .95em; }
+.pills { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .8rem; padding: 0; list-style: none; }
+.pills li { background: var(--pill); color: var(--accent); border-radius: 999px; padding: .2rem .75rem;
+  font-family: var(--label-font); font-size: .72rem; letter-spacing: .02em; }
+.intro { margin: 0 0 1.5rem; }
+.outro { margin: 1.5rem 0 0; }
+.contact { display: grid; grid-template-columns: 6rem 1fr; gap: .6rem 1rem; margin: 0; align-items: baseline; }
+.contact dt { color: var(--muted); }
+.contact dd { margin: 0; }
+.more { display: inline-block; margin-top: 1rem; color: var(--head); }
+.more:hover { color: var(--accent); }
+
+.writing .item { grid-template-columns: 4rem 1fr; align-items: baseline; padding: .9rem 1.25rem; margin-bottom: .2rem; }
+.writing .item p { margin: .1rem 0 0; color: var(--muted); }
+
+footer { color: var(--muted); font-size: .9em; max-width: 28rem; }
+
+.proto { position: fixed; right: 16px; bottom: 16px; z-index: 5; width: 360px; max-height: calc(100vh - 32px); overflow: auto;
+  border-radius: 10px; background: var(--bg); border: 1px solid var(--rule); color: var(--text);
+  font: 12px/1.3 system-ui, sans-serif; box-shadow: 0 8px 30px rgba(0,0,0,.2); }
+.proto summary { cursor: pointer; padding: .7rem .9rem; font-weight: 600; color: var(--head); list-style: none; }
+.proto summary::after { content: "▴"; float: right; color: var(--muted); }
+.proto:not([open]) summary::after { content: "▾"; }
+.proto .body { padding: 0 .9rem .9rem; display: grid; gap: .9rem; }
+.proto .row { display: flex; gap: .35rem; flex-wrap: wrap; align-items: center; }
+.proto fieldset { border: 1px solid var(--rule); border-radius: 8px; padding: .55rem .65rem .65rem; margin: 0; display: grid; gap: .45rem; }
+.proto legend { padding: 0 .3rem; font-weight: 600; color: var(--head); }
+.proto .step { display: grid; grid-template-columns: auto 1fr auto; gap: .3rem; }
+.proto .step button { padding: .3rem .5rem; line-height: 1; }
+.proto select { width: 100%; font: inherit; color: var(--head); background: var(--bg); border: 1px solid var(--rule); border-radius: 5px; padding: .3rem .35rem; }
+.proto label { display: grid; grid-template-columns: 3.6rem 1fr 2.6rem; gap: .5rem; align-items: center; color: var(--muted); }
+.proto label output { text-align: right; font-variant-numeric: tabular-nums; }
+.proto input[type=range] { width: 100%; accent-color: var(--accent); }
+.proto button { font: inherit; color: var(--text); background: none; border: 1px solid var(--rule); border-radius: 5px;
+  padding: .35rem .55rem; cursor: pointer; }
+.proto button:hover { color: var(--head); border-color: var(--muted); }
+.proto pre { margin: 0; white-space: pre-wrap; word-break: break-all; font: 11px/1.4 ui-monospace, monospace; color: var(--muted); }
+@media (max-width: 639px) {
+  .item { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; }
+  .proto { left: 16px; width: auto; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1><a href="#">Chris Smith</a></h1>
+      <p class="role">Engineer in the San Francisco Bay Area</p>
+      <p class="tagline">AI agents, infrastructure, distributed systems and data, and where AI meets the mind.</p>
+      <nav class="sections" aria-label="Sections">
+        <ul>
+          <li><a class="label" href="#about">About</a></li>
+          <li><a class="label" href="#projects">Projects</a></li>
+          <li><a class="label" href="#experience">Experience</a></li>
+          <li><a class="label" href="#writing">Writing</a></li>
+          <li><a class="label" href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="social label">
+      <a href="https://github.com/crsmithdev">GitHub</a>
+      <a href="https://www.linkedin.com/in/crsmithdev">LinkedIn</a>
+      <a href="mailto:crsmithdev@gmail.com">Email</a>
+      <button id="theme" type="button" class="label">Dark</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="about" class="prose">
+      <h2 class="label">About</h2>
+      <p>I'm Chris Smith. I live in the San Francisco Bay Area and build software, mostly around AI agents, infrastructure, distributed systems and data. I have an endless appetite for making things in both the digital and physical worlds.</p>
+      <p>With a background in engineering and psychology, and as a Zen practitioner, I'm drawn to the intersection of AI, cognitive psychology and contemplative practice. As we build minds in our own image, can we come to understand ourselves better in the process? What does it really mean for a model or a person to know something? What is the essential “self” behind our thoughts and feelings, and how should that shape where we take AI next? And if we created something with awareness, how would we even know? I think answering these questions is essential to developing technology in ways that enhance the human experience.</p>
+      <p>Since 2023 I've been on a career break, working independently on my own projects.</p>
+    </section>
+
+    <section id="projects">
+      <h2 class="label">Projects</h2>
+      <ul class="list">
+        <li class="item"><div>
+          <h3><a class="cover" href="https://github.com/crsmithdev/sidetone"></a>Sidetone <span class="arrow">↗</span></h3>
+          <p>A secure voice-driven Android client for Claude Code on my home PC, with a local voice stack. It's the primary interface used for its own development.</p>
+        </div></li>
+        <li class="item"><div>
+          <h3><a class="cover" href="https://github.com/crsmithdev/cloudchamber"></a>Cloud Chamber <span class="arrow">↗</span></h3>
+          <p>Writes genuinely unusual scifi and horror short stories. Ideates, plans, checks and writes configurably, extracts example seed themes and styles, and supports user-defined canons.</p>
+        </div></li>
+        <li class="item"><div>
+          <h3><a class="cover" href="https://github.com/crsmithdev/voiceover"></a>Voiceover <span class="arrow">↗</span></h3>
+          <p>An AI agent that makes phone calls for me, schedules appointments, takes notes and supports informational guardrails. Handles a wide range of conversational styles and situations.</p>
+        </div></li>
+        <li class="item"><div>
+          <h3><a class="cover" href="https://github.com/crsmithdev/aleph"></a>Aleph <span class="arrow">↗</span></h3>
+          <p>My ever-evolving core personal AI configuration for Claude Code, adding memory, observability and essential development patterns.</p>
+        </div></li>
+      </ul>
+      <p class="prose outro">I'm also the original developer of <a href="https://github.com/arrow-py/arrow">Arrow</a>, a popular Python datetime library. My <a href="https://github.com/crsmithdev">GitHub</a> has an eclectic collection of projects in other areas, including 3D graphics, emulation, PC game tools, and interactive toys and apps to entertain my two cats.</p>
+    </section>
+
+    <section id="experience">
+      <h2 class="label">Experience</h2>
+      <ol class="list">
+        <li class="item">
+          <div class="when label">2017 — 2023</div>
+          <div><h3>Meta</h3><p>As an engineering manager, my team kept Facebook's main web codebase buildable and deployable. We built and ran the integration and CI/CD systems that let about 10,000 engineers land dozens of commits per minute to a 100-million-line monorepo, built a novel E2E testing platform, and scaled code generation tools and practices in Facebook's specialized languages and runtimes.</p></div>
+        </li>
+        <li class="item">
+          <div class="when label">2014 — 2017</div>
+          <div><h3>Uber</h3><p>As one of Uber's first data engineers, I helped build its first in-house realtime data system and scaled it through the hypergrowth years as it expanded across the world. I moved into management, then shifted to developer experience, and co-founded and led Mindfulness@, an employee group that offered meditation spaces and sessions at offices around the world.</p></div>
+        </li>
+        <li class="item small">
+          <div class="when label">2012 — 2014</div>
+          <div><h3>Circa</h3><p>As a backend engineer joining a mobile news startup pre-launch, I built their news feed and notification systems, owned data pipelines, built internal dashboards and managed their infrastructure as devops.</p></div>
+        </li>
+        <li class="item small">
+          <div class="when label">2010 — 2012</div>
+          <div><h3>Gremlin Social</h3><p>As the lead software developer at a social media management startup, I did full-stack development, built a sentiment analysis system, and assisted with fundraising as a technical speaker when pitching to investors.</p></div>
+        </li>
+      </ol>
+      <p class="prose outro">Before software, I worked as a video engineer and projectionist under IATSE for multiple production companies across the Midwest at conferences, concerts and trade shows.</p>
+      <p class="prose">I hold a B.A. in psychology (2003) and a B.S. and M.S. in computer science (2011) from Webster University in St. Louis, MO.</p>
+    </section>
+
+    <section id="writing" class="writing">
+      <h2 class="label">Writing</h2>
+      <ul class="list">
+        <li class="item"><div class="when label">2017</div><div><h3><a class="cover" href="http://localhost:3003/blog/word-embeddings-pali-cannon/"></a>Word Embeddings in the Pāli Canon</h3></div></li>
+        <li class="item"><div class="when label">2016</div><div><h3><a class="cover" href="http://localhost:3003/blog/hotel-gracery-shinjuku/"></a>Hotel Gracery Shinjuku</h3></div></li>
+        <li class="item"><div class="when label">2016</div><div><h3><a class="cover" href="http://localhost:3003/blog/yushima-tenman-gu/"></a>Yushima Tenman-gū</h3></div></li>
+        <li class="item"><div class="when label">2016</div><div><h3><a class="cover" href="http://localhost:3003/blog/mode-gakuen-cocoon-tower/"></a>The Mode Gakuen Cocoon Tower</h3></div></li>
+        <li class="item"><div class="when label">2016</div><div><h3><a class="cover" href="http://localhost:3003/blog/book-review-cumulus/"></a>Book Review: <i>Cumulus</i></h3></div></li>
+        <li class="item"><div class="when label">2013</div><div><h3><a class="cover" href="http://localhost:3003/blog/building-better-email-habits-with-mailbox/"></a>Building Better Email Habits with Mailbox</h3></div></li>
+      </ul>
+    </section>
+
+    <section id="contact" class="prose">
+      <h2 class="label">Contact</h2>
+      <dl class="contact">
+        <dt class="label">GitHub</dt><dd><a href="https://github.com/crsmithdev">github.com/crsmithdev</a></dd>
+        <dt class="label">LinkedIn</dt><dd><a href="https://www.linkedin.com/in/crsmithdev">linkedin.com/in/crsmithdev</a></dd>
+        <dt class="label">Email</dt><dd><a href="mailto:crsmithdev@gmail.com">crsmithdev@gmail.com</a></dd>
+      </dl>
+    </section>
+
+    <footer>Prototype. Layout after Brittany Chiang's site, set in <span id="fontname">Newsreader</span>.</footer>
+  </main>
+</div>
+
+<details class="proto" open>
+  <summary>Type</summary>
+  <div class="body">
+    <div class="row">
+      <button type="button" data-preset="chosen">Chosen</button>
+      <button type="button" data-preset="newsreader">Newsreader</button>
+      <button type="button" data-preset="garamond">Garamond</button>
+      <button type="button" data-preset="source">Source Serif + Mono</button>
+      <button type="button" data-preset="instrument">Instrument</button>
+      <button type="button" data-preset="geist">Newsreader + Geist</button>
+    </div>
+    <div id="roles"></div>
+    <div class="row"><button type="button" id="copy">Copy settings</button><span id="copied"></span></div>
+    <pre id="settings"></pre>
+  </div>
+</details>
+
+<script>
+const root = document.documentElement;
+
+const FONTS = {
+  Serif: ["Newsreader", "EB Garamond", "Source Serif 4", "Literata", "Lora", "Crimson Pro", "Cormorant Garamond",
+    "Libre Baskerville", "Libre Caslon Text", "Spectral", "Fraunces", "Merriweather", "PT Serif", "Alegreya", "Cardo",
+    "Gelasio", "Vollkorn", "Petrona", "Besley", "Brygada 1918", "Bitter", "Roboto Serif", "IBM Plex Serif", "Noto Serif",
+    "Noto Serif Display", "Instrument Serif", "Young Serif", "Bodoni Moda", "Playfair Display", "Playfair", "Gloock",
+    "DM Serif Display", "DM Serif Text", "Sorts Mill Goudy", "Old Standard TT", "Linden Hill", "Castoro",
+    "Domine", "Lustria", "Cormorant", "Tinos"],
+  Sans: ["Inter", "Inter Tight", "IBM Plex Sans", "Source Sans 3", "Work Sans", "DM Sans", "Manrope", "Plus Jakarta Sans",
+    "Outfit", "Figtree", "Geist", "Public Sans", "Karla", "Nunito Sans", "Schibsted Grotesk", "Hanken Grotesk",
+    "Instrument Sans", "Albert Sans", "Archivo", "Space Grotesk", "Sora", "Onest", "Bricolage Grotesque", "Libre Franklin",
+    "Lato", "Mulish", "Rubik", "Red Hat Display", "Red Hat Text", "Familjen Grotesk", "Atkinson Hyperlegible Next",
+    "Fira Sans", "Jost", "Josefin Sans", "Raleway"],
+  Mono: ["IBM Plex Mono", "JetBrains Mono", "Fira Code", "Source Code Pro", "Space Mono", "DM Mono", "Geist Mono",
+    "Roboto Mono", "Inconsolata", "Red Hat Mono", "Martian Mono", "Azeret Mono", "Courier Prime"],
+  Display: ["Abril Fatface", "Cinzel", "Marcellus", "Italiana", "Prata", "Yeseva One", "Rozha One", "Syne", "Unbounded",
+    "Bebas Neue", "Archivo Black", "Big Shoulders Display", "Della Respira", "Forum", "Bellefair", "Limelight", "Poiret One"],
+};
+const GENERIC = { Serif: "serif", Sans: "sans-serif", Mono: "monospace", Display: "serif" };
+const ALL = Object.values(FONTS).flat();
+const groupOf = f => Object.keys(FONTS).find(g => FONTS[g].includes(f));
+
+// Google Fonts refuses a request that names a weight or style the family lacks, so each spec falls back to a smaller one.
+const SPECS = [":ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500", ":wght@300;400;500;600;700", ":wght@400;700", ":ital@0;1", ""];
+const loaded = new Set();
+function load(family, i = 0) {
+  if (i === 0 && loaded.has(family)) return;
+  loaded.add(family);
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/ /g, "+")}${SPECS[i]}&display=swap`;
+  link.onerror = () => { link.remove(); if (i + 1 < SPECS.length) load(family, i + 1); };
+  document.head.append(link);
+}
+
+const ROLES = {
+  name: "Name", heading: "Headings", body: "Body", label: "Labels",
+};
+const CASES = {
+  uppercase: { case: "uppercase", caps: "normal", track: ".12em" },
+  smallcaps: { case: "lowercase", caps: "small-caps", track: ".08em" },
+  normal: { case: "none", caps: "normal", track: "0" },
+};
+const PRESETS = {
+  chosen: { name: ["Merriweather", 1, 500], heading: ["Merriweather", 1.05, 500], body: ["Geist", .85, 400], label: ["Onest", 1.22, 500], case: "uppercase" },
+  newsreader: { name: ["Newsreader", 1, 500], heading: ["Newsreader", 1, 500], body: ["Newsreader", 1, 400], label: ["Inter", 1, 500], case: "uppercase" },
+  garamond: { name: ["EB Garamond", 1, 500], heading: ["EB Garamond", 1, 500], body: ["EB Garamond", 1.07, 400], label: ["EB Garamond", 1.45, 500], case: "smallcaps" },
+  instrument: { name: ["Instrument Serif", 1.2, 400], heading: ["Instrument Serif", 1.2, 400], body: ["Instrument Sans", .86, 400], label: ["Geist Mono", 1, 500], case: "uppercase" },
+  geist: { name: ["Newsreader", 1, 500], heading: ["Newsreader", 1.05, 500], body: ["Geist", .85, 400], label: ["Geist Mono", 1, 500], case: "uppercase" },
+  source: { name: ["Source Serif 4", 1, 600], heading: ["Source Serif 4", 1, 500], body: ["Source Serif 4", .93, 400], label: ["IBM Plex Mono", 1.08, 500], case: "normal" },
+};
+
+let state = structuredClone(PRESETS.chosen);
+try { const saved = JSON.parse(localStorage.getItem("type")); if (saved && saved.body) state = saved; } catch {}
+
+const options = Object.entries(FONTS).map(([g, fs]) =>
+  `<optgroup label="${g}">${fs.map(f => `<option>${f}</option>`).join("")}</optgroup>`).join("");
+document.getElementById("roles").innerHTML = Object.entries(ROLES).map(([k, title]) => `
+  <fieldset data-role="${k}">
+    <legend>${title}</legend>
+    <div class="step"><button type="button" data-step="-1" aria-label="Previous ${title} font">◀</button><select aria-label="${title} font">${options}</select><button type="button" data-step="1" aria-label="Next ${title} font">▶</button></div>
+    <label>Size <input type="range" min="0.6" max="1.8" step="0.01" data-i="1"><output></output></label>
+    <label>Weight <input type="range" min="200" max="900" step="100" data-i="2"><output></output></label>
+    ${k === "label" ? `<label>Case <select id="case"><option value="uppercase">Uppercase</option><option value="smallcaps">Small caps</option><option value="normal">As written</option></select><span></span></label>` : ""}
+  </fieldset>`).join("") + `<div style="height:.1rem"></div>`;
+
+function apply() {
+  for (const k of Object.keys(ROLES)) {
+    const [font, scale, weight] = state[k];
+    load(font);
+    root.style.setProperty(`--${k}-font`, `"${font}", ${GENERIC[groupOf(font)] || "serif"}`);
+    root.style.setProperty(`--${k}-scale`, scale);
+    root.style.setProperty(`--${k}-weight`, weight);
+    const fs = document.querySelector(`fieldset[data-role="${k}"]`);
+    fs.querySelector("select").value = font;
+    fs.querySelectorAll("input").forEach(inp => {
+      inp.value = state[k][inp.dataset.i];
+      inp.nextElementSibling.textContent = inp.dataset.i === "1" ? Math.round(state[k][1] * 100) + "%" : state[k][2];
+    });
+  }
+  const c = CASES[state.case];
+  root.style.setProperty("--label-case", c.case);
+  root.style.setProperty("--label-caps", c.caps);
+  root.style.setProperty("--label-track", c.track);
+  document.getElementById("case").value = state.case;
+  document.getElementById("fontname").textContent = state.name[0] === state.body[0] ? state.body[0] : `${state.name[0]} and ${state.body[0]}`;
+  document.getElementById("settings").textContent = JSON.stringify(state);
+  try { localStorage.setItem("type", JSON.stringify(state)); } catch {}
+}
+
+document.querySelectorAll("fieldset[data-role]").forEach(fs => {
+  const k = fs.dataset.role;
+  fs.querySelector("select").addEventListener("change", e => { state[k][0] = e.target.value; apply(); });
+  fs.querySelectorAll("[data-step]").forEach(btn => btn.addEventListener("click", () => {
+    const i = ALL.indexOf(state[k][0]);
+    state[k][0] = ALL[(i + +btn.dataset.step + ALL.length) % ALL.length]; apply();
+  }));
+  fs.querySelectorAll("input").forEach(inp => inp.addEventListener("input", () => { state[k][inp.dataset.i] = +inp.value; apply(); }));
+});
+document.getElementById("case").addEventListener("change", e => { state.case = e.target.value; apply(); });
+document.querySelectorAll("[data-preset]").forEach(b => b.addEventListener("click", () => {
+  state = structuredClone(PRESETS[b.dataset.preset]); apply();
+}));
+document.getElementById("copy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(JSON.stringify(state)); document.getElementById("copied").textContent = "Copied"; }
+  catch { document.getElementById("copied").textContent = "Select the text below"; }
+});
+apply();
+
+const themeButton = document.getElementById("theme");
+const isDark = () => root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+const showTheme = () => themeButton.textContent = isDark() ? "Light" : "Dark";
+try { const saved = localStorage.getItem("theme"); if (saved) root.dataset.theme = saved; } catch {}
+showTheme();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", showTheme);
+themeButton.addEventListener("click", () => {
+  root.dataset.theme = isDark() ? "light" : "dark";
+  try { localStorage.setItem("theme", root.dataset.theme); } catch {}
+  showTheme();
+});
+const links = [...document.querySelectorAll("nav.sections a")];
+const observer = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) links.forEach(l => l.classList.toggle("active", l.hash === "#" + e.target.id));
+}), { rootMargin: "-30% 0px -60% 0px" });
+document.querySelectorAll("main section").forEach(s => observer.observe(s));
+addEventListener("scroll", () => {
+  if (innerHeight + scrollY < document.documentElement.scrollHeight - 2) return;
+  links.forEach((l, i) => l.classList.toggle("active", i === links.length - 1));
+});
+</script>
+</body>
+</html>
