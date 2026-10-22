@@ -6,14 +6,14 @@ type = "post"
 
 [airbench](https://github.com/KellerJordan/cifar10-airbench) trains a small convnet to 94% test accuracy on CIFAR-10 in about 2.6 seconds on an A100. Here I reproduce it, collect timing data from a *real-time attack* (RTA) run, which speedrunners use for the wall clock from start to finish, to see how the infrastructure performs, and look at which tricks in airbench matter the most.
 
-It's a straightforward warm-up post, as it's been a bit since I've published anything; more complex stuff to come.
+This is a straightforward warm-up post, as it's been a bit since I've published anything; more complex stuff to come.
 
 The code and raw results are in [speedrun-rta](https://github.com/crsmithdev/speedrun-rta).
 
 ## Timing
 
 
-I'm using airbench unchanged and there's no new method or record here; the reproduction and ablations repeat published results. I'm using them to check that the record holds and to put each trick's share of the accuracy on one scale. I also measured real time and cost: I timed every phase from container start to the first result on nine GPU types, with and without a compile cache, priced each, and noted where things broke. I also built a small library for doing similar training on Modal in the future.
+I'm using airbench unchanged and there's no new method or record here; the reproduction and ablations repeat published results. I'm using them to check that the record holds and to put each trick's share of the accuracy on one scale. I also measured real time and cost: I timed every phase from container start to the first result on nine GPU types, with and without a compile cache, priced each, and noted where things broke.
 
 ## Reproduction
 
@@ -37,7 +37,7 @@ Two tricks carry most of the weight: test-time augmentation and the patch-whiten
 
 That caveat matters most for the optimizer. Swapping Muon for normalized SGD at Muon's learning rate gets 80.8%, but that learning rate was tuned for Muon, so the number mostly reflects the tuning. A fairer comparison is airbench's earlier record, which runs tuned SGD for 9.9 epochs against Muon's 8. Both reach 94%, and on the 5070 the Muon version trains 13% faster (6.91 s against 7.91 s).
 
-## Real time
+## Overhead
 
 To measure real time, each call starts a fresh Modal container and records the wall-clock time of three phases:
 
@@ -72,14 +72,14 @@ I encountered a few unexpected issues while doing this:
 - For a while the compile cache was slower than no cache at all. The Inductor and Triton cache for this model is 5,165 files (170 MB), and reading it file by file from a Modal Volume took about 0.39 s per file, or 33 minutes. Stored as a single tar file, it unpacks in 1 to 5 s.
 - Modal didn't always give me the GPU I asked for. Sometimes it was a different variant of the requested type: an A100 80GB for an A100 40GB request, SXM4 or PCIe cards for A100 80GB, and an A10G for an A10. The compile cache is specific to the device, so this showed up as all-or-nothing cache behavior. Each warm call hit all 10 FX graphs or missed all 10, and every miss was on a different variant from the one most calls of that type got. A cache for these types should be keyed by device name.
 - The T4 doesn't work at all. The unchanged script runs out of its 16 GB during the compile warmup, with 12.5 GB sitting in CUDA graph memory pools.
+- Some calls waited 17 to 90 s between the request and the container start. The cause is unclear, but this isn't included in the figures here and wasn't billed.
 
 ## Limits
 
 - Each real-time cell is the median of only three calls.
 - The prices are from a single day.
-- Some calls waited 17 to 90 s between the request and the container start. I didn't find the cause. Modal doesn't bill that wait, and it isn't in the figures.
-- The containers used Modal's default CPU and memory, which can change the compile time.
+- The containers used Modal's default CPU and memory, which affects the compile time.
 
 ## Afterwards
 
-Since I'll be doing more of this kind of thing in the near future, I pulled the Modal code out of this project into a small library, [modal-lib](https://github.com/crsmithdev/modal-lib). It runs a training script or a server on a Modal GPU from a recipe, and keeps each run's log, phase times, GPU use and cost in a folder on a Modal Volume.
+I've liked working with Modal and expect to use it in future projects and posts, so I pulled out all the Modal-related code into a small library, [modal-lib](https://github.com/crsmithdev/modal-lib). It runs a training script or a server on a Modal GPU from a recipe, and keeps each run's log, phase times, GPU use and cost in a folder on a Modal Volume.
