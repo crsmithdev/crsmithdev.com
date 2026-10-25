@@ -1,5 +1,5 @@
 ---
-title: "When a GPU drops out of a training run"
+title: "Measuring the cost of GPU faults in training runs"
 date: "2026-10-22T21:00:00-07:00"
 draft: false
 ---
@@ -12,7 +12,7 @@ I trained GPT-2 on four GPUs on [Modal](https://modal.com), broke it three ways,
 
 Before breaking anything, I compared [Distributed Data Parallel (DDP)](https://docs.pytorch.org/docs/stable/notes/ddp.html) and [Fully Sharded Data Parallel 2 (FSDP2)](https://docs.pytorch.org/tutorials/intermediate/FSDP_tutorial.html), the two standard PyTorch ways to split training across GPUs, since the choice sets how fast each step runs and what a checkpoint has to hold.
 
-## Setup: GPT-2 on four L40S
+## Setup
 
 The model is GPT-2 small (124 million parameters), written as in nanoGPT and trained on the [FineWeb-edu GPT-2 token shards](https://huggingface.co/datasets/karpathy/fineweb-edu-100B-gpt2-token-shards). Each training step covers about 262,000 tokens, using AdamW, [bf16](https://cloud.google.com/tpu/docs/bfloat16) and `torch.compile`.
 
@@ -22,7 +22,7 @@ The GPUs are L40S cards. They talk to each other over [PCIe](https://en.wikipedi
 
 Every run sees the same data in the same order no matter how many GPUs it uses, so four GPUs should match one GPU step for step, apart from tiny rounding differences.
 
-## FSDP2 doesn't pay off when the model fits
+## Sharding
 
 DDP gives every GPU a full copy of the model and its training state, and once per step the GPUs average their gradients. FSDP2 splits all of it four ways, so each GPU holds a quarter. Before each layer runs, the GPUs pass their pieces around so every GPU briefly has the whole layer, and after the backward pass they split the gradients back up so each keeps only its share.
 
@@ -48,7 +48,7 @@ Three runs got containers that ran an FSDP2 step in 660 ms instead of 1,030, pro
 
 On four H100s, connected over NVLink, DDP's communication nearly disappears: 9 ms per step, all but 2.5 ms of it hidden behind other work, for a 209 ms step. FSDP2 still waits 188 ms of its 391 ms step, so at this size its cost seems to come from how many times it communicates, once per layer per small batch, more than from how fast the link is.
 
-## What a checkpoint costs
+## Checkpoints
 
 Every recovery restarts from the last checkpoint, so first I measured what a save costs. A checkpoint holds the weights plus the optimizer's running averages: about 1.5 GB for the 124M model and 18.7 GB for 1.5B. DCP can save two ways. A synchronous save pauses training until the write is done. An asynchronous save copies everything to CPU memory, lets training continue, and writes it in the background.
 
@@ -63,7 +63,7 @@ Every recovery restarts from the last checkpoint, so first I measured what a sav
 
 Async saves pause training for a fraction of the time, but the write takes around ten times longer. A checkpoint can't be used until it's fully written, so async trades a shorter pause for a longer window in which a fault loses more work. The first async save of the 1.5B run took 185 seconds to finish. I don't know why async writes are so slow, or why that one was slower still.
 
-## Breaking it three ways
+## Faults
 
 I injected three faults into an FSDP2 run that saves a checkpoint every 20 steps:
 
@@ -81,11 +81,11 @@ Each fault fires once, on the first attempt, so the restarted job runs cleanly. 
 
 After every recovery, the loss at each step matched a run with no faults.
 
-### Crash: back in 22 seconds
+### Crash
 
 The dead process exits, torchrun notices within a second, stops the other three, and starts four new ones, which load the last checkpoint and redo the steps since. About half of the 21.7 seconds is redoing 10 steps. The rest is startup: launching processes, reconnecting the GPUs, loading the checkpoint, and compiling the model from cache. On four H100s the same crash took 16.8 seconds.
 
-### Hang: the built-in watchdog gets stuck too
+### Hang
 
 When one process freezes, the other three get to the next point where they need to exchange data with it, and wait. The [NVIDIA Collective Communications Library (NCCL)](https://developer.nvidia.com/nccl), which the GPUs use to communicate, has a watchdog for this with a 10-minute default timeout, so I tried that and a 60-second timeout.
 
@@ -93,7 +93,7 @@ Neither recovered. In the 60-second run, the watchdog caught the stuck exchange 
 
 So I wrote my own watchdog: if a process hasn't finished a step in 30 seconds, kill it. My first version was a thread inside the training process, and it never fired. Python runs one thread at a time, and the training loop keeps hold of Python's lock while it waits for the GPU, so the watchdog never got a turn. The version that works is a separate process. Each training process touches a file after every step, and a small watcher kills it when the file gets too old. Even a frozen process can be killed, so all four die on schedule, torchrun restarts them, and the job is back on its step 52 seconds after the hang, 30 of them spent waiting out the timeout.
 
-### Lost container: Modal retries the job
+### Lost container
 
 A lost container takes torchrun with it, so recovery has to come from Modal, which can retry a function call in a new container. I added retries to [modal-lib](https://github.com/crsmithdev/modal-lib), the small library I use to run jobs on Modal.
 
@@ -101,7 +101,7 @@ In my tests Modal retried the call whenever the container died abruptly, and the
 
 A new container only sees what was written to a Volume after a commit, and modal-lib commits every 30 seconds, so a checkpoint saved just before the loss can be lost with it. Here the last checkpoint was 10 seconds old at the fault and already committed. Otherwise the job would have resumed from the one before and redone 20 more steps.
 
-## How often to checkpoint
+## Interval
 
 Saving more often costs time at every save, and saving less often loses more work at every fault. Young's formula, later refined by Daly, puts the best interval at about √(2·C·M), where C is the time to save and M is the average time between failures.
 
@@ -113,13 +113,13 @@ Every 10 steps was best, with every 5 close behind, near the formula's answer. R
 
 At realistic failure rates the intervals get much longer. If this job had a failure once a day, the formula says to save about every 5.6 minutes, at under half a percent of training time. For the 1.5B model, with a 5.7-second save, it's about every 16.5 minutes.
 
-## What went wrong along the way
+## Problems
 
 - After a torchrun restart, the new processes couldn't connect through gloo, a second communication library PyTorch uses for work on the CPU, and failed with "Connection refused". NCCL alone restarted fine, but async checkpointing needs gloo, so the fault runs save synchronously. I reproduced it with gloo alone on PyTorch 2.11 and didn't find the cause.
 - At first the four-GPU runs didn't match the one-GPU run. Their loss was off by 0.26. The problem was a double average. Each GPU averaged its loss over all the data in the step, including the data the other three GPUs handled. Then DDP and FSDP2 averaged across the four GPUs again, so the gradients came out four times too small. The optimizer mostly doesn't care about scale, but gradient clipping does, so the runs drifted apart. The fix was to have each GPU average over only its own data.
 - Two hang runs without my watchdog cost $6.70 of the $20.73 I spent on runs.
 
-## What this doesn't show
+## Limits
 
 - Everything runs on one machine. Real jobs span many, where a fault has to be noticed across the network, and Modal's support for multiple machines is still in beta.
 - The faults are injected, and I measured each one once.
