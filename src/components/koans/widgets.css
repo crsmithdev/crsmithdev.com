@@ -2,7 +2,8 @@
    --kw-blue, --kw-violet, --kw-sky, --kw-green, --kw-teal and --kw-magenta, and
    striped with --kw-stripe (black in dark, white in light) for more of a kind.
    --kw-blue-2 and --kw-violet-2 are a second shade of each, for a variant of what
-   it marks. --kw-red marks only errors, and --kw-grey only what is missing or other;
+   it marks. --kw-red marks only the shuffle test's fails (the verdict figures show
+   agreement, not error), and --kw-grey only what is missing or other;
    hollow is none. Light and dark each have their own values, checked against their
    page for colorblind and normal vision. --kw-violet-ink is the violet for text, and
    --kw-muted is the site's muted ink darkened to 4.5:1 for small text. */
@@ -212,7 +213,7 @@
 .kw-judge .wrong .from { margin: 0 0 .2rem; color: var(--head); font-size: var(--kw-small); font-weight: 600; }
 .kw-judge .wrong .en { margin: 0 0 .2rem; font-size: var(--kw-small); line-height: 1.5; }
 .kw-judge .wrong .chars { margin: 0 0 .15rem; }
-.kw-judge .wrong .why { margin: .5rem 0 0; color: var(--kw-red); font-size: var(--kw-small); font-weight: 600; }
+.kw-judge .wrong .why { margin: .5rem 0 0; color: var(--head); font-size: var(--kw-small); font-weight: 600; }
 
 /* Baseline: a square per koan; the tip shows what the trace and each model say. */
 .kw-baseline { position: relative; }
@@ -235,7 +236,7 @@
 .kw-search .scores { margin-top: 1rem; }
 .kw-search .scores .kw-note { margin: 0 0 .2rem; }
 .kw-search .score-row { grid-template-columns: 17rem 1fr 3.2rem; }
-.kw-search .kw-tip .no { color: var(--kw-red); }
+.kw-search .kw-tip .no { color: var(--head); }
 @media (max-width: 520px) { .kw-search .score-row { grid-template-columns: 9rem 1fr 3.2rem; } }
 .kw-tip { position: absolute; z-index: 2; max-width: min(22rem, calc(100% - 16px)); padding: .55rem .7rem; border: 1px solid var(--rule); border-radius: 6px;
   background: var(--bg); box-shadow: 0 4px 14px rgba(0, 0, 0, .12); font-size: var(--kw-small); line-height: 1.45; pointer-events: none; }

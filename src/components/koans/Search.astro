@@ -102,7 +102,7 @@ const json = JSON.stringify(Astro.props.data).replace(/</g, "\\u003c");
         if (narrow) y += 22;
         rows.forEach((r, j) => {
           const hi = OURS.some(([a, b]) => r.k === a && r.n === b);
-          const edge = hi ? "; stroke: var(--head); stroke-width: 3" : r.no.length ? "; stroke: var(--kw-red); stroke-width: 2; stroke-dasharray: 3 2" : "";
+          const edge = hi ? "; stroke: var(--head); stroke-width: 3" : r.no.length ? "; stroke: var(--head); stroke-width: 2; stroke-dasharray: 3 2" : "";
           const sq = svgEl("rect", { x: L + (j % per) * C + 1, y: y + Math.floor(j / per) * C + 1, width: C - 5, height: C - 5, rx: 3, tabindex: 0,
             class: "sq", style: style(r) + edge, "aria-label": `${label} ${r.n}, ${r.en}` });
           sq.addEventListener("mouseenter", () => show(r, sq));

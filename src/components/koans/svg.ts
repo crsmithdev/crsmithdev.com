@@ -24,13 +24,6 @@ export function svgEl(tag: string, attrs: Record<string, string | number> = {}, 
   return e;
 }
 
-/** The inner square of a cell that carries a model's border. The cell is filled with the
- * model's color; this square, in the cell's own color with a page-colored edge, sits on it. */
-export function core(x: number, y: number, size: number, fill: string, ring = 2.5) {
-  const inset = ring + .75;
-  return svgEl("rect", { x: x + inset, y: y + inset, width: size - 2 * inset, height: size - 2 * inset, rx: 1.5,
-    style: `fill: ${fill}; stroke: var(--bg); stroke-width: 1.5; pointer-events: none` });
-}
 
 export function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string | null, text?: string | number) {
   const e = document.createElement(tag);

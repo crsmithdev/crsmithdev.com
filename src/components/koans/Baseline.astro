@@ -1,8 +1,8 @@
 ---
 // Experiment 3 of the koans study: ask a model for the earliest text of each case.
 // Two sections, from memory and then with search tools (Experiment 9), each one square
-// per case, a band per collection, in case order, shaded by how many of the two models
-// name the trace's own text, and by which one if only one does. A square opens what the
+// per case, a band per collection, in case order, shaded by which of the two models
+// name the text of my earliest version: agreement, not right and wrong. A square opens what the
 // trace, Claude and GPT each say. Below, how often each model names the trace's text,
 // highest first. Search is scored against the trace before the models' own finds were added.
 import "./widgets.css";
@@ -33,7 +33,7 @@ const json = JSON.stringify(Astro.props.data).replace(/</g, "\\u003c");
 </figure>
 
 <script>
-  import { core, dataOf, el, svgEl, title } from "./svg";
+  import { dataOf, el, svgEl, title } from "./svg";
   import { onWidth } from "./earliest";
 
   type Text = [string, string, string | null];
@@ -54,19 +54,19 @@ const json = JSON.stringify(Astro.props.data).replace(/</g, "\\u003c");
     const book = (i: number | null) => i == null ? null : data.texts[i][0];
     const ok = (r: Run, m: Model) => !!r.e && book(r[m].i) === book(r.e.i);
     const name = (i: number | null, named: string) => i == null ? (named ? `*${named}* (not in my corpus)` : "no answer") : title(data.texts[i]);
-    // One model's error is red, bordered in that model's color: violet for Claude, sky for GPT.
-    const KINDS: { label: string; style: string; core?: string; test: (r: Run) => boolean }[] = [
-      { label: "Both models correct", style: "fill: var(--kw-teal)", test: r => ok(r, "claude") && ok(r, "gpt") },
-      { label: "Only Claude wrong", style: "fill: var(--kw-violet)", core: "var(--kw-red)", test: r => !ok(r, "claude") && ok(r, "gpt") },
-      { label: "Only GPT wrong", style: "fill: var(--kw-sky)", core: "var(--kw-red)", test: r => ok(r, "claude") && !ok(r, "gpt") },
-      { label: "Both wrong", style: "fill: var(--kw-red)", test: r => !!r.e && !ok(r, "claude") && !ok(r, "gpt") },
+    // One model naming my text alone is that model's color: violet for Claude, sky for GPT.
+    const KINDS: { label: string; style: string; test: (r: Run) => boolean }[] = [
+      { label: "Both name my text", style: "fill: var(--kw-teal)", test: r => ok(r, "claude") && ok(r, "gpt") },
+      { label: "Only Claude names it", style: "fill: var(--kw-violet)", test: r => ok(r, "claude") && !ok(r, "gpt") },
+      { label: "Only GPT names it", style: "fill: var(--kw-sky)", test: r => !ok(r, "claude") && ok(r, "gpt") },
+      { label: "Both name another text", style: "fill: var(--kw-blue)", test: r => !!r.e && !ok(r, "claude") && !ok(r, "gpt") },
       { label: "No earlier version", style: "fill: var(--bg); stroke: var(--kw-grey); stroke-width: 1.5", test: r => !r.e },
     ];
     const kind = (r: Run) => KINDS.find(k => k.test(r))!;
     const count = (run: (r: Row) => Run, test: (r: Run) => boolean) => data.rows.filter(r => test(run(r))).length;
 
     const show = (r: Row, run: Run, sq: SVGElement) => {
-      const mark = (m: Model) => run.e ? (ok(run, m) ? " ✓" : " ✗") : "";
+      const mark = (m: Model) => run.e ? (ok(run, m) ? " · my text" : " · another text") : "";
       tip.replaceChildren(
         el("p", "who", `*${r.k === "gg" ? "Gateless Gate" : "Blue Cliff Record"}* ${r.n} · ${r.en}`),
         el("p", null, `Earliest version: ${run.e ? `${name(run.e.i, "")}, ${run.e.y}` : "no earlier version"}`),
@@ -84,7 +84,6 @@ const json = JSON.stringify(Astro.props.data).replace(/</g, "\\u003c");
       for (const k of KINDS) {
         const li = el("li"), sw = svgEl("svg", { width: 12, height: 12, viewBox: "0 0 12 12", style: "display: inline-block; vertical-align: -1px; margin-right: .4em" });
         sw.append(svgEl("rect", { x: .75, y: .75, width: 10.5, height: 10.5, rx: 2, style: k.style }));
-        if (k.core) sw.append(core(.75, .75, 10.5, k.core, 1.75));
         li.append(sw, `${k.label}: ${count(run, k.test)}`);
         legend.append(li);
       }
@@ -111,7 +110,6 @@ const json = JSON.stringify(Astro.props.data).replace(/</g, "\\u003c");
             sq.addEventListener("mouseleave", () => { tip.hidden = true; });
             sq.addEventListener("blur", () => { tip.hidden = true; });
             parts.push(sq);
-            if (kind(it).core) parts.push(core(x, top, C - 5, kind(it).core!));
           });
           y += Math.ceil(rows.length / per) * C + 16;
         }
