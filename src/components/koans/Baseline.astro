@@ -1,0 +1,142 @@
+---
+// Experiment 3 of the koans study: ask a model for the earliest text of each case.
+// Two sections, from memory and then with search tools (Experiment 9), each one square
+// per case, a band per collection, in case order, shaded by how many of the two models
+// name the trace's own text, and by which one if only one does. A square opens what the
+// trace, Claude and GPT each say. Below, how often each model names the trace's text,
+// highest first. Search is scored against the trace before the models' own finds were added.
+import "./widgets.css";
+
+interface Props { data: unknown }
+const json = JSON.stringify(Astro.props.data).replace(/</g, "\\u003c");
+---
+<figure class="kw kw-baseline">
+  <figcaption class="kw-head">
+    <div>
+      <p class="kw-title">Models’ guesses at each koan’s earliest text</p>
+      <p class="kw-note">One square per koan, colored by which models name the text of my earliest version, first from memory and then with search tools. Hover or tap one for that version and what each model says. The bars compare each model in both.</p>
+    </div>
+  </figcaption>
+  <div class="run" data-run="memory">
+    <p class="run-head">From memory <span>scored against my earliest versions, 135 koans have one</span></p>
+    <div class="chart"></div>
+    <ul class="legend below"></ul>
+  </div>
+  <div class="run" data-run="search">
+    <p class="run-head">With search tools <span>scored against my earliest versions before the ones the models found were added, 131 koans have one</span></p>
+    <div class="chart"></div>
+    <ul class="legend below"></ul>
+  </div>
+  <div class="scores"></div>
+  <div class="kw-tip" hidden></div>
+  <script type="application/json" set:html={json} />
+</figure>
+
+<script>
+  import { core, dataOf, el, svgEl, title } from "./svg";
+  import { onWidth } from "./earliest";
+
+  type Text = [string, string, string | null];
+  type Answer = { title: string; y: number; i: number | null };
+  type Run = { e: { i: number; y: number } | null; claude: Answer; gpt: Answer };
+  type Row = Run & { k: "gg" | "bc"; n: number; en: string; search: Run };
+  type Data = { texts: Text[]; rows: Row[] };
+  type Model = "claude" | "gpt";
+  const RUNS = { memory: (r: Row): Run => r, search: (r: Row): Run => r.search };
+
+  // The three koans the post follows.
+  const OURS = [["gg", 1], ["gg", 37], ["gg", 18]];
+  const COLLECTIONS = [["gg", "Gateless Gate"], ["bc", "Blue Cliff Record"]] as const;
+  const YEAR = { gg: 1228, bc: 1125 };
+
+  function init(root: HTMLElement) {
+    const data = dataOf<Data>(root), tip = root.querySelector<HTMLElement>(".kw-tip")!;
+    const book = (i: number | null) => i == null ? null : data.texts[i][0];
+    const ok = (r: Run, m: Model) => !!r.e && book(r[m].i) === book(r.e.i);
+    const name = (i: number | null, named: string) => i == null ? (named ? `*${named}* (not in my corpus)` : "no answer") : title(data.texts[i]);
+    // One model's error is red, bordered in that model's color: violet for Claude, sky for GPT.
+    const KINDS: { label: string; style: string; core?: string; test: (r: Run) => boolean }[] = [
+      { label: "Both models correct", style: "fill: var(--kw-teal)", test: r => ok(r, "claude") && ok(r, "gpt") },
+      { label: "Only Claude wrong", style: "fill: var(--kw-violet)", core: "var(--kw-red)", test: r => !ok(r, "claude") && ok(r, "gpt") },
+      { label: "Only GPT wrong", style: "fill: var(--kw-sky)", core: "var(--kw-red)", test: r => ok(r, "claude") && !ok(r, "gpt") },
+      { label: "Both wrong", style: "fill: var(--kw-red)", test: r => !!r.e && !ok(r, "claude") && !ok(r, "gpt") },
+      { label: "No earlier version", style: "fill: var(--bg); stroke: var(--kw-grey); stroke-width: 1.5", test: r => !r.e },
+    ];
+    const kind = (r: Run) => KINDS.find(k => k.test(r))!;
+    const count = (run: (r: Row) => Run, test: (r: Run) => boolean) => data.rows.filter(r => test(run(r))).length;
+
+    const show = (r: Row, run: Run, sq: SVGElement) => {
+      const mark = (m: Model) => run.e ? (ok(run, m) ? " ✓" : " ✗") : "";
+      tip.replaceChildren(
+        el("p", "who", `*${r.k === "gg" ? "Gateless Gate" : "Blue Cliff Record"}* ${r.n} · ${r.en}`),
+        el("p", null, `Earliest version: ${run.e ? `${name(run.e.i, "")}, ${run.e.y}` : "no earlier version"}`),
+        el("p", null, `Claude: ${name(run.claude.i, run.claude.title)}${run.claude.y ? `, ${run.claude.y}` : ""}${mark("claude")}`),
+        el("p", null, `GPT: ${name(run.gpt.i, run.gpt.title)}${run.gpt.y ? `, ${run.gpt.y}` : ""}${mark("gpt")}`));
+      const f = root.getBoundingClientRect(), b = sq.getBoundingClientRect();
+      tip.hidden = false;
+      tip.style.left = `${Math.max(8, Math.min(b.left - f.left, f.width - tip.offsetWidth - 8))}px`;
+      tip.style.top = `${b.bottom - f.top + 6}px`;
+    };
+
+    for (const section of root.querySelectorAll<HTMLElement>(".run")) {
+      const run = RUNS[section.dataset.run as keyof typeof RUNS];
+      const legend = section.querySelector(".legend")!;
+      for (const k of KINDS) {
+        const li = el("li"), sw = svgEl("svg", { width: 12, height: 12, viewBox: "0 0 12 12", style: "display: inline-block; vertical-align: -1px; margin-right: .4em" });
+        sw.append(svgEl("rect", { x: .75, y: .75, width: 10.5, height: 10.5, rx: 2, style: k.style }));
+        if (k.core) sw.append(core(.75, .75, 10.5, k.core, 1.75));
+        li.append(sw, `${k.label}: ${count(run, k.test)}`);
+        legend.append(li);
+      }
+
+      // Wide: the collection's name left of its band. Narrow: above it.
+      const chart = section.querySelector(".chart")!;
+      onWidth(chart, w => {
+        const W = Math.max(280, w), narrow = W < 520, L = narrow ? 0 : 165, C = narrow ? 22 : 26;
+        const per = Math.floor((W - L + 4) / C);
+        const parts: SVGElement[] = [];
+        let y = 0;
+        for (const [k, label] of COLLECTIONS) {
+          const rows = data.rows.filter(r => r.k === k).sort((a, b) => a.n - b.n);
+          parts.push(svgEl("text", { x: 0, y: y + 14, class: "lane" }, `*${label}* (${YEAR[k]})`));
+          if (narrow) y += 22;
+          rows.forEach((r, j) => {
+            const hi = OURS.some(([a, b]) => r.k === a && r.n === b), it = run(r);
+            const x = L + (j % per) * C + 1, top = y + Math.floor(j / per) * C + 1;
+            const sq = svgEl("rect", { x, y: top, width: C - 5, height: C - 5, rx: 3, tabindex: 0,
+              class: "sq", style: kind(it).style + (hi ? "; stroke: var(--head); stroke-width: 3" : ""), "aria-label": `${label} ${r.n}, ${r.en}` });
+            sq.addEventListener("mouseenter", () => show(r, it, sq));
+            sq.addEventListener("focus", () => show(r, it, sq));
+            sq.addEventListener("click", () => show(r, it, sq));
+            sq.addEventListener("mouseleave", () => { tip.hidden = true; });
+            sq.addEventListener("blur", () => { tip.hidden = true; });
+            parts.push(sq);
+            if (kind(it).core) parts.push(core(x, top, C - 5, kind(it).core!));
+          });
+          y += Math.ceil(rows.length / per) * C + 16;
+        }
+        const svg = svgEl("svg", { viewBox: `0 0 ${W} ${y - 16}`, width: W, height: y - 16,
+          "aria-label": KINDS.map(k => `${k.label}: ${count(run, k.test)}`).join("; ") });
+        svg.append(...parts);
+        chart.replaceChildren(svg);
+      });
+    }
+
+    const scores = root.querySelector(".scores")!;
+    const traced = (run: (r: Row) => Run) => count(run, r => !!r.e);
+    const bars: [string, number, number][] = [
+      ["Claude (search)", count(RUNS.search, r => ok(r, "claude")), traced(RUNS.search)], ["GPT (search)", count(RUNS.search, r => ok(r, "gpt")), traced(RUNS.search)],
+      ["Claude (memory)", count(RUNS.memory, r => ok(r, "claude")), traced(RUNS.memory)], ["GPT (memory)", count(RUNS.memory, r => ok(r, "gpt")), traced(RUNS.memory)]];
+    scores.append(el("p", "kw-note", "How often each names the text of my earliest version"));
+    for (const [label, v, of] of bars.sort((a, b) => b[1] / b[2] - a[1] / a[2])) {
+      const row = el("div", "score-row"), track = el("span", "track"), fill = el("span", "fill real");
+      fill.style.width = `${100 * v / of}%`;
+      track.append(fill);
+      row.append(el("span", "score-label", label), track, el("span", "score-num", `${v} / ${of}`));
+      row.title = `${v} of ${of}`;
+      scores.append(row);
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>(".kw-baseline").forEach(init);
+</script>

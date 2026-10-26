@@ -1,0 +1,36 @@
+---
+// The post's appendix: every text that tells Zhaozhou's dog. The dated ones come
+// oldest first, with the year of the text; a year with a star is the text's own
+// date, and its passage is dated later. The undated ones follow. Each links to its
+// passage in CBETA.
+import "./widgets.css";
+
+type Text = [string, string, string | null];
+type Version = { i: number; text: number; passage: number; l: string };
+interface Props { data: { texts: Text[]; versions: Version[]; others: { i: number; l: string }[] } }
+const { texts, versions, others } = Astro.props.data;
+const rows = [...versions].sort((a, b) => a.text - b.text);
+const cbeta = (id: string, line: string) => `https://cbetaonline.dila.edu.tw/zh/${id}_p${line}`;
+---
+<div class="kw-dated">
+  <table>
+    <thead><tr><th>Text</th><th>Year</th><th>Where</th></tr></thead>
+    <tbody>
+      {rows.map(v => (
+        <tr>
+          <td>{texts[v.i][2] ? <em>{texts[v.i][2]}</em> : texts[v.i][1]}</td>
+          <td class="num">{v.text === v.passage ? v.text : `${v.text}*`}</td>
+          <td class="num ref"><a href={cbeta(texts[v.i][0], v.l)}>{texts[v.i][0]}_p{v.l}</a></td>
+        </tr>
+      ))}
+      {others.map(v => (
+        <tr>
+          <td>{texts[v.i][2] ? <em>{texts[v.i][2]}</em> : texts[v.i][1]}</td>
+          <td class="num">undated</td>
+          <td class="num ref"><a href={cbeta(texts[v.i][0], v.l)}>{texts[v.i][0]}_p{v.l}</a></td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <p class="note">* The text’s own date. The passage with the dog is first dated {rows.find(v => v.text !== v.passage)!.passage}.</p>
+</div>

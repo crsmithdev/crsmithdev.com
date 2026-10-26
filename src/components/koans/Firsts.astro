@@ -1,0 +1,111 @@
+---
+// Where the koans of each collection are first written down: one grid per
+// collection, one square per koan grouped by source, colored by its oldest dated text.
+// A master's records count as one source. Sources with fewer than five koans share grey, and a
+// koan with no earlier version is hollow. A square shows the koan, its text and year.
+import "./widgets.css";
+
+interface Props { data: unknown }
+const json = JSON.stringify(Astro.props.data).replace(/</g, "\\u003c");
+---
+<figure class="kw kw-firsts">
+  <figcaption class="kw-head">
+    <div>
+      <p class="kw-title">The earliest dated text for each koan</p>
+      <p class="kw-note">One square per koan, grouped and colored by the earliest dated text that tells it. Hover or tap a square for the koan and its text.</p>
+    </div>
+  </figcaption>
+  <div class="chart"></div>
+  <ul class="legend below"></ul>
+  <div class="kw-tip" hidden></div>
+  <script type="application/json" set:html={json} />
+</figure>
+
+<script>
+  import { dataOf, el, plain, svgEl, title } from "./svg";
+  import { onWidth, type Case, type Data, type Key } from "./earliest";
+
+  const COLLECTIONS = [["gg", "Gateless Gate"], ["bc", "Blue Cliff Record"]] as const;
+  // Blue, violet, green and sky, then the same striped with --kw-stripe.
+  const HUES = ["--kw-blue", "--kw-violet", "--kw-green", "--kw-sky"];
+  const COLORS = [...HUES.map(v => `var(${v})`), ...HUES.map((_, j) => `url(#kw-firsts-${j})`)];
+  // A source that tells fewer koans first than this shares grey.
+  const MIN = 5;
+  const DEFS = `<svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs>${HUES.map((v, j) =>
+    `<pattern id="kw-firsts-${j}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill: var(--kw-stripe)"/><rect width="3.6" height="6" style="fill: var(${v})"/></pattern>`).join("")}</defs></svg>`;
+  const MASTER: Record<string, string> = { X69n1351: "*Records of Baiyun Shouduan*", X69n1352: "*Records of Baiyun Shouduan*" };
+  const NONE = "fill: var(--bg); stroke: var(--kw-grey); stroke-width: 1.5", ONE = "fill: var(--kw-grey)";
+
+  function init(root: HTMLElement) {
+    const data = dataOf<Data>(root), tip = root.querySelector<HTMLElement>(".kw-tip")!;
+    root.insertAdjacentHTML("beforeend", DEFS);
+    const all = COLLECTIONS.flatMap(([k]) => data[k].cases);
+    const key = (c: Case) => { const id = data.texts[c.e!.i][0]; return MASTER[id] ?? id; };
+    // The sources that tell MIN or more koans first, most first, each with its own color.
+    const by = new Map<string, Case[]>();
+    for (const c of all) if (c.e) by.set(key(c), [...(by.get(key(c)) ?? []), c]);
+    const big = [...by].filter(([, cs]) => cs.length >= MIN).sort((a, b) => b[1].length - a[1].length);
+    const color = new Map(big.map(([s], j) => [s, COLORS[j]]));
+    const style = (c: Case) => !c.e ? NONE : color.has(key(c)) ? `fill: ${color.get(key(c))}` : ONE;
+    // Squares go by source, in the legend's order: the colored sources oldest first, then grey, then none.
+    const first = (cs: Case[]) => Math.min(...cs.map(c => c.e!.y));
+    const order = [...big].sort((a, b) => first(a[1]) - first(b[1])).map(([s]) => s);
+    const rank = (c: Case) => !c.e ? order.length + 1 : color.has(key(c)) ? order.indexOf(key(c)) : order.length;
+    const sorted = (cs: Case[]) => [...cs].sort((a, b) => rank(a) - rank(b) || (a.e?.y ?? 0) - (b.e?.y ?? 0) || a.n - b.n);
+
+    const legend = root.querySelector(".legend")!;
+    const swatch = (s: string) => {
+      const sw = svgEl("svg", { width: 12, height: 12, viewBox: "0 0 12 12", style: "display: inline-block; vertical-align: -1px; margin-right: .4em" });
+      sw.append(svgEl("rect", { x: .75, y: .75, width: 10.5, height: 10.5, rx: 2, style: s }));
+      return sw;
+    };
+    const entries: [string, string][] = [
+      ...order.map(s => [s, by.get(s)!] as const)
+        .map(([s, cs]): [string, string] => [`fill: ${color.get(s)}`, `${MASTER[data.texts[cs[0].e!.i][0]] ?? title(data.texts[cs[0].e!.i])} (${first(cs)})`]),
+      [ONE, "Other texts"],
+      [NONE, "No earlier version"],
+    ];
+    for (const [s, label] of entries) { const li = el("li"); li.append(swatch(s), el("span", null, label)); legend.append(li); }
+
+    const show = (k: Key, c: Case, sq: SVGElement) => {
+      const name = COLLECTIONS.find(([x]) => x === k)![1];
+      tip.replaceChildren(
+        el("p", "who", `*${name}* ${c.n} · ${c.en}`),
+        el("p", null, c.e ? `First written down: ${title(data.texts[c.e.i])}, ${c.e.y}` : `No earlier version; first written down in the *${name}*, ${data[k].year}`));
+      const f = root.getBoundingClientRect(), b = sq.getBoundingClientRect();
+      tip.hidden = false;
+      tip.style.left = `${Math.max(8, Math.min(b.left - f.left, f.width - tip.offsetWidth - 8))}px`;
+      tip.style.top = `${b.bottom - f.top + 6}px`;
+    };
+
+    // Wide: the collection's name left of its grid. Narrow: above it.
+    const chart = root.querySelector(".chart")!;
+    onWidth(chart, w => {
+      const W = Math.max(280, w), narrow = W < 520, L = narrow ? 0 : 165, C = narrow ? 22 : 26;
+      const per = Math.floor((W - L + 4) / C);
+      const parts: SVGElement[] = [];
+      let y = 0;
+      for (const [k, label] of COLLECTIONS) {
+        const cases = sorted(data[k].cases);
+        parts.push(svgEl("text", { x: 0, y: y + 14, class: "lane" }, `*${label}* (${data[k].year})`));
+        if (narrow) y += 22;
+        cases.forEach((c, j) => {
+          const sq = svgEl("rect", { x: L + (j % per) * C + 1, y: y + Math.floor(j / per) * C + 1, width: C - 5, height: C - 5, rx: 3, tabindex: 0,
+            class: "sq", style: style(c), "aria-label": `${label} ${c.n}, ${c.en}` });
+          sq.addEventListener("mouseenter", () => show(k, c, sq));
+          sq.addEventListener("focus", () => show(k, c, sq));
+          sq.addEventListener("click", () => show(k, c, sq));
+          sq.addEventListener("mouseleave", () => { tip.hidden = true; });
+          sq.addEventListener("blur", () => { tip.hidden = true; });
+          parts.push(sq);
+        });
+        y += Math.ceil(cases.length / per) * C + 16;
+      }
+      const svg = svgEl("svg", { viewBox: `0 0 ${W} ${y - 16}`, width: W, height: y - 16, "aria-label": entries.map(e => plain(e[1])).join("; ") });
+      svg.append(...parts);
+      chart.replaceChildren(svg);
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>(".kw-firsts").forEach(init);
+</script>

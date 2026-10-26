@@ -1,0 +1,33 @@
+---
+// The post's appendix: all 148 koans of the two collections, each with a link to
+// it in its collection and to its earliest version, where the trace has one.
+import "./widgets.css";
+
+type Text = [string, string, string | null];
+type Case = { n: number; en: string; l: string; e: { i: number; y: number; l: string } | null };
+type Collection = { year: number; cases: Case[] };
+interface Props { data: { texts: Text[]; gg: Collection; bc: Collection } }
+const { texts, gg, bc } = Astro.props.data;
+const cbeta = (id: string, line: string) => `https://cbetaonline.dila.edu.tw/zh/${id}_p${line}`;
+const COLLECTIONS = [["Gateless Gate", "T48n2005", gg], ["Blue Cliff Record", "T48n2003", bc]] as const;
+---
+<div class="kw-dated">
+  {COLLECTIONS.map(([name, id, col]) => (
+    <details>
+      <summary><em>{name}</em> ({col.year}), {col.cases.length} koans</summary>
+      <table>
+        <thead><tr><th>#</th><th>Koan</th><th>Earliest version</th><th>Year</th></tr></thead>
+        <tbody>
+          {col.cases.map(c => (
+            <tr>
+              <td class="num"><a href={cbeta(id, c.l)}>{c.n}</a></td>
+              <td>{c.en}</td>
+              <td>{c.e ? <a href={cbeta(texts[c.e.i][0], c.e.l)}>{texts[c.e.i][2] ? <em>{texts[c.e.i][2]}</em> : texts[c.e.i][1]}</a> : "None found"}</td>
+              <td class="num">{c.e?.y ?? ""}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </details>
+  ))}
+</div>

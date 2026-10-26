@@ -34,7 +34,7 @@ The output is in `dist/`. `npm run preview` serves it.
 
 `weight` sets the order. `small: true` shows a job in the compact style.
 
-A post has `title`, `date` (with its offset, for example `"2026-09-21T21:00:00-07:00"`) and optionally `draft: true`. The text before `<!--more-->` is the summary for the feeds and the meta description. Without it, the summary is the first paragraphs up to 70 words.
+A post has `title`, `date` (with its offset, for example `"2026-09-21T21:00:00-07:00"`) and optionally `draft: true`. The text before `<!--more-->` (`{/* more */}` in MDX) is the summary for the feeds and the meta description. Without it, the summary is the first paragraphs up to 70 words.
 
 In MDX, `Svg` inlines an SVG so that it takes the page's colours:
 

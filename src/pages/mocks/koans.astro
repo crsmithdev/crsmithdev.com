@@ -1,0 +1,536 @@
+---
+// Design mocks for three figures of the koans post. Not linked from the site;
+// delete before the branch merges.
+import Base from "../../layouts/Base.astro";
+import PageTop from "../../components/PageTop.astro";
+import "../../components/koans/widgets.css";
+import Masters from "../../components/koans/Masters.astro";
+import earliest from "../../content/blog/where-the-koans-come-from/earliest.json";
+import judge from "../../content/blog/where-the-koans-come-from/judge.json";
+import baseline from "../../content/blog/where-the-koans-come-from/baseline.json";
+
+const json = (x: unknown) => JSON.stringify(x).replace(/</g, "\\u003c");
+---
+<Base title="Koans figure mocks">
+<div class="page">
+  <PageTop />
+  <article class="post prose">
+    <h1 class="page-title">Figure mocks</h1>
+    <p>Real data throughout. The three koans of the post are in purple: Zhaozhou’s Dog (GG1), the Cypress Tree (GG37) and the Flax (BC12 in the judge figure, GG18 in the baseline).</p>
+
+    <h1>1 · Checking the matcher</h1>
+
+    <h2>A. Scorecard</h2>
+    <p>Three numbers lead: agreement on the 29, the always-yes line, and the bad matches caught. The three koans sit below as one line each.</p>
+    <figure class="kw mk" id="judge-a"><div class="chart"></div></figure>
+
+    <h2>B. Only the rows that matter</h2>
+    <p>A short table of every match where anyone said no, plus the three koans. The 107 matches where all agree fold into one line.</p>
+    <figure class="kw mk" id="judge-b"><div class="chart"></div></figure>
+
+    <h2>B2. B, in koan order, with the matched text</h2>
+    <p>Same style as B. Ordered by collection and case; the matched text links to the passage in CBETA; rows where we split are tinted.</p>
+    <figure class="kw mk" id="judge-b2"><div class="chart"></div></figure>
+
+    <h2>C. 119 squares, coloured by verdict</h2>
+    <p>Keeps the overview of every match, but one colour per square instead of three stripes. The three koans are outlined and labelled.</p>
+    <figure class="kw mk" id="judge-c"><div class="chart"></div></figure>
+
+    <h1>2 · Ask a model</h1>
+
+    <h2>A. What each one names</h2>
+    <p>Three rows of 148 squares, coloured by the book named. The trace is varied; Claude is mostly teal (Jingde Record), GPT mostly purple (Zutang ji).</p>
+    <figure class="kw mk" id="base-a"><div class="chart"></div></figure>
+
+    <h2>B. Three koans, three answers</h2>
+    <p>The three koans on a year line: where the trace puts each, and where each model does. Then two bars for the whole set, from memory and with tools.</p>
+    <figure class="kw mk" id="base-b"><div class="chart"></div></figure>
+
+    <h2>C. Named year against the trace’s year</h2>
+    <p>One dot per koan. Dots on the diagonal are right; the flat rows at 952 and 1004 are the famous books, named whatever the koan.</p>
+    <figure class="kw mk" id="base-c"><div class="chart"></div></figure>
+
+    <h2>D. One grid: does each model name the trace’s text?</h2>
+    <p>One square per koan, coloured by agreement, grouped so the counts read at once. Hover (or tap) a square for what the trace, Claude and GPT each say. Below, the four scores, highest first.</p>
+    <figure class="kw mk" id="base-d"><div class="chart"></div><div class="mk-tip" hidden></div></figure>
+
+    <h2>D1. Teal, amber, rust; the collections side by side</h2>
+    <p>A traffic-light order without red and green: right, half right, wrong. Gateless Gate as an 8 × 6 block, Blue Cliff Record as 10 × 10.</p>
+    <figure class="kw mk" id="base-d1"><div class="chart"></div><div class="mk-tip" hidden></div></figure>
+
+    <h2>D2. One blue, three strengths; a row per collection</h2>
+    <p>Solid, hatched and pale blue: agreement as an amount, and wrong answers recede. Each collection gets its own band with its name on the left.</p>
+    <figure class="kw mk" id="base-d2"><div class="chart"></div><div class="mk-tip" hidden></div></figure>
+
+    <h2>D3. Teal, light teal, orange; one grid with a break</h2>
+    <p>The current colours, with the half-right squares lighter instead of hatched. One grid, with a gap and a label where the Blue Cliff Record starts.</p>
+    <figure class="kw mk" id="base-d3"><div class="chart"></div><div class="mk-tip" hidden></div></figure>
+
+    <h1>3 · Masters, then all 148</h1>
+    <p>The current Masters figure, with a strip under it on the same year axis. Each option replaces the “120 of the 148” figure.</p>
+
+    <h2>A. A cumulative line</h2>
+    <Masters data={earliest} />
+    <figure class="kw mk joined" id="told-a"><div class="chart"></div></figure>
+
+    <h2>B. Koans first written down, by year</h2>
+    <Masters data={earliest} />
+    <figure class="kw mk joined" id="told-b"><div class="chart"></div></figure>
+
+    <h2>C. One more row: all 148 koans</h2>
+    <Masters data={earliest} />
+    <figure class="kw mk joined" id="told-c"><div class="chart"></div></figure>
+  </article>
+</div>
+<script type="application/json" id="d-earliest" set:html={json(earliest)} />
+<script type="application/json" id="d-judge" set:html={json(judge)} />
+<script type="application/json" id="d-baseline" set:html={json(baseline)} />
+</Base>
+
+<style is:global>
+  .mk .big { font-size: 1.9em; font-weight: 650; fill: var(--head); }
+  .mk .lab { font: 12px var(--font-body, system-ui), sans-serif; fill: var(--text); }
+  .mk .sub { font: 11px var(--font-body, system-ui), sans-serif; fill: var(--kw-muted); }
+  .mk .hi { fill: var(--k1); font-weight: 600; }
+  .mk .white { fill: #fff; }
+  .mk .head { font-weight: 600; fill: var(--head); }
+  .mk .link { text-decoration: underline; text-decoration-color: var(--rule); font-style: italic; }
+  .mk a:hover .link { fill: var(--head); }
+  .mk .in { font: 600 11px system-ui, sans-serif; fill: #fff; }
+  .kw.joined { margin-top: -2.6rem; border-top: none; border-top-left-radius: 0; border-top-right-radius: 0; }
+  .mk svg { width: 100%; }
+  .mk { position: relative; }
+  .mk-tip { position: absolute; z-index: 2; max-width: 22rem; padding: .55rem .7rem; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); box-shadow: 0 4px 14px rgba(0,0,0,.12); font-size: .82em; line-height: 1.45; pointer-events: none; }
+  .mk-tip b { color: var(--head); }
+  .mk-tip .ok { color: var(--k2); font-weight: 600; }
+  .mk-tip .no { color: var(--k3); font-weight: 600; }
+  .mk-tip p { margin: 0; }
+  .mk-table { width: 100%; border-collapse: collapse; font-size: .82em; line-height: 1.3; }
+  .mk-table th { font-weight: 500; color: var(--kw-muted); font-size: .9em; text-align: left; padding: 0 .4rem .3rem; }
+  .mk-table th:nth-child(n+3) { text-align: center; }
+  .mk-table td { padding: .28rem .4rem; border-top: 1px solid var(--rule); vertical-align: middle; }
+  .mk-table td.v { text-align: center; width: 2.8rem; padding-inline: .2rem; }
+  .mk-table tr.split td { background: color-mix(in srgb, var(--k3) 12%, transparent); }
+  .mk-table tr.group td { border-top: none; padding: .7rem .4rem .2rem; color: var(--head); font-weight: 600; }
+  .mk-table .koan { color: var(--head); }
+  .mk-table .koan.hi { color: var(--k1); font-weight: 600; }
+  .mk-table .num { display: inline-block; min-width: 1.6em; color: var(--kw-muted); font-variant-numeric: tabular-nums; font-weight: 400; }
+  .mk-table .vs { color: var(--kw-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 11rem; }
+  .mk-table td.koan { white-space: nowrap; }
+  .mk-table .vs a { color: inherit; }
+  .mk-table .dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; vertical-align: middle; }
+  .mk-table .dot.later { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px currentColor; }
+  .mk-table .na { color: var(--kw-muted); }
+  @media (max-width: 560px) { .mk-table .vs { display: none; } .mk-table td.koan { white-space: normal; } }
+  .mk-foot { margin-top: .8rem; }
+</style>
+
+<script>
+  import { svgEl } from "../../components/koans/svg";
+  import { color, items, type Data } from "../../components/koans/earliest";
+
+  const get = (id: string) => JSON.parse(document.getElementById(id)!.textContent!);
+  const E: Data = get("d-earliest"), J = get("d-judge"), B = get("d-baseline");
+  const SAME = "var(--k2)", NOT = "var(--k3)", HI = "var(--k1)", GREY = "var(--kw-grey)";
+  const OURS: [string, number][] = [["gg", 1], ["gg", 37], ["bc", 12], ["gg", 18]];
+  const ours = (k: string, n: number) => OURS.some(([a, b]) => a === k && b === n);
+  const id = (k: string, n: number) => `${k === "gg" ? "GG" : "BC"}${n}`;
+
+  function svg(root: string, W: number, H: number) {
+    const s = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H }) as SVGSVGElement;
+    document.querySelector(`#${root} .chart`)!.replaceChildren(s);
+    return s;
+  }
+  const t = (s: SVGElement, x: number, y: number, text: string | number, cls = "lab", anchor = "start") =>
+    s.append(svgEl("text", { x, y, class: cls, "text-anchor": anchor }, text));
+  const r = (s: SVGElement, x: number, y: number, w: number, h: number, fill: string, extra: Record<string, string | number> = {}) =>
+    s.append(svgEl("rect", { x, y, width: Math.max(0, w), height: h, rx: 2, style: `fill: ${fill}`, ...extra }));
+
+  // ---- 1. Judge ----
+  type Row = { k: string; n: number; en: string; i: number; y: number; hand: boolean | null; claude: { same?: boolean }; gpt: { same?: boolean } };
+  const rows: Row[] = J.rows;
+  const read = rows.filter(x => x.hand != null), good = read.filter(x => x.hand), bad = read.filter(x => !x.hand);
+  const agree = (m: "claude" | "gpt") => read.filter(x => !!x[m].same === x.hand).length;
+
+  {
+    const W = 680, s = svg("judge-a", W, 330), X0 = 150, BW = 440, sc = (v: number) => BW * v / 29;
+    t(s, 0, 18, "On the 29 matches I read, how often each agrees with me", "sub");
+    ([["Claude", agree("claude"), SAME], ["GPT", agree("gpt"), SAME]] as [string, number, string][]).forEach(([who, v, c], j) => {
+      const y = 34 + j * 38;
+      t(s, 0, y + 19, who, "lab"); r(s, X0, y, sc(29), 26, "var(--rule)"); r(s, X0, y, sc(v), 26, c);
+      t(s, X0 + sc(v) - 8, y + 18, `${v} of 29`, "lab white", "end");
+    });
+    const a = X0 + sc(26);
+    s.append(svgEl("line", { x1: a, x2: a, y1: 28, y2: 112, style: "stroke: var(--head); stroke-dasharray: 4 3; stroke-width: 1.5" }));
+    t(s, a, 124, "Saying “same” every time scores 26", "sub", "end");
+    t(s, 0, 160, "The 3 bad matches", "sub");
+    bad.forEach((x, j) => {
+      const y = 172 + j * 22;
+      t(s, 0, y + 12, `${id(x.k, x.n)} · ${x.en}`, "lab");
+      ["Claude", "GPT"].forEach((m, q) => { r(s, 300 + q * 120, y, 110, 17, NOT); t(s, 355 + q * 120, y + 13, `${m} caught it`, "lab white", "middle"); });
+    });
+    t(s, 0, 260, "The three koans", "sub");
+    rows.filter(x => ours(x.k, x.n) && x.k + x.n !== "gg18").forEach((x, j) => {
+      const y = 272 + j * 20;
+      t(s, 0, y + 11, x.en, "lab hi");
+      t(s, 300, y + 11, "me ✓   Claude ✓   GPT ✓   the same story", "lab");
+    });
+  }
+
+  {
+    const W = 680, shown = rows.filter(x => !(x.hand !== false && x.claude.same && x.gpt.same) || (ours(x.k, x.n) && x.k + x.n !== "gg18"));
+    shown.sort((a, b) => (ours(b.k, b.n) ? 1 : 0) - (ours(a.k, a.n) ? 1 : 0) || (a.hand == null ? 1 : 0) - (b.hand == null ? 1 : 0));
+    const RH = 24, s = svg("judge-b", W, 40 + shown.length * RH + 46), C = [430, 510, 590];
+    ["Me", "Claude", "GPT"].forEach((h, j) => t(s, C[j], 16, h, "sub", "middle"));
+    shown.forEach((x, j) => {
+      const y = 30 + j * RH, hi = ours(x.k, x.n);
+      t(s, 0, y + 12, `${id(x.k, x.n)} · ${x.en}`, hi ? "lab hi" : "lab");
+      t(s, 300, y + 12, x.hand == null ? "not read" : "", "sub");
+      [x.hand, x.claude.same, x.gpt.same].forEach((v, q) => {
+        if (q === 0 && v == null) return;
+        s.append(svgEl("circle", { cx: C[q], cy: y + 8, r: 7, style: `fill: ${v ? SAME : NOT}` }));
+      });
+      if (x.k + x.n === "bc47") t(s, C[2] + 16, y + 12, "my mistake", "sub");
+    });
+    const y = 40 + shown.length * RH;
+    s.append(svgEl("line", { x1: 0, x2: W, y1: y - 8, y2: y - 8, class: "axis" }));
+    const rest = rows.length - shown.length;
+    t(s, 0, y + 14, `The other ${rest} matches: all three say the same story`, "lab");
+    [0, 1, 2].forEach(q => s.append(svgEl("circle", { cx: C[q], cy: y + 10, r: 7, style: `fill: ${SAME}` })));
+    s.append(svgEl("circle", { cx: 6, cy: y + 34, r: 5, style: `fill: ${SAME}` })); t(s, 16, y + 38, "the same story", "sub");
+    s.append(svgEl("circle", { cx: 116, cy: y + 34, r: 5, style: `fill: ${NOT}` })); t(s, 126, y + 38, "not the same story", "sub");
+  }
+
+  {
+    type R2 = Row & { l: string; later: boolean | null };
+    const T: [string, string, string | null][] = J.texts, all2 = rows as R2[];
+    const me = (x: R2) => x.hand ?? x.later;
+    const split = (x: R2) => { const v = [me(x), x.claude.same, x.gpt.same].filter(v => v != null).map(Boolean); return v.some(a => a !== v[0]); };
+    const anyNo = (x: R2) => [me(x), x.claude.same, x.gpt.same].some(v => v === false);
+    const three = all2.filter(x => ours(x.k, x.n) && !(x.k === "gg" && x.n === 18));
+    const shown = all2.filter(x => three.includes(x) || anyNo(x)).sort((a, b) => (a.k === b.k ? 0 : a.k === "gg" ? -1 : 1) || a.n - b.n);
+    // The visual style of B: one row per match, dots in three columns.
+    const W = 680, RH = 24, C = [520, 582, 644], MX = 300, short = (x: R2) => { const [, zh, en] = T[x.i]; const n = (en ?? zh).replace(" of the Transmission of the Lamp", "").replace(" of the Lamp", ""); return n.length > 26 ? n.slice(0, 25) + "…" : n; };
+    const s = svg("judge-b2", W, 40 + shown.length * RH + 66);
+    ["Me", "Claude", "GPT"].forEach((h, j) => t(s, C[j], 16, h, "sub", "middle"));
+    t(s, MX, 16, "Matched to", "sub");
+    shown.forEach((x, j) => {
+      const y = 30 + j * RH;
+      if (split(x)) r(s, -6, y - 4, W + 12, RH, "color-mix(in srgb, var(--k3) 12%, transparent)", { rx: 3 });
+      t(s, 0, y + 12, `${id(x.k, x.n)} · ${x.en}`, ours(x.k, x.n) ? "lab hi" : "lab");
+      const a = svgEl("a", { href: `https://cbetaonline.dila.edu.tw/zh/${T[x.i][0]}_p${x.l}` });
+      a.append(svgEl("text", { x: MX, y: y + 12, class: "sub link" }, `${short(x)}, ${x.y}`));
+      s.append(a);
+      const later = x.hand == null && x.later != null;
+      [me(x), x.claude.same, x.gpt.same].forEach((v, q) => {
+        if (v == null) { t(s, C[q], y + 12, "–", "sub", "middle"); return; }
+        const fill = v ? SAME : NOT;
+        if (q === 0 && later) s.append(svgEl("circle", { cx: C[q], cy: y + 8, r: 10, style: `fill: none; stroke: ${fill}; stroke-width: 1.5` }));
+        s.append(svgEl("circle", { cx: C[q], cy: y + 8, r: 7, style: `fill: ${fill}` }));
+      });
+    });
+    const y = 40 + shown.length * RH;
+    s.append(svgEl("line", { x1: 0, x2: W, y1: y - 8, y2: y - 8, class: "axis" }));
+    const rest = all2.length - shown.length;
+    t(s, 0, y + 14, `The other ${rest} matches: Claude and GPT both say the same story`, "lab");
+    [1, 2].forEach(q => s.append(svgEl("circle", { cx: C[q], cy: y + 10, r: 7, style: `fill: ${SAME}` })));
+    t(s, C[0], y + 14, "–", "sub", "middle");
+    const legend: [string, string][] = [[SAME, "the same story"], [NOT, "not the same story"]];
+    legend.forEach(([c, l], q) => { s.append(svgEl("circle", { cx: 6 + q * 110, cy: y + 38, r: 5, style: `fill: ${c}` })); t(s, 16 + q * 110, y + 42, l, "sub"); });
+    s.append(svgEl("circle", { cx: 262, cy: y + 38, r: 7, style: `fill: none; stroke: var(--kw-muted); stroke-width: 1.5` }));
+    t(s, 274, y + 42, "read after the models flagged it", "sub");
+    t(s, 460, y + 42, "– not read", "sub");
+    r(s, 536, y + 31, 14, 14, "color-mix(in srgb, var(--k3) 25%, transparent)"); t(s, 556, y + 42, "we split", "sub");
+  }
+
+  {
+    const W = 680, PER = 15, CELL = 20, s = svg("judge-c", W, 330);
+    const cat = (x: Row) => x.claude.same && x.gpt.same ? SAME : !x.claude.same && !x.gpt.same ? NOT : "var(--kw-agg)";
+    [[read, "The 29 I read", 0], [rows.filter(x => x.hand == null), "The 90 I didn’t", 340]].forEach(([list, label, x0]) => {
+      const L = list as Row[], left = x0 as number;
+      t(s, left, 16, label as string, "lab");
+      L.sort((a, b) => [SAME, "var(--kw-agg)", NOT].indexOf(cat(a)) - [SAME, "var(--kw-agg)", NOT].indexOf(cat(b)));
+      L.forEach((x, j) => {
+        const cx = left + (j % PER) * CELL, cy = 28 + Math.floor(j / PER) * CELL, hi = ours(x.k, x.n) && x.k + x.n !== "gg18";
+        r(s, cx, cy, CELL - 3, CELL - 3, cat(x), hi ? { style: `fill: ${cat(x)}; stroke: ${HI}; stroke-width: 3` } : {});
+        if (x.hand === false) t(s, cx + 8.5, cy + 13, "✗", "lab", "middle");
+      });
+    });
+    t(s, 0, 180, "Teal: both models say the same story. Orange: both say not. Light: they split.", "sub");
+    t(s, 0, 198, "✗: one of my three rejections. Purple outline: the three koans.", "sub");
+    t(s, 0, 236, "Both models catch all 3 of my rejections, and among the 90 flag 3 more:", "lab");
+    t(s, 0, 256, "GG36, BC97 (a sutra quotation), and BC47, a real mistake of mine.", "lab");
+  }
+
+  // ---- 2. Baseline ----
+  type Ans = { title: string; y: number; i: number | null };
+  type BRow = { k: string; n: number; en: string; e: { i: number; y: number } | null; claude: Ans; gpt: Ans };
+  const brows: BRow[] = B.rows, BT: [string, string, string | null][] = B.texts;
+  const book = (i: number | null) => i == null ? null : BT[i][0];
+  const BOOK = (i: number | null) => book(i) === "B25n0144" ? HI : book(i) === "T51n2076" ? SAME : GREY;
+  const right = (m: "claude" | "gpt") => brows.filter(x => x.e && book(x[m].i) === book(x.e.i)).length;
+
+  {
+    const W = 680, s = svg("base-a", W, 300), PER = 37, C = 11;
+    const lines: [string, (x: BRow) => string, string][] = [
+      ["The trace", x => x.e ? BOOK(x.e.i) : "none", "Its oldest text varies"],
+      ["Claude", x => BOOK(x.claude.i), "Jingde Record for 88 of 148"],
+      ["GPT", x => BOOK(x.gpt.i), "Zutang ji for 109 of 148"]];
+    lines.forEach(([who, f, note], j) => {
+      const y0 = 10 + j * 92;
+      t(s, 0, y0 + 12, who, "lab"); t(s, 0, y0 + 28, note, "sub");
+      const sorted = [...brows].sort((a, b) => [HI, SAME, GREY, "none"].indexOf(f(a)) - [HI, SAME, GREY, "none"].indexOf(f(b)));
+      sorted.forEach((x, q) => {
+        const c = f(x), cx = 190 + (q % PER) * (C + 2), cy = y0 + Math.floor(q / PER) * (C + 2);
+        r(s, cx, cy, C, C, c === "none" ? "none" : c, c === "none" ? { style: `fill: none; stroke: ${GREY}` } : {});
+      });
+    });
+    t(s, 0, 292, "■ Zutang ji (952)   ■ Jingde Record (1004)   ■ any other text   □ no earlier version", "sub");
+  }
+
+  {
+    const W = 680, s = svg("base-b", W, 330), lo = 900, hi = 1150, X = (y: number) => 200 + (y - lo) / (hi - lo) * 440;
+    for (let y = 900; y <= 1150; y += 50) { s.append(svgEl("line", { x1: X(y), x2: X(y), y1: 10, y2: 150, class: "axis", style: "stroke-opacity: .3" })); t(s, X(y), 166, y, "sub", "middle"); }
+    const three = OURS.filter(([k, n]) => !(k === "bc" && n === 12)).map(([k, n]) => brows.find(x => x.k === k && x.n === n)!);
+    three.forEach((x, j) => {
+      const y = 30 + j * 44;
+      t(s, 0, y + 4, x.en, "lab hi");
+      const ys = [x.e!.y, x.claude.y, x.gpt.y];
+      s.append(svgEl("line", { x1: X(Math.min(...ys)), x2: X(Math.max(...ys)), y1: y, y2: y, style: "stroke: var(--rule); stroke-width: 6" }));
+      s.append(svgEl("circle", { cx: X(x.e!.y), cy: y, r: 8, style: `fill: ${HI}` }));
+      ([["C", x.claude.y, -1], ["G", x.gpt.y, 1]] as [string, number, number][]).forEach(([m, yr, d]) => {
+        const ok = yr === x.e!.y;
+        s.append(svgEl("circle", { cx: X(yr) + (ok ? d * 9 : 0), cy: y + (ok ? 0 : d * 7), r: 6, style: `fill: ${ok ? SAME : NOT}` }));
+        t(s, X(yr) + (ok ? d * 9 : 0), y + (ok ? 0 : d * 7) + 4, m, "sub", "middle");
+      });
+    });
+    ([[HI, "the trace"], [SAME, "C, G: the model names the same text"], [NOT, "C, G: it names another, older text"]] as [string, string][]).forEach(([c, l], q) => {
+      s.append(svgEl("circle", { cx: 6 + q * 190, cy: 186, r: 5, style: `fill: ${c}` })); t(s, 16 + q * 190, 190, l, "sub"); });
+    const bar = (y: number, label: string, v: number, of: number) => {
+      t(s, 0, y + 14, label, "lab"); r(s, 200, y, 440, 20, "var(--rule)"); r(s, 200, y, 440 * v / of, 20, SAME);
+      t(s, 200 + 440 * v / of + 6, y + 14, `${v} of ${of}`, "lab");
+    };
+    t(s, 0, 222, "Names the trace’s own text", "sub");
+    bar(232, "Claude, from memory", right("claude"), 135); bar(258, "GPT, from memory", right("gpt"), 135);
+    bar(284, "Claude, with search", 84, 131); bar(310, "GPT, with search", 83, 131);
+  }
+
+  {
+    const W = 680, H = 420, s = svg("base-c", W, H), lo = 740, hi = 1240, L = 60, P = 460, V = 330;
+    const X = (y: number) => L + (y - lo) / (hi - lo) * P, Y = (y: number) => 30 + V - (y - lo) / (hi - lo) * V;
+    for (let y = 800; y <= 1200; y += 100) {
+      s.append(svgEl("line", { x1: X(y), x2: X(y), y1: Y(hi), y2: Y(lo), class: "axis", style: "stroke-opacity: .25" })); t(s, X(y), Y(lo) + 14, y, "sub", "middle");
+      s.append(svgEl("line", { x1: L, x2: L + P, y1: Y(y), y2: Y(y), class: "axis", style: "stroke-opacity: .25" })); t(s, L - 6, Y(y) + 4, y, "sub", "end");
+    }
+    s.append(svgEl("line", { x1: X(lo), y1: Y(lo), x2: X(hi), y2: Y(hi), style: "stroke: var(--head); stroke-dasharray: 4 3" }));
+    t(s, X(1180), Y(1180) - 8, "right year", "sub", "end");
+    t(s, L + P / 2, Y(lo) + 32, "Year of the trace’s text", "sub", "middle");
+    t(s, L + P + 14, Y(1004) + 4, "← Jingde Record", "sub"); t(s, L + P + 14, Y(952) + 10, "← Zutang ji", "sub");
+    for (const m of ["claude", "gpt"] as const) for (const x of brows) {
+      if (!x.e || !x[m].y || x[m].y < lo || x[m].y > hi) continue;
+      const hiK = ours(x.k, x.n) && !(x.k === "bc" && x.n === 12);
+      s.append(svgEl("circle", { cx: X(x.e.y) + (Math.random() - .5) * 6, cy: Y(x[m].y) + (Math.random() - .5) * 6, r: hiK ? 6 : 3.5,
+        style: `fill: ${hiK ? HI : m === "claude" ? SAME : NOT}; fill-opacity: ${hiK ? 1 : .55}` }));
+    }
+    t(s, 0, 14, "Year named by the model", "sub");
+    ([[SAME, "Claude"], [NOT, "GPT"], [HI, "the three koans, both models"]] as [string, string][]).forEach(([c, l], q) => {
+      s.append(svgEl("circle", { cx: L + 6 + q * 90, cy: H - 10, r: 5, style: `fill: ${c}` })); t(s, L + 16 + q * 90, H - 6, l, "sub"); });
+  }
+
+  {
+    const fig = document.getElementById("base-d")!, tip = fig.querySelector<HTMLElement>(".mk-tip")!;
+    const name = (i: number | null, title: string) => i == null ? `${title} (not in my corpus)` : (BT[i][2] ?? BT[i][1]);
+    const CATS: [string, string, (x: BRow) => boolean][] = [
+      ["Both models name the trace’s text", SAME, x => !!x.e && book(x.claude.i) === book(x.e.i) && book(x.gpt.i) === book(x.e.i)],
+      ["One model does", "url(#hatch)", x => !!x.e && (book(x.claude.i) === book(x.e.i)) !== (book(x.gpt.i) === book(x.e.i))],
+      ["Neither does", NOT, x => !!x.e && book(x.claude.i) !== book(x.e.i) && book(x.gpt.i) !== book(x.e.i)],
+      ["No earlier version in the trace", "none", x => !x.e]];
+    const W = 680, PER = 25, C = 26, order = [...brows].sort((a, b) => (a.k === b.k ? 0 : a.k === "gg" ? -1 : 1) || a.n - b.n);
+    const H = 56 + Math.ceil(order.length / PER) * C + 190;
+    const s = svg("base-d", W, H);
+    s.insertAdjacentHTML("afterbegin", `<defs><pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="5" height="5" style="fill: color-mix(in srgb, var(--k2) 22%, var(--bg))"/><rect width="2.4" height="5" style="fill: var(--k2)"/></pattern></defs>`);
+    CATS.forEach(([label, fill, f], q) => {
+      const lx = (q % 2) * 330, ly = 4 + Math.floor(q / 2) * 20;
+      r(s, lx, ly, 12, 12, fill === "none" ? "var(--bg)" : fill, fill === "none" ? { style: `fill: var(--bg); stroke: ${GREY}; stroke-width: 1.5` } : {});
+      t(s, lx + 18, ly + 11, `${label}: ${brows.filter(f).length}`, "lab");
+    });
+    let y = 52;
+    [[order]].forEach(([g]) => {
+      g.forEach((x, j) => {
+        const fill = CATS.find(c => c[2](x))![1];
+        const cx = (j % PER) * C, cy = y + Math.floor(j / PER) * C, hiK = ours(x.k, x.n) && !(x.k === "bc" && x.n === 12);
+        const sq = svgEl("rect", { x: cx, y: cy, width: C - 4, height: C - 4, rx: 3, tabindex: 0,
+          style: fill === "none" ? `fill: var(--bg); stroke: ${GREY}; stroke-width: 1.5` : `fill: ${fill}` + (hiK ? `; stroke: ${HI}; stroke-width: 3` : "") });
+        const show = () => {
+          const mark = (a: Ans) => !x.e ? "" : book(a.i) === book(x.e.i) ? ' <span class="ok">✓</span>' : ' <span class="no">✗</span>';
+          tip.innerHTML = `<p><b>${id(x.k, x.n)} · ${x.en}</b></p>` +
+            `<p>The trace: ${x.e ? `${BT[x.e.i][2] ?? BT[x.e.i][1]}, ${x.e.y}` : "no earlier version"}</p>` +
+            `<p>Claude: ${name(x.claude.i, x.claude.title)}, ${x.claude.y}${mark(x.claude)}</p>` +
+            `<p>GPT: ${name(x.gpt.i, x.gpt.title)}, ${x.gpt.y}${mark(x.gpt)}</p>`;
+          const f = fig.getBoundingClientRect(), b = sq.getBoundingClientRect();
+          tip.hidden = false;
+          tip.style.left = `${Math.min(b.left - f.left, f.width - tip.offsetWidth - 8)}px`;
+          tip.style.top = `${b.bottom - f.top + 6}px`;
+        };
+        sq.addEventListener("mouseenter", show); sq.addEventListener("focus", show); sq.addEventListener("click", show);
+        sq.addEventListener("mouseleave", () => { tip.hidden = true; });
+        s.append(sq);
+      });
+      y += Math.ceil(g.length / PER) * C;
+    });
+    t(s, 0, y + 12, "Ordered by koan: the Gateless Gate 1–48, then the Blue Cliff Record 1–100. Purple outline: the three koans.", "sub");
+    y += 34;
+    t(s, 0, y, "Names the trace’s own text", "sub");
+    const bars: [string, number, number][] = [["Claude, with search", 84, 131], ["GPT, with search", 83, 131],
+      ["Claude, from memory", right("claude"), 135], ["GPT, from memory", right("gpt"), 135]];
+    bars.sort((a, b) => b[1] / b[2] - a[1] / a[2]).forEach(([label, v, of], q) => {
+      const by = y + 10 + q * 28;
+      t(s, 0, by + 14, label, "lab"); r(s, 170, by, 440, 20, "var(--rule)"); r(s, 170, by, 440 * v / of, 20, SAME);
+      t(s, 170 + 440 * v / of - 8, by + 14, `${Math.round(100 * v / of)}%`, "lab white", "end");
+      t(s, 170 + 440 * v / of + 6, by + 14, `${v} of ${of}`, "sub");
+    });
+  }
+
+  // 2D variants: a palette (both, one, neither) and a layout for the two collections.
+  function variant(rootId: string, pal: [string, string, string], layout: "side" | "bands" | "break") {
+    const fig = document.getElementById(rootId)!, tip = fig.querySelector<HTMLElement>(".mk-tip")!;
+    const name = (i: number | null, title: string) => i == null ? `${title} (not in my corpus)` : (BT[i][2] ?? BT[i][1]);
+    const ok = (x: BRow, m: "claude" | "gpt") => !!x.e && book(x[m].i) === book(x.e.i);
+    const CATS: [string, string, (x: BRow) => boolean][] = [
+      ["Both models name the trace’s text", pal[0], x => ok(x, "claude") && ok(x, "gpt")],
+      ["One model does", pal[1], x => !!x.e && ok(x, "claude") !== ok(x, "gpt")],
+      ["Neither does", pal[2], x => !!x.e && !ok(x, "claude") && !ok(x, "gpt")],
+      ["No earlier version", "none", x => !x.e]];
+    const gg = brows.filter(x => x.k === "gg").sort((a, b) => a.n - b.n), bc = brows.filter(x => x.k === "bc").sort((a, b) => a.n - b.n);
+    const C = 26, W = 680;
+    // Where each square goes, and a heading per collection.
+    const at: [BRow, number, number][] = [], heads: [string, number, number][] = [];
+    let H: number;
+    if (layout === "side") {
+      heads.push(["Gateless Gate · 48", 0, 60], ["Blue Cliff Record · 100", 8 * C + 40, 60]);
+      gg.forEach((x, j) => at.push([x, (j % 8) * C, 70 + Math.floor(j / 8) * C]));
+      bc.forEach((x, j) => at.push([x, 8 * C + 40 + (j % 10) * C, 70 + Math.floor(j / 10) * C]));
+      H = 70 + 10 * C;
+    } else if (layout === "bands") {
+      const L = 130, PER = 21;
+      heads.push(["Gateless Gate", 0, 70 + 14]);
+      gg.forEach((x, j) => at.push([x, L + (j % PER) * C, 70 + Math.floor(j / PER) * C]));
+      const y2 = 70 + Math.ceil(gg.length / PER) * C + 14;
+      heads.push(["Blue Cliff Record", 0, y2 + 14]);
+      bc.forEach((x, j) => at.push([x, L + (j % PER) * C, y2 + Math.floor(j / PER) * C]));
+      H = y2 + Math.ceil(bc.length / PER) * C;
+    } else {
+      const PER = 25, all = [...gg, ...bc];
+      heads.push(["Gateless Gate", 0, 60]);
+      let row = 0, col = 0, y = 70;
+      all.forEach((x, j) => {
+        if (j === gg.length) { row++; col = 0; y += 22; heads.push(["Blue Cliff Record", 0, 70 + row * C + y - 70 - 10]); }
+        at.push([x, col * C, y + row * C]);
+        col++; if (col === PER) { col = 0; row++; }
+      });
+      H = y + (row + 1) * C;
+    }
+    const s = svg(rootId, W, H + 10);
+    s.insertAdjacentHTML("afterbegin", `<defs><pattern id="hatch-${rootId}" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="5" height="5" style="fill: color-mix(in srgb, ${pal[0]} 22%, var(--bg))"/><rect width="2.4" height="5" style="fill: ${pal[0]}"/></pattern></defs>`);
+    const paint = (f: string) => f === "hatch" ? `url(#hatch-${rootId})` : f;
+    CATS.forEach(([label, fill, f], q) => {
+      const lx = (q % 2) * 330, ly = 4 + Math.floor(q / 2) * 20;
+      r(s, lx, ly, 12, 12, "", fill === "none" ? { style: `fill: var(--bg); stroke: ${GREY}; stroke-width: 1.5` } : { style: `fill: ${paint(fill)}` });
+      t(s, lx + 18, ly + 11, `${label}: ${brows.filter(f).length}`, "lab");
+    });
+    for (const [label, x, y] of heads) t(s, x, y, label, "lab head");
+    for (const [x, cx, cy] of at) {
+      const fill = CATS.find(c => c[2](x))![1], hiK = ours(x.k, x.n) && !(x.k === "bc" && x.n === 12);
+      const sq = svgEl("rect", { x: cx, y: cy, width: C - 4, height: C - 4, rx: 3, tabindex: 0,
+        style: fill === "none" ? `fill: var(--bg); stroke: ${GREY}; stroke-width: 1.5` : `fill: ${paint(fill)}` + (hiK ? `; stroke: ${HI}; stroke-width: 3` : "") });
+      const show = () => {
+        const mark = (m: "claude" | "gpt") => !x.e ? "" : ok(x, m) ? ' <span class="ok">✓</span>' : ' <span class="no">✗</span>';
+        tip.innerHTML = `<p><b>${x.k === "gg" ? "Gateless Gate" : "Blue Cliff Record"} ${x.n} · ${x.en}</b></p>` +
+          `<p>The trace: ${x.e ? `${BT[x.e.i][2] ?? BT[x.e.i][1]}, ${x.e.y}` : "no earlier version"}</p>` +
+          `<p>Claude: ${name(x.claude.i, x.claude.title)}, ${x.claude.y}${mark("claude")}</p>` +
+          `<p>GPT: ${name(x.gpt.i, x.gpt.title)}, ${x.gpt.y}${mark("gpt")}</p>`;
+        const f = fig.getBoundingClientRect(), b = sq.getBoundingClientRect();
+        tip.hidden = false;
+        tip.style.left = `${Math.min(b.left - f.left, f.width - tip.offsetWidth - 8)}px`;
+        tip.style.top = `${b.bottom - f.top + 6}px`;
+      };
+      sq.addEventListener("mouseenter", show); sq.addEventListener("focus", show); sq.addEventListener("click", show);
+      sq.addEventListener("mouseleave", () => { tip.hidden = true; });
+      s.append(sq);
+    }
+  }
+  variant("base-d1", ["var(--k2)", "#e0a33a", "#b5533c"], "side");
+  variant("base-d2", ["var(--k4)", "hatch", "color-mix(in srgb, var(--k4) 18%, var(--bg))"], "bands");
+  variant("base-d3", ["var(--k2)", "color-mix(in srgb, var(--k2) 40%, var(--bg))", "var(--k3)"], "break");
+
+  // ---- 3. Masters + all 148 (same x scale as Masters, wide layout) ----
+  const all = items(E), lo = 760, hi = 1205;
+  function strip(rootId: string, H: number) {
+    const root = document.querySelector(`#${rootId} .chart`)!, W = Math.max(280, root.clientWidth || 680), LW = 130;
+    const X = (y: number) => LW + 8 + (y - lo) / (hi - lo) * (W - LW - 22);
+    return { s: svg(rootId, W, H), X, W, LW };
+  }
+  const dated = all.filter(x => x.y != null).sort((a, b) => a.y! - b.y!);
+
+  {
+    const { s, X } = strip("told-a", 150), Y = (k: number) => 120 - k / 148 * 104;
+    for (let y = 800; y <= 1150; y += 50) s.append(svgEl("line", { x1: X(y), x2: X(y), y1: 10, y2: 120, class: "axis", style: `stroke-opacity: ${y % 100 ? .2 : .45}` }));
+    s.append(svgEl("line", { x1: X(lo), x2: X(hi), y1: Y(74), y2: Y(74), style: "stroke: var(--kw-muted); stroke-dasharray: 3 3" }));
+    let d = `M ${X(lo)} ${Y(0)}`, k = 0;
+    for (const x of dated) { d += ` H ${X(x.y!)}`; k++; d += ` V ${Y(k)}`; }
+    d += ` H ${X(1228 > hi ? hi : 1228)}`;
+    s.append(svgEl("path", { d, style: `fill: none; stroke: ${HI}; stroke-width: 2.5` }));
+    t(s, 0, Y(74) + 4, "Half of 148", "sub");
+    t(s, 0, 30, "All 148 koans,", "lab"); t(s, 0, 46, "written down by", "lab");
+    s.append(svgEl("circle", { cx: X(1004), cy: Y(74), r: 4, style: `fill: ${HI}` }));
+    t(s, X(1004) + 8, Y(74) + 14, "half by 1004", "sub");
+    const at1100 = dated.filter(x => x.y! < 1100).length;
+    s.append(svgEl("circle", { cx: X(1100), cy: Y(at1100), r: 4, style: `fill: ${HI}` }));
+    t(s, X(1100) + 8, Y(at1100) + 14, `${at1100} by 1100`, "sub");
+    for (let y = 800; y <= 1100; y += 100) t(s, X(y), 140, y, "sub", "middle");
+  }
+
+  {
+    const { s, X } = strip("told-b", 160), base = 120;
+    const by = new Map<string, { y: number; fill: string; n: number }>();
+    for (const x of dated) { const f = color(E, x.c.e!.i, x.y!), key = `${x.y}:${f}`; const g = by.get(key) ?? { y: x.y!, fill: f, n: 0 }; g.n++; by.set(key, g); }
+    const stack = new Map<number, number>();
+    for (const g of [...by.values()].sort((a, b) => a.y - b.y)) {
+      const h = g.n * 2.6, below = stack.get(g.y) ?? 0;
+      r(s, X(g.y) - 3, base - below - h, 6, h, g.fill, { rx: 1 });
+      stack.set(g.y, below + h);
+      if (g.n >= 10) t(s, X(g.y), base - below - h - 4, g.n, "sub", "middle");
+    }
+    s.append(svgEl("rect", { x: X(lo), y: 6, width: X(1100) - X(lo), height: base - 6, style: "fill: var(--k-wash)" }));
+    s.append(svgEl("line", { x1: X(1100), x2: X(1100), y1: 6, y2: base, style: "stroke: var(--head); stroke-dasharray: 3 3" }));
+    const pre = dated.filter(x => x.y! < 1100).length;
+    t(s, X(lo) + 6, 22, `${pre} before 1100`, "lab"); t(s, X(1100) + 6, 22, `${148 - pre} after, or never`, "lab");
+    t(s, 0, 60, "All 148 koans:", "lab"); t(s, 0, 76, "first written down", "sub");
+    s.append(svgEl("line", { x1: X(lo), x2: X(hi), y1: base, y2: base, class: "axis" }));
+    for (let y = 800; y <= 1100; y += 100) t(s, X(y), 140, y, "sub", "middle");
+  }
+
+  {
+    const { s, X, LW } = strip("told-c", 96), base = 34;
+    for (let y = 800; y <= 1150; y += 50) s.append(svgEl("line", { x1: X(y), x2: X(y), y1: 0, y2: 60, class: "axis", style: `stroke-opacity: ${y % 100 ? .2 : .45}` }));
+    t(s, 0, base + 5, "All 148 koans", "lab hi");
+    const groups: [string, number[], string][] = [
+      ["Zutang ji", [952], "var(--k1)"], ["Jingde Record", [1004], "var(--k2)"], ["Baiyun", [1072], "var(--k3)"]];
+    const counted = new Set<unknown>();
+    for (const [, ys, fill] of groups) {
+      const list = dated.filter(x => ys.includes(x.y!) && color(E, x.c.e!.i, x.y!) === fill); list.forEach(x => counted.add(x));
+      const S = 10 + Math.sqrt(list.length) * 4;
+      r(s, X(ys[0]) - S / 2, base - S / 2, S, S, fill, { rx: 3 });
+      t(s, X(ys[0]), base + 4, list.length, "in", "middle");
+    }
+    const otherPre = dated.filter(x => x.y! < 1100 && !counted.has(x)).length, late = dated.filter(x => x.y! >= 1100).length;
+    const S2 = 10 + Math.sqrt(otherPre) * 4; r(s, X(1035) - S2 / 2, base - S2 / 2, S2, S2, GREY, { rx: 3 }); t(s, X(1035), base + 4, otherPre, "in", "middle");
+    s.append(svgEl("line", { x1: X(1100), x2: X(1100), y1: 10, y2: 58, style: "stroke: var(--head); stroke-dasharray: 3 3" }));
+    const S3 = 10 + Math.sqrt(late) * 4; r(s, X(1140) - S3 / 2, base - S3 / 2, S3, S3, "var(--k4)", { rx: 3 }); t(s, X(1140), base + 4, late, "in", "middle");
+    t(s, X(1100) - 6, 76, `${dated.filter(x => x.y! < 1100).length} before 1100`, "lab", "end");
+    t(s, X(1100) + 6, 76, `${late} after, ${148 - dated.length} never`, "lab");
+    void LW;
+  }
+</script>

@@ -1,0 +1,125 @@
+---
+// Experiments 2, 9 and 5 of the koans study: the searches past the matcher. One square
+// per case, a band per collection, in case order, colored by which search found its
+// earliest version: the matcher, the search by meaning (bge-m3), a model with search
+// tools, or the search by meaning with an embedder trained on Buddhist texts (MITRA).
+// A dashed outline marks a case where a search offered a version that reading rejected.
+// A square opens what each search found. Below, per search, how many of the versions it
+// offered were kept.
+import "./widgets.css";
+
+interface Props { data: unknown }
+const json = JSON.stringify(Astro.props.data).replace(/</g, "\\u003c");
+---
+<figure class="kw kw-search">
+  <figcaption class="kw-head">
+    <div>
+      <p class="kw-title">Which search found each koan’s earliest version</p>
+      <p class="kw-note">One square per koan, colored by the search that found its earliest version. A dashed outline marks a koan where a search offered a version I rejected on reading. Hover or tap one for what each search found. The bars show how many of the versions each search offered I kept.</p>
+    </div>
+  </figcaption>
+  <div class="chart"></div>
+  <ul class="legend below"></ul>
+  <div class="scores"></div>
+  <div class="kw-tip" hidden></div>
+  <script type="application/json" set:html={json} />
+</figure>
+
+<script>
+  import { dataOf, el, svgEl, title } from "./svg";
+  import { onWidth } from "./earliest";
+
+  type Text = [string, string, string | null];
+  type Source = "5-gram" | "embed" | "agent" | "mitra";
+  type Found = { i: number; y: number };
+  type No = { s: Source; why: string; i?: number | null };
+  type Row = { k: "gg" | "bc"; n: number; en: string; e: (Found & { s: Source }) | null; m: Found | null; no: No[] };
+  type Tally = { searched: number; offered: number; kept: number };
+  type Data = { texts: Text[]; rows: Row[]; tally: Record<"embed" | "agent" | "mitra", Tally> };
+
+  // The three koans the post follows.
+  const OURS = [["gg", 1], ["gg", 37], ["gg", 18]];
+  const COLLECTIONS = [["gg", "Gateless Gate"], ["bc", "Blue Cliff Record"]] as const;
+  const YEAR = { gg: 1228, bc: 1125 };
+  const SEARCHES: { s: Source; label: string; style: string }[] = [
+    { s: "5-gram", label: "The matcher", style: "fill: var(--kw-blue)" },
+    { s: "embed", label: "Search by meaning", style: "fill: var(--kw-violet)" },
+    { s: "agent", label: "Models with search tools", style: "fill: var(--kw-green)" },
+    { s: "mitra", label: "Search by meaning, Buddhist embedder", style: "fill: var(--kw-magenta)" },
+  ];
+  const NONE = { label: "No earlier version", style: "fill: var(--bg); stroke: var(--kw-grey); stroke-width: 1.5" };
+  const WHY: Record<string, string> = { opening: "only the opening exchange", other: "not the story", not: "not the story" };
+
+  function init(root: HTMLElement) {
+    const data = dataOf<Data>(root), tip = root.querySelector<HTMLElement>(".kw-tip")!;
+    const name = (i: number) => title(data.texts[i]);
+    const search = (s: Source) => SEARCHES.find(x => x.s === s)!;
+    const lower = (s: Source) => search(s).label[0].toLowerCase() + search(s).label.slice(1);
+    const style = (r: Row) => r.e ? search(r.e.s).style : NONE.style;
+
+    const legend = root.querySelector(".legend")!;
+    for (const k of [...SEARCHES.map(x => ({ ...x, count: data.rows.filter(r => r.e?.s === x.s).length })), { ...NONE, count: data.rows.filter(r => !r.e).length }]) {
+      const li = el("li"), sw = svgEl("svg", { width: 12, height: 12, viewBox: "0 0 12 12", style: "display: inline-block; vertical-align: -1px; margin-right: .4em" });
+      sw.append(svgEl("rect", { x: .75, y: .75, width: 10.5, height: 10.5, rx: 2, style: k.style }));
+      li.append(sw, `${k.label}: ${k.count}`);
+      legend.append(li);
+    }
+
+    const scores = root.querySelector(".scores")!;
+    scores.append(el("p", "kw-note", "Versions kept on reading, of those each search offered"));
+    for (const [s, about] of [["agent", "All 148 koans"], ["embed", "The 30 with no match"], ["mitra", "All 148 koans"]] as const) {
+      const t = data.tally[s], row = el("div", "score-row"), track = el("span", "track"), fill = el("span", "fill");
+      fill.style.cssText = `width: ${100 * t.kept / t.offered}%; ${search(s).style.replace("fill", "background")}`;
+      track.append(fill);
+      const label = el("span", "score-label", search(s).label);
+      label.append(el("span", "about", about));
+      row.append(label, track, el("span", "score-num", `${t.kept} / ${t.offered}`));
+      scores.append(row);
+    }
+
+    const show = (r: Row, sq: SVGElement) => {
+      const lines = [el("p", "who", `*${r.k === "gg" ? "Gateless Gate" : "Blue Cliff Record"}* ${r.n} · ${r.en}`),
+        el("p", null, r.e ? `Earliest: ${name(r.e.i)}, ${r.e.y}, found by ${lower(r.e.s)}` : "No earlier version")];
+      if (r.m && (r.e?.s !== "5-gram")) lines.push(el("p", null, `The matcher’s earliest: ${name(r.m.i)}, ${r.m.y}`));
+      for (const no of r.no) lines.push(el("p", "no", `Rejected from ${lower(no.s)}: ${WHY[no.why] ?? no.why}${no.i != null ? ` (${name(no.i)})` : ""}`));
+      tip.replaceChildren(...lines);
+      const f = root.getBoundingClientRect(), b = sq.getBoundingClientRect();
+      tip.hidden = false;
+      tip.style.left = `${Math.max(8, Math.min(b.left - f.left, f.width - tip.offsetWidth - 8))}px`;
+      tip.style.top = `${b.bottom - f.top + 6}px`;
+    };
+
+    // Wide: the collection's name left of its band. Narrow: above it.
+    const chart = root.querySelector(".chart")!;
+    onWidth(chart, w => {
+      const W = Math.max(280, w), narrow = W < 520, L = narrow ? 0 : 165, C = narrow ? 22 : 26;
+      const per = Math.floor((W - L + 4) / C);
+      const parts: SVGElement[] = [];
+      let y = 0;
+      for (const [k, label] of COLLECTIONS) {
+        const rows = data.rows.filter(r => r.k === k).sort((a, b) => a.n - b.n);
+        parts.push(svgEl("text", { x: 0, y: y + 14, class: "lane" }, `*${label}* (${YEAR[k]})`));
+        if (narrow) y += 22;
+        rows.forEach((r, j) => {
+          const hi = OURS.some(([a, b]) => r.k === a && r.n === b);
+          const edge = hi ? "; stroke: var(--head); stroke-width: 3" : r.no.length ? "; stroke: var(--kw-red); stroke-width: 2; stroke-dasharray: 3 2" : "";
+          const sq = svgEl("rect", { x: L + (j % per) * C + 1, y: y + Math.floor(j / per) * C + 1, width: C - 5, height: C - 5, rx: 3, tabindex: 0,
+            class: "sq", style: style(r) + edge, "aria-label": `${label} ${r.n}, ${r.en}` });
+          sq.addEventListener("mouseenter", () => show(r, sq));
+          sq.addEventListener("focus", () => show(r, sq));
+          sq.addEventListener("click", () => show(r, sq));
+          sq.addEventListener("mouseleave", () => { tip.hidden = true; });
+          sq.addEventListener("blur", () => { tip.hidden = true; });
+          parts.push(sq);
+        });
+        y += Math.ceil(rows.length / per) * C + 16;
+      }
+      const svg = svgEl("svg", { viewBox: `0 0 ${W} ${y - 16}`, width: W, height: y - 16,
+        "aria-label": SEARCHES.map(x => `${x.label}: ${data.rows.filter(r => r.e?.s === x.s).length}`).join("; ") + `; ${NONE.label}: ${data.rows.filter(r => !r.e).length}` });
+      svg.append(...parts);
+      chart.replaceChildren(svg);
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>(".kw-search").forEach(init);
+</script>

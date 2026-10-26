@@ -121,7 +121,9 @@ section > h2 { margin: 0 0 1.25rem; color: var(--muted); }
 .page-title { font-family: var(--heading-font); font-weight: var(--heading-weight); color: var(--head);
   font-size: calc(2.2rem * var(--heading-scale)); line-height: 1.2; margin: 0 0 2.5rem; }
 .post h1, .post h2, .post h3 { font-family: var(--heading-font); font-weight: var(--heading-weight); color: var(--head); line-height: 1.3; margin: 2.5rem 0 1rem; }
-.post h1 { font-size: 1.5em; } .post h2 { font-size: 1.3em; } .post h3 { font-size: 1.1em; }
+.post h1 { font-size: 1.3em; } .post h2 { font-size: 1.1em; } .post h3 { font-size: 1em; }
+.post h1.page-title { font-size: 1.5em; }
+.post strong, .post th { font-weight: 600; }
 .post p, .post ul, .post ol, .post blockquote, .post pre, .post table { margin: 0 0 1.2rem; }
 .post img { display: block; max-width: 100%; height: auto; margin: 2rem auto; border-radius: 4px; }
 .post figure.chart { margin: 2rem 0; }
@@ -136,3 +138,18 @@ section > h2 { margin: 0 0 1.25rem; color: var(--muted); }
 .page-foot a { color: var(--muted); }
 .page-foot a:hover { color: var(--head); }
 .page .list { margin-top: 1rem; }
+
+/* Footnotes: the numbers in the text, and the list at the end of the post. */
+.post sup a { font-family: var(--label-font); font-size: .8em; margin-left: .1em; text-decoration: none; color: var(--accent); }
+.post .footnotes { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule); font-size: .85em; color: var(--muted); }
+.post .footnotes ol { padding-left: 1.7rem; }
+.post .footnotes li { margin-bottom: .4rem; }
+.post .footnotes p { margin: 0; display: inline; }
+.post .footnotes a[data-footnote-backref] { text-decoration: none; margin-left: .3em; }
+.fn-tip { position: absolute; z-index: 20; max-width: min(26rem, calc(100vw - 16px)); padding: .6rem .8rem; border: 1px solid var(--rule); border-radius: 6px;
+  background: var(--bg); box-shadow: 0 4px 14px rgba(0, 0, 0, .12); color: var(--text); font-size: calc(1.02rem * var(--body-scale)); line-height: 1.5; }
+.fn-tip[hidden] { display: none; }
+.fn-tip p { margin: 0; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+/* Astro hides the list's heading for screen readers only; a post with many notes shows it. */
+.post .footnotes > #footnote-label { position: static; width: auto; height: auto; margin: 0 0 1rem; clip: auto; overflow: visible; white-space: normal; font: var(--heading-weight) 1.3em/1.3 var(--heading-font); color: var(--head); }

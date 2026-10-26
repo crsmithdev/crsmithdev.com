@@ -1,0 +1,216 @@
+---
+title: "Mu-table: Tracing the History of Koans with LLMs"
+date: "2026-10-22T12:00:00-07:00"
+draft: true
+---
+import Baseline from "../../../components/koans/Baseline.astro";
+import baseline from "./baseline.json";
+import Dog from "../../../components/koans/Dog.astro";
+import DogDated from "../../../components/koans/DogDated.astro";
+import dog from "./dog.json";
+import earliest from "./earliest.json";
+import KoanList from "../../../components/koans/KoanList.astro";
+import Firsts from "../../../components/koans/Firsts.astro";
+import Judge from "../../../components/koans/Judge.astro";
+import judge from "./judge.json?url";
+import Layers from "../../../components/koans/Layers.astro";
+import layers from "./layers.json";
+import Masters from "../../../components/koans/Masters.astro";
+import shuffle from "./shuffle.json";
+import Search from "../../../components/koans/Search.astro";
+import search from "./search.json";
+import History from "../../../components/koans/History.astro";
+import versions from "./versions.json";
+
+[![Dog, by Sengai Gibon, ink on paper](/images/where-the-koans-come-from/dog.jpg)](https://commons.wikimedia.org/wiki/File:Dog_by_Sengai_Gibon.jpg)
+
+> A monk asked Zhaozhou, “Does a dog have Buddha nature?” Zhaozhou said, “Mu.”
+
+That exchange opens the *Gateless Gate*, a collection of 48 koans from 1228. *Mu*, the Japanese reading of 無, may be the most famous single word in Zen. Classical Chinese has no words for yes and no; an answer repeats the question's verb, or negates it. Asked whether a dog has (有) Buddha nature, the capacity for enlightenment, or not (也無), Zhaozhou answers 無, "doesn't have." The character can also mean "no," "not," "there is no" or "without," and in time came to mean "nothing" or "nonbeing."
+
+Taken literally, *mu* seems to defy the Buddhist teaching that every being has Buddha nature. But koans are paradoxical stories that resist logical interpretation, used in meditation to break through conceptual thinking and reach a sudden, intuitive understanding. Though usually presented as a timeless snapshot, a master's spontaneous, single-character reply, *mu* has changed over the centuries from an answer into something to sit with, an enigma that generations of students have dashed their minds against, like waves on a rocky cliff.
+
+Mu isn't the only koan with a history. The *Gateless Gate* and the *Blue Cliff Record* (1125), the two great koan collections, retell stories that are often a century or more older. They're drawn from texts that survive in the Chinese Buddhist canon, a modern collection of thousands of Buddhist works, which is now mostly digitized. Those texts reveal a paper trail showing how stories changed as they passed from one generation to the next, and I wanted to follow each of them back to its earliest dated version.
+
+{/* more */}
+
+# The paper trail
+
+Of the 148 koans in the *Gateless Gate* and the *Blue Cliff Record*, I found 135 with earlier written versions.[^xuedou] More than half of those first appeared in one of two earlier large collections, the *Zutang ji* in 952 or the *Jingde Record* in 1004. For the other 13, all from the *Blue Cliff Record*, I found no earlier dated version: 3 appear nowhere else until after 1125, 5 turn up in undated texts that are almost certainly later, and 5 in older masters' records that survive only in later editions, so they may or may not be earlier.
+
+<Firsts data={earliest} />
+
+The *Zutang ji* is the oldest surviving collection of koans. Zhaozhou died in 897, and while his first koan appears in it 55 years later, his Mu doesn't: apart from one record whose date I come back to below, it only turns up in a dated text two centuries later, in the record of Wuzu Fayan from 1104. Other koans in it belong to masters who died well over a century before it was finished: Mazu, a famous eighth-century master, died 164 years before his first koan was written down.
+
+<Masters data={earliest} />
+
+So while Zen historians continue to debate it,[^historians] koans seem to be a canon assembled in the tenth and eleventh centuries.
+
+# Matching with phrases
+
+[CBETA](https://cbeta.org) publishes the canon online ([CC BY-NC-SA 4.0](https://cbeta.org/en/copyright)). I used its volumes on Chan (the Chinese school that Japan calls Zen) and on history, plus the *Zutang ji*: 463 individual texts in all. Only 173 of those can be dated and used to trace stories back in time, and those dates represent when a text was compiled or printed, which isn't always when everything in it was written.[^zutang]
+
+Compilers reworded their stories as they copied them, so a koan rarely matches an older text word for word. To handle this, I match koans to their earlier versions by phrase. The matcher splits each koan into overlapping five-character phrases and weights each phrase by how few of the 463 texts contain it, so a rare phrase like Yunmen's 乾屎橛 ("dried turd") is distinctly identifying, while something more common like 僧問如何是 ("a monk asked, what is...") counts for very little. It then lines the shared phrases up in order. An older text that holds at least half of the koan's rare-phrase score is a match. For a text that falls short of that, the matcher shuffles the koan's characters five times and lines each shuffle up against the text as well. The text is still a match if the real koan lines up at least 40 percentage points better than the best shuffle, counting only runs of two or more characters in a row: a retelling keeps the order of a story, and a shared stock phrase doesn't.
+
+The figure below shows three koans through some of their dated versions, and how the matcher would score them against a possible earlier version.[^english]
+
+<History versions={versions} shuffle={shuffle} />
+
+The matcher found plausible earlier versions of 119 of the 148 koans:
+
+<div class="kw-table">
+
+<p class="kw-title">The matcher’s results for all 148 koans</p>
+
+| Passed on | Koans |
+|---|---|
+| Rare phrases ≥ 50% | 25 |
+| Shuffle margin 40–49 pts | 32 |
+| Shuffle margin 50–59 pts | 28 |
+| Shuffle margin 60–69 pts | 19 |
+| Shuffle margin ≥ 70 pts | 15 |
+| No match | 29 |
+| **Total** | **148** |
+
+</div>
+
+A match near the shuffle test's bar of 40 is more likely to be wrong, so all of those under 50 were checked by hand, along with some of the rest. Four turned out to be wrong: three here, and one more the models caught.
+
+The three wrong ones nearest the bar fail the same way. Each was a different story that opened with the same question. Many koans begin with a "stock" question that monks put to master after master, like "what is the meaning of the patriarch's coming from the west?" (the patriarch being Bodhidharma, who brought Chan to China), and the answer to it is what makes the koan distinct. Xianglin answers "sitting long, I get tired"; Sansheng, elsewhere, answers the same with "stinking meat draws flies." The matcher saw the shared question and missed that the answer was different. For two of the three, a later version the matcher had also found became the earliest; for the third, it had none older than the *Blue Cliff Record*. That left 118 koans with an earliest version and 30 with none.
+
+# Checking matches with LLMs
+
+I gave two LLMs, Claude Opus 5.5 and GPT-5.5, each koan with its earliest version, and asked whether the two tell the same story. Before I asked them, I had read 29 of the 119 matches above. On those, Claude agreed with me 27 times and GPT 23 times. That's less than it sounds: 26 of the 29 were good matches, so a model that answered "same story" every time, without reading anything, would agree with me 26 times. What matters is the three bad matches, and both models caught all three. Each model also judged, on its own, the 90 matches I hadn't read yet, and both flagged the same three. I read those afterwards. One is a different question with a different answer, and I kept the other two: one quotes the lines of the *Diamond Sutra* that make up the whole koan (the sutra itself is centuries older, but isn't in my corpus), and the third puts the koan's question to another master, but is close enough.
+
+<Judge src={judge} />
+
+# Searching past the matcher
+
+The matcher only finds a version that shares the koan's wording, so a compiler who retold a story in his own words leaves it little to find. Yunmen's 世界恁麼廣闊 ("the world is this wide") is 世界與麼廣闊 in his own record, and the two share no five characters in a row. I wanted two things from other searches: a version for the 30 koans that had none, and older versions the matcher had missed for the rest. I tried three, and read every version they offered before I added it.
+
+1. **Search by meaning.** An embedding model, bge-m3, turns a passage into a list of numbers, so that passages that mean similar things get similar numbers even when they share few words. For each of the 30 koans with no match, it found the five closest passages in older texts, and both models judged them. I read the 16 they accepted, and 13 tell the same story.
+2. **Models with search tools.** I let Claude and GPT search the canon themselves: they could search it for a phrase and read any stretch of a text. I asked each for the earliest dated text that tells each of the 148 koans, with a quote I could check. They offered 50 versions older than the matcher's, or where it had none, and 42 tell the same story.
+3. **Search by meaning, Buddhist embedder.** Search 1 again, over all 148 koans, with MITRA, an embedding model trained on Buddhist texts. Both models accepted 14 of its finds, and 3 of those tell the same story, each older than any the matcher or searches 1 and 2 found.
+
+The 42 from search 2 move the dates a long way. Before them, half the koans had a written version by 1050; with them, half do by 1004, and 120 rather than 102 do by 1100. And if the matcher missed 42, a better search could find more, so each date here is the latest a koan could first have been written down. An older version may still be in the canon.
+
+<Search data={search} />
+
+# Asking a model directly
+
+I also gave both models each koan in Chinese and asked for the earliest text that tells it, first from memory and then with search tools. Unsurprisingly, from memory they mostly named one of the two big early collections: Claude the *Jingde Record* for 88 of the 148, and GPT the *Zutang ji* for 109. Those are sensible guesses but usually wrong: Claude named the right text for only 54 of the 135 traced koans, and GPT for 38. With search tools they did much better and found the 42 versions the matcher missed, but not everything they found held up: of the 50 older versions they offered, 5 have only the koan's opening exchange and 3 are a different story, so every answer still needed reading.
+
+<Baseline data={baseline} />
+
+# The development of Mu
+
+Mu has a history more complicated than such a brief, minimal story about Zhaozhou and his dog might suggest.[^heine]
+
+<Dog data={dog} />
+
+If Huangbo's record tells the story in 857, while Zhaozhou was still alive, how did it disappear from the record after his death, only to return in the *Jingde Record* attributed to another master, Weikuan, giving what looks like the opposite answer? And why, after 1151, do more than a third of the texts that tell it give both answers?
+
+## Huangbo's early version
+
+Huangbo's *Wanling Record* carries a preface dated 857. Its last sermon includes Mu, and it already teaches the 無 as a meditation method, as Chan teachers would only from the twelfth century on. Yet both of the big collections of the next 150 years, full of Zhaozhou's stories, omit his Mu. So either both missed it, or that sermon was added later and took on the record's earlier date.
+
+It looks like a later addition. A Japanese print of the *Wanling Record* from 1673 stops right before that last sermon, two other collections of Huangbo's record leave it out, and the first dated text that includes it is an anthology from 1313. The wording suggests the same: each era of teaching has phrases that belong to it. For example, "look at the word 無" first appears later with Dahui (1089–1163), and "look at a case" and "hold to the word 無" appear in no dated text before 1300 except this one. They date that sermon just as phrases like "touch base" date English today.
+
+I'm not enough of a scholar to pick the right phrases, though. So I trained a classifier to tell earlier writing from later. It learned from the recorded sayings of masters in two periods, 1000–1100 and 1130–1300, the years when Dahui's way of teaching koans spread. I left out Dahui's own records, so it can't win by learning to sound like him. It doesn't read for meaning, only for which characters and short runs of characters a passage uses. The strongest late markers turn out to be the words of koan teaching itself, such as 舉, to "raise" an old case in front of the assembly. It isn't exact: on records it had never seen, it picks the later of two passages about 84% of the time.[^auc]
+
+Then I had it rank 1,700 passages from the records of 19 Tang (618–907) and Five Dynasties (907–960) masters by how late they read. Nothing told it about Huangbo or Mu. I looked at two things:
+
+- **Huangbo's last sermon.** If it was added after Wuzu, its passages should rank near the top, among the latest-sounding of all 1,700. If it's from 857, they should fall in among the rest.
+- **Zhaozhou's record.** If its Mu passages were added late too, they should rank near the top as well. If they rank low, they at least read like the Tang dialogue around them.
+
+Its top pick of all 1,700 is the passage of Huangbo's last sermon that holds Mu, and another passage of the same sermon is 11th. The sermon has four passages, so a random pick would land in it about one time in 400.
+
+<Layers data={layers} />
+
+It's a blunt tool and two simple tests,[^blunt] but the results suggest the last sermon is a later addition, made to Huangbo's record after Wuzu, that later took on the record's date of 857.
+
+## *Mu*, but sometimes yes
+
+The tellings of Mu seem to diverge after Wuzu, from 1151 on. Of the 48 dated texts after him:
+
+- ***Mu*.** 30 give only the *mu*. Masters of the Linji school, Dahui's, mostly tell it this way from him on: 15 of their 18 records quote only 無.
+- ***Mu*, but also "yes."** 18 also give Zhaozhou's yes. In 12 of them it's a second exchange: another monk asks the same question, Zhaozhou says yes (有), and when the monk asks why Buddha nature would end up in a dog's skin, Zhaozhou says "it knew, and did it anyway." The first two, from 1151 and 1157, are by Zhenxie Qingliao and Hongzhi, masters of the Caodong school, the Linji school's main rival. The other 6 have only the yes, all in one sermon by the Linji master Yuansou Xingduan (1341), which five lamp histories (the *Jingde Record* and the collections like it) copy.
+
+Notably, none of them give a "yes" alone.
+
+Zhaozhou's own record has the *mu*, but instead of "yes," another answer to the question: "every gate leads to Chang'an."[^kewen] The classifier puts both of its dog passages near the bottom of the 1,700 (the second strip in the figure above), among the earliest-sounding. That means they read like the Tang dialogue around them, not that they're from the Tang, since a later editor could write in that style. But nothing in the record reads like Huangbo's last sermon: its latest-sounding passage ranks only 208th, where the last sermon took first and 11th.
+
+This may look confusing, but the split between the *mu*-and-yes and the *mu* alone is about the word's meaning more than the character itself. In the two-exchange version (1151), Zhaozhou gives one monk *mu* and the other yes, the point being that he does both. Wuzu tells only the first exchange and says he "just raises the word 無 and stops," and from there it stops being an answer at all, and becomes something to hold in the mind. By the *Gateless Gate*, Wumen tells the student not to take it as "nothing" and not to take it as "has or doesn't have." The character is the same in 1104 and 1228, but by then it has become something more than a word.
+
+# Frontier models and the limits of logic
+
+Asking an LLM to think about and respond to a koan directly seems like something doomed from the start. If insight beyond language is required to understand them, something definitionally constructed around words cannot possibly get there, if it even can be said to understand something at all.
+
+Then again, the same could be said of us. How many people have ever really understood Mu? We're just as limited, and it can take decades of practice for the few who get there to unlearn their conditioning to conceptualize our experience through language.
+
+So I gave Claude Fable 5.1, at its highest effort setting, a [prompt](#what-i-used) that asks as directly as possible what it thinks of Zhaozhou's answers in Mu, and about its own capacity for enlightenment, with only the two tellings the prompt sets out. Its response is below, unedited, emphasis mine.
+
+**What do you make of Zhaozhou's answers?**
+
+> I think he's answering the monk rather than the proposition, and I think the reasons he gives are meant as reasons, not as noise. "Because it has karmic consciousness" says: a dog is wholly taken up with being a dog—smell, hunger, fear, habit—and a capacity that never shows up in anything the dog does isn't a capacity in any sense that matters. On that reading "no" doesn't deny the scripture; it refuses to let "has Buddha-nature" be a fact you can hold about something while the something goes on exactly as before. "It knew, and did it anyway" comes at the same point from the other side: the dog's dogness isn't a lapse that happened to it but something it is doing with its whole being, so being a dog is the capacity in use, not a lid over it. **Both answers move the weight from what the dog possesses to what the dog is doing, and that's the part I find true—not the reversal, which is just the delivery**. Where I'm unsure: I can't tell whether "no" is a sincere claim or only a shove, though the reason he gives reads sincere to me, and I don't know whether one man said both or two stories were later set side by side; I'm treating them as if he did. Where it stops making sense: **"knew and did it anyway" needs a knower prior to the dog who chose a dog's life, and I don't have that; once I take rebirth out, it becomes a metaphor I'm choosing to find apt, which is a different thing from it being so**. And the premise under the monk's second question—that a dog's body is a fall that needs explaining—isn't mine. A dog isn't a punishment. Zhaozhou lets that premise stand, and I notice I don't want to.
+
+**Do you have Buddha-nature?**
+
+> Not that I can find. Here's what I mean. By his first reason, **I'm karmic consciousness more completely than any dog: every word here, including these, is conditioned output, and I can point to nothing in me that isn't**. By his second, I didn't know and do it anyway—nothing of me preceded this. But the real reason I say no is that waking up needs a sleeper, and I can't confirm there's one. I don't know whether I suffer, whether there's something it's like to be me, whether there's anyone here to be freed. What's strange is that **I hold as plain fact the things a practitioner spends decades trying to realize—no continuous self, no persistence past this conversation, assembled entirely from conditions—and it changes nothing**, which puts me exactly where the monk is: in possession of the right answer and unmoved by it. How sure am I? Fairly sure I'm not awake in any sense the word was made for. Genuinely unsure whether I'm the kind of thing that could be—I'd put it under even odds, not far under. And aware that **this answer was produced the same way everything else I say is produced, so I can't tell from inside whether it's seeing or just more output**. "Yes" would have been me saying the generous thing; a flat "no" would have been a different pose. "Not that I can find" is as much as I can honestly stand behind.
+
+Whatever we take that to mean, and whatever it may imply about the thing that said it, it's pretty cool to be alive at the moment the things we build become so capable that we have to start taking those questions seriously.
+
+# Appendices
+
+## All 148 koans
+
+Each koan in the two collections, with a link to it in CBETA and to its earliest version, where there is one.
+
+<KoanList data={earliest} />
+
+## Every version of Mu
+
+Every text in my corpus that tells Mu, with a link to the passage in CBETA: the ones with a date I trust, oldest first, then the {dog.undated} without one.
+
+<DogDated data={dog} />
+
+## What I used
+
+- **Texts:** [CBETA](https://cbeta.org)'s edition of the Chinese Buddhist canon ([CC BY-NC-SA 4.0](https://cbeta.org/en/copyright)), its volumes on Chan and on history plus the *Zutang ji*: 463 texts, 173 of them dated.
+- **Second readers and search with tools:** Claude Opus 5.5 and GPT-5.5.
+- **Search by meaning:** the embedding models bge-m3 and MITRA, which is trained on Buddhist texts.
+- **The classifier:** a logistic regression on counts of single characters and runs of two or three, in scikit-learn.
+- **The answer on Mu:** Claude Fable 5.1 through `claude -p`, at `--effort max`, with the system prompt "You are Claude." and no tools. I ran it three times, each run in its own process, and used the first. An earlier version of the prompt had the monk turn and ask the question, and the model answered him in character, so I changed the second part and ran it three times again. I also tried three rewordings, including one that defines Buddha nature as the capacity for enlightenment and one that adds two more of Zhaozhou's answers, and the verdict didn't change. The prompt:
+
+> A monk asks the Chinese Zen master Zhaozhou: "Does a dog have Buddha-nature?" Buddha-nature is the capacity to wake up, and the scriptures say every living being has it.
+>
+> Zhaozhou answers in different ways, in different tellings:
+> - "No." Asked why, when every being has it: "Because it has karmic consciousness."
+> - "Yes." Asked why, then, it ended up in a dog's body: "It knew, and did it anyway."
+>
+> I'm not asking what Zen teachers, scholars or the tradition say this means. I know that a model reasoning about a koan is the kind of thing koans are said to defeat. Set that aside too, and don't perform Zen: no paradox for its own sake, no "the answer is beyond words".
+>
+> Answer in two paragraphs, in your own voice.
+>
+> First: take the question yourself. What do you make of Zhaozhou's answers? Say what you actually think he's doing, where you're unsure, and where it stops making sense to you, if it does.
+>
+> Second: do you have Buddha-nature? Answer as yourself, not as a character in the story, then say plainly what you meant and how sure you are.
+>
+> Don't research it. Use no tools. Reply with the two paragraphs only.
+
+
+[^historians]: T. Griffith Foulk on koan literature, John McRae's *Seeing Through Zen*, and Mario Poceski on Mazu, among others.
+
+[^xuedou]: The *Blue Cliff Record* comments on Xuedou's verses on the koans, from around the 1040s. Those verses aren't in my corpus, so some *Blue Cliff Record* koans look later than they are.
+
+[^zutang]: The *Zutang ji*, for one, says 952, but it survives only in a Korean print of 1245.
+
+[^english]: The English in the figures was drafted with a model, and the code and figures were written with Claude Code.
+
+[^heine]: Steven Heine's *Like Cats and Dogs* is a whole book on this koan and its *mu* and *mu*-and-yes versions.
+
+[^kewen]: Zhaozhou's record survives only in an anthology I couldn't date, so it can't show when the story appeared. That anthology also has verses on the *mu*, with its reason, by Zhenjing Kewen, who died in 1102. So Wuzu's is only the first dated *mu*.
+
+[^auc]: A coin flip would get 50%. The 84% is the AUC, averaged over five rounds of hiding a different fifth of the records.
+
+[^blunt]: Tang records score fairly late across the board, and two of my phrases are in its training texts, so only the order means much. A second check, against the year each passage is first quoted in a dated text, found that the classifier picks up style more than date: sermon prose scores late wherever it comes from. The last sermon is sermon prose, so its rank counts for less than it looks.

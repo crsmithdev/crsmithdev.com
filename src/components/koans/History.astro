@@ -1,0 +1,124 @@
+---
+// Three koans as dated texts tell them, oldest first, ending with the Gateless Gate,
+// and the shuffle test of tracing.py worked through for the version the matcher
+// picked as the earliest. Each version has the English and the Chinese, with the words
+// the Gateless Gate keeps marked; the matched version is tagged. Below a rule, the koan
+// and five shuffles of its characters, each with what lines up with that version, then
+// the verdict. The buttons pick the koan.
+import "./widgets.css";
+
+interface Props { versions: unknown; shuffle: unknown }
+const json = (x: unknown) => JSON.stringify(x).replace(/</g, "\\u003c");
+const versions = json(Astro.props.versions), shuffle = json(Astro.props.shuffle);
+---
+<figure class="kw kw-versions kw-shuffle kw-history">
+  <figcaption class="kw-head">
+    <div>
+      <p class="kw-title">Three koans across their dated versions, and how the matcher found the earliest</p>
+      <p class="kw-note">Marked characters are words the <em>Gateless Gate</em> keeps. Each version shows what the matcher scores its text. The tagged version is the one tested below against shuffles of the koan.</p>
+    </div>
+  </figcaption>
+  <div class="examples" role="group" aria-label="Koan"></div>
+  <div class="body"></div>
+  <script type="application/json" class="d-versions" set:html={versions} />
+  <script type="application/json" class="d-shuffle" set:html={shuffle} />
+</figure>
+
+<script>
+  import { el, title } from "./svg";
+
+  type Text = [string, string, string | null];
+  // The matcher's scores for the version's whole text: rare-phrase share, run share and best shuffle.
+  type Score = { w: number; r: number; n: number; pass: boolean };
+  type Version = { i: number; y: number; l: string; t: string; m: [number, number][]; score?: Score };
+  type Koan = { n: number; en: string; about: string; versions: Version[] };
+  type Aligned = { s: string; w: string; b: [number, number, number][]; a: number };
+  type Example = { k: "bc" | "gg"; n: number; i: number; y: number | null; l: string; en: string; real: Aligned; shuffles: Aligned[] };
+  type Versions = { texts: Text[]; koans: Koan[]; gloss: Record<string, string>; version: number; margin: number };
+  type Shuffle = { texts: Text[]; margin: number; run: number; examples: Example[] };
+
+  const pts = (x: number) => Math.round(100 * x);
+  const name = (t: Text) => t[2] ?? t[1];
+  const cbeta = (id: string, line: string) => `https://cbetaonline.dila.edu.tw/zh/${id}_p${line}`;
+
+  // A string with the characters that count marked.
+  function marked(text: string, at: number[][], cls: string) {
+    const p = el("p", `chars zh ${cls}`), on = new Set<number>();
+    for (const [start, size] of at) for (let j = start; j < start + size; j++) on.add(j);
+    let run = "", lit = false;
+    const flush = () => { if (run) p.append(lit ? el("mark", null, run) : run); run = ""; };
+    [...text].forEach((ch, j) => { if (on.has(j) !== lit) { flush(); lit = on.has(j); } run += ch; });
+    flush();
+    return p;
+  }
+
+  function init(root: HTMLElement) {
+    const V = JSON.parse(root.querySelector(".d-versions")!.textContent!) as Versions;
+    const S = JSON.parse(root.querySelector(".d-shuffle")!.textContent!) as Shuffle;
+    const counted = (x: Aligned) => x.b.filter(([, , size]) => size >= S.run);
+    const share = (x: Aligned) => counted(x).reduce((s, [, , size]) => s + size, 0) / x.s.length;
+    const body = root.querySelector(".body")!, buttons = root.querySelector(".examples")!;
+
+    // What the matcher scores a version, colored by whether it passes.
+    function scored(x: Score) {
+      const p = el("p", `score ${x.pass ? "pass" : "fail"}`);
+      p.append(el("span", "badge", x.pass ? "✓ Passes" : "✗ Fails"),
+        `Rare phrases ${pts(x.w)}% (passes at ${pts(V.version)}%), or lines up ${pts(x.r)}% against a best shuffle of ${pts(x.n)}%: ${pts(x.r - x.n)} points (passes at ${pts(V.margin)})`);
+      return p;
+    }
+
+    // The koan and five shuffles, each with what lines up marked, then the verdict.
+    function test(x: Example) {
+      const scores = el("div", "scores");
+      const line = (label: string, a: Aligned, cls: string) => {
+        const row = el("div", `score-line ${cls}`);
+        row.append(el("span", "score-label", label), el("span", "score-num", `${pts(share(a))}%`),
+          marked(a.s, counted(a).map(([s, , size]) => [s, size]), "small"));
+        return row;
+      };
+      scores.append(line("Koan", x.real, "real"));
+      x.shuffles.forEach((s, j) => scores.append(line(`Shuffle ${j + 1}`, s, "shuffled")));
+      const real = share(x.real), best = Math.max(...x.shuffles.map(share)), passes = real >= best + S.margin;
+      const verdict = el("p", `verdict ${passes ? "yes" : "no"}`);
+      verdict.append(el("span", "badge", passes ? "✓ The same story." : "✗ Not the same story."),
+        `The koan lines up ${pts(real)}% and the best shuffle ${pts(best)}%; a match has to beat every shuffle by ${pts(S.margin)} points.`);
+      return [scores, verdict];
+    }
+
+    function show(j: number) {
+      const k = V.koans[j], x = S.examples.find(e => e.k === "gg" && e.n === k.n)!;
+      const at = k.versions.findIndex(v => V.texts[v.i][0] === S.texts[x.i][0] && v.y === x.y);
+      const passes = share(x.real) >= Math.max(...x.shuffles.map(share)) + S.margin;
+      const koan = el("div", "koan"), steps = el("ol", "steps"), about = el("p", "about");
+      about.append(el("span", "case", `GG${k.n}`), ...el("span", null, k.about).childNodes);
+      koan.append(about, steps);
+      k.versions.forEach((v, n) => {
+        const li = el("li", n === at ? "matched" : null), when = el("p", "when");
+        when.append(el("span", "num", String(v.y)), " ", el("em", null, name(V.texts[v.i])));
+        if (n === at) when.append(el("span", passes ? "tag" : "tag rejected", passes ? "Matcher’s earliest" : "Rejected by the matcher"));
+        const ref = el("p", "ref"), a = el("a", null, `${V.texts[v.i][0]}_p${v.l}`) as HTMLAnchorElement;
+        a.href = cbeta(V.texts[v.i][0], v.l);
+        ref.append(a);
+        li.append(when, el("p", "en", V.gloss[v.t] ?? ""), marked(v.t, v.m, "small"), ref);
+        if (v.score) li.append(scored(v.score));
+        steps.append(li);
+      });
+      const after = el("div", "after");
+      after.append(el("p", "from", `*Gateless Gate* (1228) vs ${title(S.texts[x.i])}${x.y ? ` (${x.y})` : ""}`), ...test(x));
+      koan.append(after);
+      body.replaceChildren(koan);
+      buttons.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.i === String(j))));
+    }
+
+    V.koans.forEach((k, j) => {
+      const b = el("button", null, k.en) as HTMLButtonElement;
+      b.type = "button";
+      b.dataset.i = String(j);
+      b.addEventListener("click", () => show(j));
+      buttons.append(b);
+    });
+    show(0);
+  }
+
+  document.querySelectorAll<HTMLElement>(".kw-history").forEach(init);
+</script>

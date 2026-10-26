@@ -1,0 +1,275 @@
+[
+ {
+  "id": "BC3",
+  "en": "Sun-Face Buddha, Moon-Face Buddha",
+  "case": "馬大師不安院主問。和尚近日。尊候如何大師云。日面佛月面佛。",
+  "text": "Zutang ji",
+  "y": 952,
+  "l": "0562b10",
+  "cbeta": "B25n0144",
+  "p": "水尚未滿！」道吾云：「滿也。」雲嵒云：「湛湛底。」洞山云：「什摩劫中曾欠少來？」師明晨遷化，今日晚際，院主問：「和尚四體違和，近日如何？」師曰：「日面佛，月面佛。」汾州和尚為座主時，講四十二本經論，來問師：「三乘十二分教，某甲粗知，未審宗門",
+  "margin": 44,
+  "weight": 15,
+  "claude": {
+   "same": true,
+   "why": "Both record Mazu, gravely ill shortly before his death, being asked by the temple steward (院主) how he is doing these days and answering 'Sun-face Buddha, Moon-face Buddha'; B simply has a slightly expanded setting (he dies the next morning, his body is unwell)."
+  },
+  "gpt": {
+   "same": true,
+   "why": "B contains the same illness exchange in which the院主 asks how the master is recently and the master answers “日面佛，月面佛,” with only added surrounding context."
+  },
+  "post": false
+ },
+ {
+  "id": "GG45",
+  "en": "Who Is He?",
+  "case": "東山演師祖曰。釋迦彌勒猶是他奴。且道他是阿誰。",
+  "text": "Record of Wuzu Fayan",
+  "y": 1104,
+  "l": "0657a29",
+  "cbeta": "T47n1995",
+  "p": "則神出鬼沒，別則醉後添盃。畢竟如何？待爾念得熟，向爾道。」上堂，舉：「古人云：『釋迦彌勒猶是他奴。』且道他是誰？」便下座。上堂云：「五千四十八卷，教理行果成見，祖師門下商量，須知一貴一賤，貴",
+  "margin": 45,
+  "weight": 35,
+  "claude": {
+   "same": true,
+   "why": "Both passages pose the same saying, that Shakyamuni and Maitreya are still his servants, and end on the same unanswered challenge, 'who is he?'; B has Baiyun quoting it from 'an ancient' and stepping down, while A credits it to Dongshan Yan, but the content and point are identical."
+  },
+  "gpt": {
+   "same": true,
+   "why": "B gives the same saying and challenge—“Shakyamuni and Maitreya are still his slaves; say, who is he?”—with no different answer or development, only framing it as a sermon quotation."
+  },
+  "post": false
+ },
+ {
+  "id": "BC46",
+  "en": "Jingqing and the Sound of Rain",
+  "case": "鏡清問僧。門外是什麼聲僧云。雨滴聲清云。眾生顛倒迷己逐物僧云。和尚作麼生清云。洎不迷己僧云。洎不迷己意旨如何清云。出身猶可易。脫體道應難洎。",
+  "text": "Zutang ji",
+  "y": 952,
+  "l": "0493b12",
+  "cbeta": "B25n0144",
+  "p": "得活底人又作摩生？」師云：「出身路險。」「與摩則大可畏。」師云：「不足驚怛。」師問僧：「外邊是什摩聲？」學人云：「雨滴聲。」師云：「眾生迷己逐物。」學人云：「和尚如何？」師云：「洎不迷己。」後有人問：「和尚與摩道意作摩生？」師云：「出身猶可易，脫體道還難。」師又問僧：「離什處？」學云：「離應天。」師云：「還見鰻鯉不？」學人云：「不見",
+  "margin": 46,
+  "weight": 9,
+  "claude": {
+   "same": true,
+   "why": "B contains the same exchange as A, with Jingqing asking what the sound outside is, the monk answering raindrops, the remark about beings deluding themselves and chasing things, 'almost not deluded about myself', and the closing line that getting out is still easy but saying it fully is hard."
+  },
+  "gpt": {
+   "same": true,
+   "why": "B contains the same Jingqing rain-sound exchange and the same follow-up explanation, only with slight wording differences and surrounding unrelated material."
+  },
+  "post": false
+ },
+ {
+  "id": "GG39",
+  "en": "Yunmen: You Have Slipped",
+  "case": "雲門因僧問。光明寂照遍河沙。一句未絕。門遽曰。豈不是張拙秀才語。僧云是。門云話墮也。後來死心。拈云。且道那裏是者僧話墮處。",
+  "text": "Record of Baojue Zuxin",
+  "y": 1141,
+  "l": "0222a04",
+  "cbeta": "X69n1343",
+  "p": "過在什麼處？」僧曰：「過在唯我獨尊。」師曰：「早知上座恁麼道，我也不問。」舉：「雲門因僧問：『光明寂照遍河沙。』雲門曰：『豈不是張拙秀才語？』僧曰：『是。』雲門曰：『話墮也。』」　師問僧：「爾見什麼處是話墮處？」僧曰：「和尚話墮也。」師曰：「爾十二時中向什麼處安身立命？」僧無對。師曰：",
+  "margin": 47,
+  "weight": 23,
+  "claude": {
+   "same": true,
+   "why": "B cites the same Yunmen exchange (the monk quotes 'Light silently illuminates the sands of the Ganges,' Yunmen asks if it is Zhang Zhuo's line, the monk says yes, and Yunmen declares 'you have fallen into words'), then, like Sixin in A, presses on where the fall into words lies, so the core story and point are the same despite the different commentary."
+  },
+  "gpt": {
+   "same": true,
+   "why": "B quotes the same Yunmen exchange verbatim and then continues with a master's follow-up on the same '話墮處' question that A attributes to Sixin."
+  },
+  "post": false
+ },
+ {
+  "id": "BC18",
+  "en": "The Seamless Stūpa",
+  "case": "肅宗皇帝問忠國師。百年後所須何物國師云。與老僧作箇無縫塔帝曰。請師塔樣國師良久云。會麼帝云。不會國師云。吾有付法弟子耽源。却諳此事。請詔問之國師遷化後帝詔耽源。問此意如何源云。湘之南潭之北雪竇著語云。獨掌不浪鳴中有黃金。充一國雪竇著語云。山形拄杖子無影樹下合同船雪竇著語云。海晏河清瑠璃殿上無知識雪竇著語云。拈了也。",
+  "text": "Zutang ji",
+  "y": 952,
+  "l": "0363a06",
+  "cbeta": "B25n0144",
+  "p": "「乞師慈悲。」師又索一草，拋放水裏，其蟻子驚訝，依草便上䤬羅外。皇帝豁然便悟。代宗皇帝問：「師百年後要個什摩？」師曰：「與老僧造個無縫塔。」帝乃胡跪曰：「請師塔樣。」師良久，帝罔措。師曰：「吾有付法弟子在，耽源卻諳此事，問取他去。」國師頓世後，帝乃詔耽源，舉此因緣，問：「此意如何？」耽源乃作偈曰：湘之南，潭之北，中有黃金充一國。無影樹下合同舡，琉璃殿上無知識。師大曆十年十二月九日終，代宗諡號大證禪師。淨修禪師讚曰：「唐朝國師，大播洪猷。",
+  "margin": 47,
+  "weight": 9,
+  "claude": {
+   "same": true,
+   "why": "Both tell the same seamless-stupa exchange: National Teacher Zhong asks for a seamless stupa, falls silent when asked for its design, refers the emperor to his heir Danyuan, and Danyuan answers with the same verse ('south of Xiang, north of Tan... no one who knows in the lapis palace'); B names the emperor Daizong rather than Suzong and omits Xuedou's comments."
+  },
+  "gpt": {
+   "same": true,
+   "why": "B preserves the same seamless-tower exchange with National Teacher Zhong and the same Danyuan verse, though embedded in a longer biographical passage and with minor wording/name variation."
+  },
+  "post": false
+ },
+ {
+  "id": "BC73",
+  "en": "Mazu: I Am Tired Today",
+  "case": "僧問馬大師。離四句絕百非。請師直指某甲西來意馬師云。我今日勞倦。不能為汝說。問取智藏去僧問智藏藏云。何不問和尚僧云。和尚教來問藏云。我今日頭痛。不能為汝說。問取海兄去僧問海兄海云。我到這裏却不會僧舉似馬大師馬師云。藏頭白海頭黑。",
+  "text": "Zutang ji",
+  "y": 952,
+  "l": "0561b14",
+  "cbeta": "B25n0144",
+  "p": "問：「如何是佛法旨趣？」師云：「正是你放身命處。」問：「請和尚離四句絕百非，直指西來意，不煩多說。」師云：「我今日無心情，不能為汝說。汝去西堂，問取智藏。」其僧去西堂，具陳前問。西堂云：「汝何不問和尚？」僧云：「和尚教某甲來問上座。」西堂便以手點頭，云：「我今日可殺頭痛，不能為汝說，汝去問取海師兄。」其僧又去百丈，乃陳前問。百丈云：「某甲到這裏卻不會。」其僧卻舉似師，師云：「藏頭白，海頭黑。」師遣人送書到先俓山欽和尚處，書中只畫圓相。俓山纔見，以筆於圓相中與一",
+  "margin": 48,
+  "weight": 16,
+  "claude": {
+   "same": true,
+   "why": "B tells the same exchange as A: a monk asks Mazu to point directly to the meaning of the coming from the West beyond the four propositions, is sent to Zhizang, who pleads a headache and sends him on to Baizhang Huaihai, who says he does not understand, and Mazu closes with 'Zang's head is white, Hai's head is black.'"
+  },
+  "gpt": {
+   "same": true,
+   "why": "B recounts the same exchange as A: the monk asks Mazu to directly indicate the meaning of the West-coming, Mazu sends him to Zhizang, Zhizang sends him to Hai/Baizhang, Hai says he does not understand, and Mazu concludes that Zhizang’s head is white and Hai’s head is black."
+  },
+  "post": false
+ },
+ {
+  "id": "BC52",
+  "en": "Zhaozhou’s Stone Bridge",
+  "case": "僧問趙州。久響趙州石橋。到來只見略彴州云。汝只見略彴。且不見石橋僧云。如何是石橋州云。渡驢渡馬彴。",
+  "text": "Jingde Record of the Transmission of the Lamp",
+  "y": 1004,
+  "l": "0277c12",
+  "cbeta": "T51n2076",
+  "p": "失命。僧云。請和尚舉。師才舉前語。僧指傍僧云。者箇師僧喫却飯了作恁麼語話。師乃休僧問。久嚮。趙州石橋。到來只見掠彴。師云。汝只見掠彴不見趙州橋。僧云。如何是趙州橋。師云。過來。又有僧同前問。師亦如前答。僧云。如何是趙州橋。師云。度驢度馬。僧云。如何",
+  "margin": 48,
+  "weight": 12,
+  "claude": {
+   "same": true,
+   "why": "B contains the same Zhaozhou stone-bridge exchange: the monk sees only a log bridge, Zhaozhou says he misses the real bridge, and when asked what the bridge is he answers 'it lets donkeys and horses cross'; B is simply a fuller version with an extra 'come across' round and a follow-up about the log bridge."
+  },
+  "gpt": {
+   "same": true,
+   "why": "B contains the same Zhaozhou stone-bridge exchange and the same answer, “it lets donkeys and horses cross,” though it also includes an additional variant and follow-up."
+  },
+  "post": false
+ },
+ {
+  "id": "GG44",
+  "en": "Bajiao’s Staff",
+  "case": "芭蕉和尚示眾云。爾有拄杖子。我與爾拄杖子。爾無拄杖子。我奪爾拄杖子。",
+  "text": "Extended Record of Baiyun Shouduan",
+  "y": 1072,
+  "l": "0325a12",
+  "cbeta": "X69n1352",
+  "p": "明鏡當軒燭盡幽，滿面慚惶移步去，清光灼灼避無由。雲蓋鵬和尚參雙泉雅山主，雅令看芭蕉室中，示僧云：你有拄杖子，我與你拄杖子；你無拄杖子，我奪却你拄杖子。鵬經久看之未省。一日，雅向火次，鵬侍立，雅顧視鵬云：你有拄杖子，我與你拄杖子；",
+  "margin": 48,
+  "weight": 10,
+  "claude": {
+   "same": true,
+   "why": "B explicitly quotes Bajiao's teaching from his room ('you have a staff, I give you a staff; you have no staff, I take it away') in full and with the same point, though it embeds that teaching in a later story where Shuangquan Ya assigns it to Yungai Peng and uses it to bring about his awakening."
+  },
+  "gpt": {
+   "same": true,
+   "why": "B explicitly quotes the same Bajiao staff saying as A, though it embeds it in a later story about Peng’s practice and awakening under Yashan."
+  },
+  "post": false
+ },
+ {
+  "id": "BC20",
+  "en": "Longya’s Meditation Board",
+  "case": "龍牙問翠微。如何是祖師西來意微云。與我過禪板來牙過禪板與翠微。微接得便打牙云。打即任打。要且無祖師西來意牙又問臨濟。如何是祖師西來意濟云。與我過蒲團來牙取蒲團過與臨濟濟接得便打牙云。打即任打。要且無祖師西來意。",
+  "text": "Jingde Record of the Transmission of the Lamp",
+  "y": 1004,
+  "l": "0337b27",
+  "cbeta": "T51n2076",
+  "p": "得。但學佛學祖。則萬劫無有得期。又問。如何得不被祖佛謾去。師曰。則須自悟去。師在翠微時。問如何是祖師意。翠微曰。與我將禪板來。師遂過禪板。翠微接得便打。師曰。打即任打要。且無祖師意。又問臨濟。如何是祖師意。臨濟曰。與我將蒲團來。師乃過蒲團。臨濟接得便打。師曰。打即任打要。且無祖師意。後有僧問。和尚行脚時問二尊宿祖師意。未審二尊宿道眼明也未。師曰。明即明也。要且",
+  "margin": 48,
+  "weight": 13,
+  "claude": {
+   "same": true,
+   "why": "B gives the same exchange as A, told from Longya's point of view: Cuiwei asks for the meditation board, Linji asks for the cushion, each strikes him, and he replies that they may strike but there is no meaning of the patriarch's coming, with only minor rewording such as 祖師意 for 祖師西來意."
+  },
+  "gpt": {
+   "same": true,
+   "why": "B recounts the same Longya exchanges with Cuiwei and Linji—asking the patriarchal meaning, being told to bring a board or cushion, being struck, and replying that the beating is fine but there is still no patriarchal meaning."
+  },
+  "post": false
+ },
+ {
+  "id": "BC39",
+  "en": "Yunmen’s Flower Hedge",
+  "case": "僧問雲門。如何是清淨法身門云。花藥欄僧云。便恁麼去時如何門云。金毛獅子。",
+  "text": "Extended Record of Yunmen",
+  "y": 1076,
+  "l": "0552c27",
+  "cbeta": "T47n1988",
+  "p": "還同說也無？」師云：「痛領一問。」進云：「與麼則同說也。」師云：「適來道什麼？」問：「如何是清淨法身？」師云：「花藥欄。」進云：「便與麼會時如何？」師云：「金毛師子。」上堂，因聞鐘鳴，乃云：「世界與麼廣闊，為什麼鐘聲披七條？」上堂云：「不可雪上",
+  "margin": 48,
+  "weight": 10,
+  "claude": {
+   "same": true,
+   "why": "B contains the same exchange as A, with Yunmen answering the question about the pure Dharma-body with 'flowering hedge' and the follow-up with 'golden-haired lion,' differing only in minor wording (便與麼會時 vs 便恁麼去時, 師子 vs 獅子)."
+  },
+  "gpt": {
+   "same": true,
+   "why": "B contains the same Yunmen exchange: the question about the pure dharmakaya, the answer “flower-medicine railing,” and the follow-up answered “golden-haired lion.”"
+  },
+  "post": false
+ },
+ {
+  "id": "BC56",
+  "en": "One Arrow Through Three Barriers",
+  "case": "良禪客問欽山。一鏃破三關時如何山云。放出關中主看良云。恁麼則知過必改山云。更待何時良云。好箭放不著所在便出山云。且來闍黎良回首山把住云。一鏃破三關即且止。試與欽山發箭看良擬議山打七棒云。且聽這漢疑三十年。",
+  "text": "Jingde Record of the Transmission of the Lamp",
+  "y": 1004,
+  "l": "0340b20",
+  "cbeta": "T51n2076",
+  "p": "圓相。師曰。不得不問。巖頭呵呵云太遠生。師曰。有口不喫茶人多。巖頭雪峯俱無語。有良禪客參次才禮拜後便問云。一箭射三關時如何。師曰。放出關中主看。良云恁麼即知過必改去也。師云。更待何時。良云。好隻箭放不著所在便出去。師曰。擬射三關且從試為欽山發箭。良近前良久而退。師乃打良七拄杖。良乃出去。師曰。且聽箇亂統漢心內疑三十年。有人舉似同安和尚。安云。良公雖發箭要且未中的。其僧便問同安云。未審如何得中的去",
+  "margin": 49,
+  "weight": 16,
+  "claude": {
+   "same": true,
+   "why": "B is the same exchange between Chan traveler Liang and Qinshan about one arrow breaking three barriers, with the same lines ('release the master within the barrier', 'when else', 'good arrow, no place to land'), the same challenge to shoot an arrow for Qinshan, the seven blows, and the closing remark about thirty years of doubt; only minor details are reworded."
+  },
+  "gpt": {
+   "same": true,
+   "why": "B contains the same exchange between Liang and Qinshan with the same answer, challenge, beating, and remark about doubting for thirty years, only with minor wording differences and added later commentary."
+  },
+  "post": false
+ },
+ {
+  "id": "GG18",
+  "en": "Dongshan’s Three Pounds of Flax",
+  "case": "洞山和尚。因僧問。如何是佛。山云。麻三斤。",
+  "text": "Tiansheng Record of the Lamp",
+  "y": 1036,
+  "l": "0534a05",
+  "cbeta": "X78n1553",
+  "p": "云：四十五里長松徑，南北遊人不猒頻。　進云：如何是道中人？　師云：兩兩三三。師在洞山會裏，有僧問洞山：如何是佛？　洞山云：麻三斤。爾後眾皆下語，不契洞山。師乃有頌：七寶𦘕牛頭，黃金為點額。春晴二月初。農人皆取",
+  "margin": 50,
+  "weight": 15,
+  "claude": {
+   "same": true,
+   "why": "B directly recounts the same exchange, a monk asking Dongshan 'What is Buddha?' and Dongshan answering 'Three pounds of flax' (麻三斤), and then adds a disciple's verse on it, so it tells the same story with the same answer as A."
+  },
+  "gpt": {
+   "same": true,
+   "why": "B explicitly recounts the same monk asking Dongshan 'What is Buddha?' and Dongshan answering 'three pounds of hemp,' then adds later reactions and a verse."
+  },
+  "post": true
+ },
+ {
+  "id": "BC12",
+  "en": "Dongshan’s Three Pounds of Flax",
+  "case": "僧問洞山。如何是佛山云。麻三斤。",
+  "text": "Jingde Record of the Transmission of the Lamp",
+  "y": 1004,
+  "l": "0386c21",
+  "cbeta": "T51n2076",
+  "p": "有言句盡落有無。不落有無如何。師曰。東弗于代。曰遮箇猶落有無。師曰。支過雪山西。僧問洞山。如何是佛。洞山云。麻三斤。師聞之乃曰。向南有竹向北有木。師後住智門。僧問。不可以智知不可以識識時如何。師",
+  "margin": 54,
+  "weight": 51,
+  "claude": {
+   "same": true,
+   "why": "B quotes the same exchange verbatim, with a monk asking Dongshan 'What is Buddha?' and Dongshan answering 'Three pounds of flax,' and then adds the master's own comment ('south there is bamboo, north there is wood') without changing the original answer."
+  },
+  "gpt": {
+   "same": true,
+   "why": "B explicitly quotes the same exchange—a monk asks Dongshan 'What is Buddha?' and Dongshan answers 'three pounds of hemp'—though it then adds another master's comment."
+  },
+  "post": true
+ }
+]

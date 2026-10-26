@@ -1,0 +1,117 @@
+---
+// One row per master who died before 1000 and is the main figure of three or more
+// cases. A tick marks his death, labeled with the year and the years until the
+// first written version of any of his cases. Each box is the cases first written
+// down in one year and one source, with how many inside; hover or tap one for its cases.
+import "./widgets.css";
+
+interface Props { data: unknown }
+const json = JSON.stringify(Astro.props.data).replace(/</g, "\\u003c");
+---
+<figure class="kw kw-masters">
+  <figcaption class="kw-head">
+    <div>
+      <p class="kw-title">Early masters and the first written versions of their koans</p>
+      <p class="kw-note">One row per master who died before 1000 and has three or more koans. A tick marks when he died, and the line from it gives the years until his first koan was written down. Each box counts his koans first written down in one text, at its year. Hover or tap a box for its koans.</p>
+    </div>
+  </figcaption>
+  <div class="chart"></div>
+  <ul class="legend below"></ul>
+  <div class="kw-tip" hidden></div>
+  <script type="application/json" set:html={json} />
+</figure>
+
+<script>
+  import { dataOf, el, plain, svgEl } from "./svg";
+  import { color, items, legend, onWidth, tip as tipText, type Data, type Item, type Key } from "./earliest";
+
+  // The main master of each case, and his death year. Not in the data, and not yet checked against a reference.
+  const DIED: Record<string, number> = { Zhaozhou: 897, Mazu: 788, Xuefeng: 908, Yunmen: 949, Fayan: 958, Huangbo: 850, "Dongshan Shouchu": 990, Jingqing: 937,
+    "Nanyang Huizhong": 775, Longya: 923, Zhimen: 1031, Guishan: 853, Baizhang: 814, Nanquan: 835, Dasui: 963, Linji: 866, Yangshan: 883,
+    Changsha: 868, Panshan: 814, Fengxue: 973, "Dongshan Liangjie": 869, "Fu Dashi": 569, Xuansha: 908, Yanguan: 842, Changqing: 932,
+    Huoan: 1179, Xiangyan: 898, Yuean: 1152, Caoshan: 901, Deshan: 865, Songyuan: 1202, Huineng: 713, Wuzu: 1104, Shoushan: 993, Doushuai: 1091 };
+  const WHO: Record<Key, Record<number, string>> = {
+    bc: { 2: "Zhaozhou", 4: "Deshan", 3: "Mazu", 5: "Xuefeng", 6: "Yunmen", 7: "Fayan", 11: "Huangbo", 12: "Dongshan Shouchu", 14: "Yunmen", 16: "Jingqing",
+      18: "Nanyang Huizhong", 20: "Longya", 21: "Zhimen", 22: "Xuefeng", 24: "Guishan", 26: "Baizhang", 27: "Yunmen", 28: "Nanquan", 29: "Dasui",
+      30: "Zhaozhou", 32: "Linji", 34: "Yangshan", 36: "Changsha", 37: "Panshan", 38: "Fengxue", 39: "Yunmen", 40: "Nanquan", 41: "Zhaozhou",
+      43: "Dongshan Liangjie", 45: "Zhaozhou", 46: "Jingqing", 47: "Yunmen", 49: "Xuefeng", 50: "Yunmen", 51: "Xuefeng", 52: "Zhaozhou", 53: "Mazu", 54: "Yunmen",
+      57: "Zhaozhou", 58: "Zhaozhou", 59: "Zhaozhou", 60: "Yunmen", 61: "Fengxue", 62: "Yunmen", 63: "Nanquan", 64: "Zhaozhou", 67: "Fu Dashi",
+      68: "Yangshan", 69: "Nanquan", 70: "Baizhang", 71: "Baizhang", 72: "Baizhang", 73: "Mazu", 77: "Yunmen", 80: "Zhaozhou", 83: "Yunmen", 86: "Yunmen", 87: "Yunmen", 88: "Xuansha",
+      90: "Zhimen", 91: "Yanguan", 95: "Changqing", 96: "Zhaozhou", 99: "Nanyang Huizhong" },
+    gg: { 1: "Zhaozhou", 2: "Baizhang", 4: "Huoan", 5: "Xiangyan", 7: "Zhaozhou", 8: "Yuean", 10: "Caoshan", 11: "Zhaozhou", 13: "Deshan",
+      14: "Nanquan", 15: "Dongshan Shouchu", 16: "Yunmen", 17: "Nanyang Huizhong", 18: "Dongshan Shouchu", 19: "Nanquan", 20: "Songyuan",
+      21: "Yunmen", 23: "Huineng", 24: "Fengxue", 25: "Yangshan", 26: "Fayan", 27: "Nanquan", 28: "Deshan", 29: "Huineng", 30: "Mazu",
+      31: "Zhaozhou", 34: "Nanquan", 35: "Wuzu", 36: "Wuzu", 37: "Zhaozhou", 38: "Wuzu", 39: "Yunmen", 40: "Guishan", 43: "Shoushan", 45: "Wuzu", 47: "Doushuai" },
+  };
+  const lo = 760, hi = 1205;
+
+  function init(root: HTMLElement) {
+    const data = dataOf<Data>(root);
+    const by = new Map<string, Item[]>();
+    for (const x of items(data)) {
+      const who = WHO[x.k][x.c.n];
+      if (x.y == null || !who || DIED[who] >= 1000) continue;
+      by.set(who, [...by.get(who) ?? [], x]);
+    }
+    const rows = [...by].filter(([, list]) => list.length >= 3).map(([who, list]) => ({ who, died: DIED[who], list })).sort((a, b) => a.died - b.died);
+    legend(root.querySelector(".legend")!);
+    const chart = root.querySelector(".chart")!, tip = root.querySelector<HTMLElement>(".kw-tip")!;
+    const show = (list: Item[], line: string, box: SVGElement) => {
+      tip.replaceChildren(...list.map(x => el("p", null, tipText(data, x))), el("p", "kw-note", line));
+      tip.hidden = false;
+      const f = root.getBoundingClientRect(), b = box.getBoundingClientRect();
+      tip.style.left = `${Math.max(8, Math.min(b.left - f.left, f.width - tip.offsetWidth - 8))}px`;
+      tip.style.top = `${b.bottom - f.top + 6}px`;
+    };
+    const hide = () => { tip.hidden = true; };
+
+    // Wide: the name left of the row. Narrow: the name on a line above the row.
+    onWidth(chart, w => {
+      const W = Math.max(280, w), narrow = W < 520, LW = narrow ? 0 : 130, RH = narrow ? 52 : 40, TOP = narrow ? 34 : 22, BW = narrow ? 14 : 15;
+      const X = (y: number) => LW + 8 + (y - lo) / (hi - lo) * (W - LW - 22);
+      const H = rows.length * RH + TOP;
+      const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
+        "aria-label": rows.map(r => `${r.who} died ${r.died}, first written ${Math.min(...r.list.map(x => x.y!))}`).join("; ") });
+      for (let y = 800; y <= 1150; y += 50) svg.append(svgEl("line", { x1: X(y), x2: X(y), y1: 0, y2: H - 22, class: "axis", style: `stroke-opacity: ${y % 100 ? .2 : .45}` }));
+      for (let y = 800; y <= 1100; y += 100) svg.append(svgEl("text", { x: X(y), y: H - 6, "text-anchor": "middle" }, y));
+      rows.forEach((r, j) => {
+        const base = j * RH + TOP - (narrow ? 4 : 0), first = Math.min(...r.list.map(x => x.y!)), gap = first - r.died;
+        // Narrow: the death year goes on the name line, as there is no room beside the tick.
+        svg.append(svgEl("text", { x: 0, y: narrow ? base - 13 : base + 5, class: "name" }, narrow ? `${r.who}, died ${r.died}` : r.who));
+        // Cases first written in the same year and source share a box. A box that would
+        // touch the one before it moves right to the next free place.
+        const groups = new Map<string, { y: number; fill: string; list: Item[] }>();
+        for (const x of r.list) {
+          const fill = color(data, x.c.e!.i), key = `${fill}:${x.y}`;
+          const g = groups.get(key) ?? { y: x.y!, fill, list: [] };
+          g.list.push(x); groups.set(key, g);
+        }
+        const placed: number[] = [];
+        for (const g of [...groups.values()].sort((a, b) => a.y - b.y)) {
+          let bx = X(g.y) - BW / 2;
+          while (placed.some(p => Math.abs(p - bx) < BW + 1)) bx += BW + 1;
+          placed.push(bx);
+          const box = svgEl("rect", { x: bx, y: base - BW / 2, width: BW, height: BW, rx: 3, tabindex: 0, style: `fill: ${g.fill}`,
+            "aria-label": g.list.map(x => plain(tipText(data, x))).join("; ") });
+          const line = `${g.y - r.died} years after ${r.who} died`;
+          for (const ev of ["mouseenter", "focus", "click"]) box.addEventListener(ev, () => show(g.list, line, box));
+          box.addEventListener("mouseleave", hide);
+          box.addEventListener("blur", hide);
+          svg.append(box, svgEl("text", { x: bx + BW / 2, y: base + 4, "text-anchor": "middle", class: "in" }, g.list.length));
+        }
+        // The death tick, its year left of it (wide), and a hairline to the first box with the years between.
+        svg.append(svgEl("line", { x1: X(r.died), x2: X(r.died), y1: base - 9, y2: base + 9, style: "stroke: var(--head); stroke-width: 2.5" }));
+        if (!narrow) svg.append(svgEl("text", { x: X(r.died) - 6, y: base + 4, "text-anchor": "end", class: "died" }, r.died));
+        const x1 = X(r.died) + 3, x2 = placed[0] - 3;
+        // The years sit in the middle of the line, with the line broken around them; a short line has no room for them.
+        const mid = (x1 + x2) / 2, half = String(gap).length * 3.3 + 5;
+        if (x2 - x1 < 2 * half + 16) svg.append(svgEl("line", { x1, x2, y1: base, y2: base, class: "gap" }));
+        else svg.append(svgEl("line", { x1, x2: mid - half, y1: base, y2: base, class: "gap" }), svgEl("line", { x1: mid + half, x2, y1: base, y2: base, class: "gap" }),
+          svgEl("text", { x: mid, y: base + 4, "text-anchor": "middle", class: "gap" }, gap));
+      });
+      chart.replaceChildren(svg);
+    });
+  }
+
+  document.querySelectorAll(".kw-masters").forEach(init);
+</script>

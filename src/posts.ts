@@ -17,10 +17,10 @@ export const day = (post: Post) =>
   new Date(post.data.date.slice(0, 10) + "T00:00:00Z")
     .toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 
-// The summary is the text before <!--more-->, or else whole paragraphs up to 70 words, as in Hugo.
+// The summary is the text before <!--more--> ({/* more */} in MDX), or else whole paragraphs up to 70 words, as in Hugo.
 function summaryMarkdown(body: string): string {
   body = body.replace(/^import .*$/gm, "");
-  const more = body.indexOf("<!--more-->");
+  const more = body.search(/<!--more-->|\{\/\* more \*\/\}/);
   if (more >= 0) return body.slice(0, more);
   const out: string[] = [];
   let words = 0;

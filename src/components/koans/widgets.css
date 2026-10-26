@@ -1,0 +1,273 @@
+/* The interactive figures of "Where the Koans Come From". Six colors mark data:
+   --kw-blue, --kw-violet, --kw-sky, --kw-green, --kw-teal and --kw-magenta, and
+   striped with --kw-stripe (black in dark, white in light) for more of a kind.
+   --kw-blue-2 and --kw-violet-2 are a second shade of each, for a variant of what
+   it marks. --kw-red marks only errors, and --kw-grey only what is missing or other;
+   hollow is none. Light and dark each have their own values, checked against their
+   page for colorblind and normal vision. --kw-violet-ink is the violet for text, and
+   --kw-muted is the site's muted ink darkened to 4.5:1 for small text. */
+/* Four text sizes for the figures, in rem so that nesting does not change them:
+   the title, the body, small (controls, rows and tables) and the note (captions,
+   legends, references). The post's prose is 1.02rem. */
+:root { --kw-title: .87rem; --kw-body: .92rem; --kw-small: .82rem; --kw-note: .74rem; }
+:root { --kw-blue: #0051e3; --kw-violet: #8f3bb3; --kw-sky: #2a91e1; --kw-green: #18780f; --kw-teal: #159b86; --kw-magenta: #de4fc6; --kw-blue-2: #0f2e94; --kw-violet-2: #5f1e77; --kw-red: #db1d1d; --kw-violet-ink: #8f3bb3; --kw-stripe: #fff; --kw-grey: #585b63; --kw-agg: #c9cbd2; --k-wash: rgba(143, 59, 179, .1); --kw-muted: #6f6a5f; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --kw-blue: #3452ee; --kw-violet: #9448ad; --kw-sky: #2e92e1; --kw-green: #1b8111; --kw-teal: #21aa8b; --kw-magenta: #e944c9; --kw-blue-2: #99d1ff; --kw-violet-2: #ee9ceb; --kw-red: #e2352e; --kw-violet-ink: #c588e0; --kw-stripe: #000; --kw-grey: #60636c; --kw-agg: #45474e; --k-wash: rgba(148, 72, 173, .18); --kw-muted: #918b80; }
+}
+:root[data-theme="dark"] { --kw-blue: #3452ee; --kw-violet: #9448ad; --kw-sky: #2e92e1; --kw-green: #1b8111; --kw-teal: #21aa8b; --kw-magenta: #e944c9; --kw-blue-2: #99d1ff; --kw-violet-2: #ee9ceb; --kw-red: #e2352e; --kw-violet-ink: #c588e0; --kw-stripe: #000; --kw-grey: #60636c; --kw-agg: #45474e; --k-wash: rgba(148, 72, 173, .18); --kw-muted: #918b80; }
+
+.kw { margin: 2.5rem 0; padding: 1.1rem 1.2rem 1.2rem; border: 1px solid var(--rule); border-radius: 8px; container-type: inline-size; }
+.kw .kw-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .6rem 1rem; margin-bottom: .6rem; }
+.kw .kw-head > div:first-child { flex: 1 1 18rem; }
+.kw .kw-title { margin: 0; color: var(--head); font-weight: 600; font-size: var(--kw-title); }
+.kw .kw-note { margin: .2rem 0 0; color: var(--kw-muted); font-size: var(--kw-note); }
+.kw .zh { font-family: "Songti TC", "Noto Serif CJK TC", "Source Han Serif TC", "PMingLiU", serif; }
+.kw .gloss { margin: .25rem 0 0; color: var(--text); font-size: var(--kw-body); font-style: italic; }
+.kw .case { margin: 0 0 .6rem; font-size: var(--kw-body); }
+.kw .case .gloss { margin: 0; }
+.kw svg { display: block; max-width: 100%; height: auto; overflow: visible; touch-action: manipulation; }
+.kw svg text { font: 11px "Geist", sans-serif; font-variant-numeric: tabular-nums; fill: var(--kw-muted); }
+.kw svg text.tag { fill: var(--head); }
+.kw svg text.tag, .kw svg text.lane { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
+.kw svg .axis { stroke: var(--muted); }
+.kw svg .mark { stroke: var(--kw-muted); stroke-dasharray: 3 3; }
+.kw svg .band { fill: var(--hover); }
+.kw svg .hit { fill: transparent; pointer-events: none; }
+.kw svg .hit:focus { outline: none; }
+.kw svg .hit:focus-visible { stroke: var(--accent); stroke-width: 2; }
+.kw svg .dot { fill: var(--kw-muted); stroke: var(--bg); stroke-width: 2; pointer-events: none; }
+.kw svg .dot.hollow { fill: var(--bg); stroke: var(--kw-muted); stroke-width: 1.5; }
+.kw svg .dot.on { stroke: var(--head); stroke-width: 2.5; }
+.kw svg .moving { transition: transform .6s ease; }
+@media (prefers-reduced-motion: reduce) { .kw svg .moving { transition: none; } }
+
+.kw .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; padding: 2px; }
+.kw .seg button { all: unset; cursor: pointer; padding: .35rem .85rem; border-radius: 999px; font-size: var(--kw-small); color: var(--kw-muted); }
+.kw .seg button[aria-pressed="true"] { background: var(--head); color: var(--bg); }
+.kw .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.kw .legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; margin: 0 0 .5rem; padding: 0; list-style: none; font-size: var(--kw-note); color: var(--text); }
+.kw .legend i { display: inline-block; width: .65em; height: .65em; border-radius: 50%; margin-right: .35em; vertical-align: baseline; }
+.kw .legend .how { color: var(--kw-muted); }
+
+.kw .panel { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--rule); font-size: var(--kw-body); min-height: 6.5em; }
+.kw .panel .who { color: var(--head); }
+.kw .ref { color: var(--kw-muted); font: var(--kw-note) "Geist Mono", ui-monospace, monospace; }
+.kw .passage { font-size: 1.15em; line-height: 1.8; margin: .3rem 0 0; }
+.kw details { margin-top: .8rem; font-size: var(--kw-small); }
+.kw summary { cursor: pointer; color: var(--kw-muted); padding: .3rem 0; }
+.kw .scroll { overflow-x: auto; }
+.kw table { width: 100%; margin: .6rem 0 0; font-size: 1em; display: table; }
+.kw td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.kw svg text.lane { font: 600 12px "Geist", sans-serif; fill: var(--head); }
+.kw .pair { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem 1.4rem; margin-top: .5rem; }
+.kw .pair > div { min-width: 0; }
+.kw .passage.first { background: var(--k-wash); padding: .2rem .5rem; border-radius: 4px; }
+.kw .note { background: var(--hover); padding: .5rem .7rem; border-radius: 4px; }
+.kw .desk svg { margin-top: .4rem; }
+@container (max-width: 520px) { .kw .pair { grid-template-columns: 1fr; } }
+
+/* Novelty: grey is in the Dunhuang text, hatched violet is partly, solid violet is new. */
+.kw .shared { background: var(--muted); }
+.kw .partial { background: repeating-linear-gradient(135deg, var(--kw-blue) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1px var(--kw-blue); }
+.kw .new { background: var(--kw-blue); }
+.kw .chapters { display: grid; gap: .15rem; margin-top: .4rem; }
+.kw .chapters button { all: unset; cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: .25rem .8rem; padding: .45rem .5rem; border-radius: 4px; font-size: var(--kw-small); }
+.kw .chapters button:hover { background: var(--hover); }
+.kw .chapters button[aria-expanded="true"] { background: var(--hover); color: var(--head); box-shadow: inset 3px 0 var(--head); }
+.kw .chapters button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.kw .ch-pct { color: var(--kw-muted); font-variant-numeric: tabular-nums; }
+.kw .bar { grid-column: 1 / -1; display: flex; gap: 2px; height: 10px; }
+.kw .bar span { border-radius: 2px; min-width: 0; }
+.kw .chapter-head { margin: 0 0 .7rem; color: var(--head); }
+.kw .row { border-left: 3px solid; padding: .1rem 0 .1rem .7rem; margin-bottom: .7rem; }
+.kw .row.shared { border-color: var(--muted); background: none; }
+.kw .row.partial { border-left: 3px dashed var(--kw-blue); background: none; box-shadow: none; }
+.kw .row.new { border-color: var(--kw-blue); background: none; }
+.kw .row .passage { font-size: 1.05em; margin: 0; }
+.kw .row .kw-note { display: block; margin: .1rem 0 0; }
+.kw .more { all: unset; cursor: pointer; color: var(--head); text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: .18em; font-size: var(--kw-small); padding: .3rem 0; }
+.kw .more:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.kw .examples { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .35rem; margin-bottom: .8rem; }
+.kw .examples button { all: unset; cursor: pointer; padding: .35rem .65rem; border: 1px solid var(--rule); border-radius: 6px; font-size: var(--kw-small); line-height: 1.35; }
+.kw .examples button span { display: block; color: var(--kw-muted); }
+.kw .examples button[aria-pressed="true"] { border-color: var(--head); color: var(--head); box-shadow: inset 0 0 0 1px var(--head); }
+.kw .examples button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.kw .chars { font-size: 1.1em; line-height: 1.9; margin: .1rem 0 0; overflow-wrap: anywhere; }
+.kw .chars.small { font-size: var(--kw-body); margin: .3rem 0; }
+.kw .chars mark { background: none; color: var(--kw-violet-ink); font-weight: 700; }
+.kw .chars + .gloss { margin-bottom: .6rem; }
+.kw .scores { display: grid; gap: .3rem; margin: .8rem 0 .6rem; }
+.kw .score-row { display: grid; grid-template-columns: 5.5rem 1fr 2.6rem; align-items: center; gap: .6rem; font-size: var(--kw-small); }
+.kw .score-label { color: var(--kw-muted); }
+.kw .score-num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.kw .track { position: relative; height: 10px; }
+.kw .fill { display: block; height: 100%; border-radius: 0 3px 3px 0; }
+.kw .fill.real { background: var(--kw-blue); }
+.kw .fill.shuffled { background: var(--muted); }
+.kw .needed { position: absolute; top: -3px; bottom: -3px; border-left: 2px dashed var(--head); }
+.kw .verdict { margin: .3rem 0 0; padding: .5rem .7rem; border-radius: 4px; background: var(--hover); }
+.kw .verdict .badge { display: inline-block; margin-right: .5em; font-weight: 600; color: var(--head); }
+
+/* Platform: English leads; the Chinese shows only with "With Chinese". */
+.kw .chapter > button { box-sizing: border-box; width: 100%; }
+.kw .ch-pct { display: flex; gap: .7rem; font-size: .92em; }
+.kw .ch-pct i { display: inline-block; width: .6em; height: .6em; border-radius: 2px; margin-right: .3em; }
+.kw .ch-panel { padding: .6rem .5rem .4rem .8rem; font-size: var(--kw-body); }
+.kw .ch-panel .chapter-head { color: var(--kw-muted); margin: 0 0 .7rem; }
+.kw .row.scene .en { margin: 0; font-size: 1em; }
+.kw .row.scene .en-d { margin-top: .5rem; }
+.kw .row.scene .src { margin: .1rem 0 0; font-size: var(--kw-note); font-style: italic; color: var(--kw-muted); }
+.kw .zh-toggle { display: inline-flex; align-items: center; gap: .4rem; font-size: var(--kw-small); color: var(--text); cursor: pointer; white-space: nowrap; }
+.kw .zh-toggle input { accent-color: var(--kw-blue); margin: 0; }
+.kw .row.scene .passage { display: none; }
+.kw.with-zh .row.scene .passage { display: block; font-size: .85em; color: var(--kw-muted); margin-top: .1rem; }
+.kw .row.scene.joined { margin-bottom: 0; padding-bottom: .45rem; }
+.kw .rest { margin-top: .2rem; }
+
+/* Shuffle: English leads each side; the Chinese below it carries the marks. */
+.kw-shuffle .about { margin: 0 0 .7rem; }
+.kw-shuffle .examples { display: flex; flex-wrap: wrap; }
+.kw-shuffle .verdict .badge svg { width: .8em; height: .8em; vertical-align: -.05em; }
+.kw-shuffle .note-why { margin: 0 0 .8rem; }
+.kw-shuffle .match-side { margin-bottom: .7rem; }
+.kw-shuffle .match-side .en { margin: .15rem 0 0; }
+.kw-shuffle .match-side .from { margin: 0; font-size: var(--kw-small); font-weight: 600; color: var(--kw-muted); }
+.kw-shuffle .scores { gap: .1rem; }
+.kw-shuffle .score-line { display: grid; grid-template-columns: 4.6rem 2.8rem 1fr; align-items: baseline; gap: .6rem; font-size: .9em; }
+.kw-shuffle .score-line .score-label { font-size: var(--kw-small); }
+.kw-shuffle .score-line.real .score-num { color: var(--head); font-weight: 600; }
+.kw-shuffle .score-line .chars { margin: 0; }
+
+/* Earliest versions: the grids, the sources and the masters. */
+.kw .legend.below { margin: .7rem 0 0; gap: .15rem .8rem; }
+.kw .legend.below i { border-radius: 2px; }
+.kw svg text.grid-head { font: 600 15px "Geist", sans-serif; fill: var(--head); }
+.kw svg text.grid-sub { font-size: 13px; }
+.kw svg text.name { font: 12px "Geist", sans-serif; fill: var(--text); }
+.kw svg text.count { font: 600 12px "Geist", sans-serif; fill: var(--head); }
+.kw svg text.died { font-size: 11px; fill: var(--head); }
+.kw svg line.gap { stroke: var(--muted); stroke-width: 1; stroke-opacity: .7; }
+.kw svg text.gap { font-size: 11px; fill: var(--kw-muted); paint-order: stroke; stroke: var(--bg); stroke-width: 6px; }
+.kw svg text.in { font: 600 11px "Geist", sans-serif; fill: #fff; pointer-events: none; }
+
+/* The scores of the shuffle test: larger, and centered in the figure. */
+.kw-shuffle .scores { width: fit-content; max-width: 100%; margin: 1.1rem auto .9rem; gap: .25rem; }
+.kw-shuffle .score-line { grid-template-columns: 5.4rem 3.2rem auto; font-size: 1em; }
+.kw-shuffle .score-line .chars.small { font-size: 1.3em; letter-spacing: .06em; }
+
+@container (max-width: 520px) {
+  .kw-shuffle .score-line { grid-template-columns: 3.6rem 2.4rem auto; gap: .4rem; font-size: .9em; }
+  .kw-shuffle .score-line .chars.small { font-size: .86em; letter-spacing: 0; }
+}
+.kw-dog svg text.year { font: 600 16px "Geist", sans-serif; fill: var(--head); }
+.kw-dog .notes { display: grid; grid-template-columns: max-content 1fr; gap: .25rem .9rem; margin: .8rem 0 0; padding-top: .7rem; border-top: 1px solid var(--rule); font-size: var(--kw-small); }
+.kw-dog .notes dt { color: var(--head); font-weight: 600; font-variant-numeric: tabular-nums; }
+.kw-dog .notes dd { margin: 0; }
+.kw-dated { overflow-x: auto; font-size: var(--kw-small); }
+.kw-dated table { display: table; width: 100%; border-collapse: collapse; font-size: 1em; }
+.kw-dated th, .kw-dated td { padding: .3rem .8rem .3rem 0; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+.kw-dated .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kw-dated .ref { font: var(--kw-note) "Geist Mono", ui-monospace, monospace; color: var(--kw-muted); }
+.kw-dated .note { color: var(--kw-muted); font-size: var(--kw-note); }
+
+/* The model experiments: the judge's tiles, the search's cases, the models' reasons. */
+.kw .lane-head { margin: .9rem 0 .4rem; color: var(--head); font-weight: 600; font-size: var(--kw-small); }
+.kw svg .tile[aria-selected="true"] { stroke: var(--accent); stroke-width: 2; }
+.kw .passage.small { font-size: 1em; line-height: 1.7; color: var(--text); overflow-wrap: anywhere; }
+.kw .pair .ref { margin: 0; }
+.kw .said { display: grid; gap: .35rem; margin-top: .6rem; }
+.kw .said .verdict { margin: 0; }
+.kw-layers svg .cell:hover, .kw-layers svg .cell[aria-selected="true"] { stroke: var(--head); stroke-width: 2; }
+.kw-layers svg .cell:focus { outline: none; }
+.kw-layers svg .cell:focus-visible { stroke: var(--accent); stroke-width: 2; }
+.kw-layers .panel p { margin: 0 0 .4rem; }
+.kw-layers .panel .who { font-weight: 600; }
+.kw-layers .panel .zh { color: var(--kw-muted); line-height: 1.8; }
+
+/* Versions: one koan at a time, its versions down a rule, oldest first. */
+.kw-versions .examples { display: flex; flex-wrap: wrap; margin-bottom: 0; }
+.kw-versions .koan { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--rule); }
+.kw-versions .about { margin: 0 0 .9rem; }
+.kw .ref a { color: inherit; }
+.kw-versions .steps { list-style: none; margin: 0; padding: 0 0 0 1rem; border-left: 2px solid var(--rule); }
+.kw-versions .steps li { position: relative; margin: 0 0 1.1rem; }
+.kw-versions .steps li:last-child { margin-bottom: 0; }
+.kw-versions .steps li::before { content: ""; position: absolute; left: calc(-1rem - 6px); top: .45em; width: 10px; height: 10px; border-radius: 50%; background: var(--kw-grey); }
+.kw-versions .steps li:last-child::before { background: var(--kw-violet); }
+.kw-versions .when { margin: 0; color: var(--head); font-weight: 600; }
+.kw-versions .when .num { font-variant-numeric: tabular-nums; margin-right: .3rem; }
+.kw-versions .what { margin: .15rem 0 .35rem; color: var(--kw-muted); font-size: var(--kw-small); }
+.kw-versions .en { margin: 0; font-size: var(--kw-body); }
+
+/* Judge: a square per koan; the tip shows the match and each verdict. Below, the wrong matches. */
+.kw-judge { position: relative; }
+.kw-judge svg .sq { cursor: pointer; }
+.kw-judge svg .sq:focus { outline: none; }
+.kw-judge svg .sq:focus-visible { stroke: var(--accent); stroke-width: 2; }
+.kw-judge .wrong { margin-top: 1rem; }
+.kw-judge .wrong .kw-note { margin: 0 0 .3rem; }
+.kw-judge .wrong .case { padding: .8rem 0; border-top: 1px solid var(--rule); }
+.kw-judge .wrong .from { margin: 0 0 .2rem; color: var(--head); font-size: var(--kw-small); font-weight: 600; }
+.kw-judge .wrong .en { margin: 0 0 .2rem; font-size: var(--kw-small); line-height: 1.5; }
+.kw-judge .wrong .chars { margin: 0 0 .15rem; }
+.kw-judge .wrong .why { margin: .5rem 0 0; color: var(--kw-red); font-size: var(--kw-small); font-weight: 600; }
+
+/* Baseline: a square per koan; the tip shows what the trace and each model say. */
+.kw-baseline { position: relative; }
+.kw-baseline svg .sq { cursor: pointer; }
+.kw-baseline svg .sq:focus { outline: none; }
+.kw-baseline svg .sq:focus-visible { stroke: var(--accent); stroke-width: 2; }
+.kw-baseline .run + .run { margin-top: 1.4rem; }
+.kw-baseline .run-head { margin: 0 0 .6rem; color: var(--head); font-weight: 600; font-size: var(--kw-small); }
+.kw-baseline .run-head span { display: block; color: var(--kw-muted); font-weight: 400; font-size: var(--kw-note); }
+.kw-baseline .scores { margin-top: 1rem; }
+.kw-baseline .scores .kw-note { margin: 0 0 .2rem; }
+.kw-baseline .score-row { grid-template-columns: 9.5rem 1fr 4.2rem; }
+.kw-baseline .fill.real { background: var(--kw-blue); }
+
+/* Search: a square per koan, colored by the search that found its earliest version. */
+.kw-search { position: relative; }
+.kw-search svg .sq { cursor: pointer; }
+.kw-search svg .sq:focus { outline: none; }
+.kw-search svg .sq:focus-visible { stroke: var(--accent); stroke-width: 2; }
+.kw-search .scores { margin-top: 1rem; }
+.kw-search .scores .kw-note { margin: 0 0 .2rem; }
+.kw-search .score-row { grid-template-columns: 17rem 1fr 3.2rem; }
+.kw-search .kw-tip .no { color: var(--kw-red); }
+@media (max-width: 520px) { .kw-search .score-row { grid-template-columns: 9rem 1fr 3.2rem; } }
+.kw-tip { position: absolute; z-index: 2; max-width: min(22rem, calc(100% - 16px)); padding: .55rem .7rem; border: 1px solid var(--rule); border-radius: 6px;
+  background: var(--bg); box-shadow: 0 4px 14px rgba(0, 0, 0, .12); font-size: var(--kw-small); line-height: 1.45; pointer-events: none; }
+.kw-tip p { margin: 0; }
+.kw-tip .who { color: var(--head); font-weight: 600; }
+.kw-baseline .track, .kw-search .track { background: var(--rule); border-radius: 3px; }
+.kw-search .score-label .about { display: block; color: var(--kw-muted); font-size: var(--kw-note); }
+.kw-dated details { margin: .5rem 0; }
+.kw-dated summary { cursor: pointer; padding: .3rem 0; }
+.kw-dated a { color: inherit; }
+.kw-masters { position: relative; }
+.kw-firsts { position: relative; }
+.kw-firsts svg .sq { cursor: pointer; }
+.kw-firsts svg .sq:focus { outline: none; }
+.kw-firsts svg .sq:focus-visible { stroke: var(--accent); stroke-width: 2; }
+
+/* History: the versions of a koan down a rule, then the shuffle test for the matched one. */
+.kw-history .about .case { display: inline-block; margin-right: .5rem; padding: 0 .45rem; border-radius: 4px; font: 600 var(--kw-small) "Geist", sans-serif; color: var(--kw-violet-ink); background: var(--k-wash); vertical-align: .1em; }
+.kw-history .tag { display: inline-block; margin-left: .5rem; padding: 0 .45rem; border-radius: 999px; font: 600 var(--kw-note) "Geist", sans-serif; color: var(--bg); background: var(--kw-blue); vertical-align: .1em; }
+.kw-history .steps li.matched::before { background: var(--kw-blue); }
+.kw-history .tag.rejected { background: var(--kw-grey); }
+.kw-history .score { margin: .25rem 0 0; font-size: var(--kw-note); color: var(--kw-muted); }
+.kw-history .score .badge { margin-right: .5em; font-weight: 600; }
+.kw-history .score.pass .badge { color: var(--kw-green); }
+.kw-history .score.fail .badge { color: var(--kw-red); }
+.kw-history .after { margin-top: 1.2rem; padding-top: .9rem; border-top: 1px solid var(--rule); }
+.kw-history .after .from { margin: 0 0 .3rem; font-size: var(--kw-small); font-weight: 600; color: var(--kw-muted); }
+.kw-history .verdict { margin: 0; }
+/* A table in the post that sits with the figures: centered, with room around it. */
+.kw-table { width: fit-content; margin: 1.6rem auto 2rem; }
+.kw-table .kw-title { margin: 0 0 .4rem; color: var(--head); font-weight: 600; font-size: var(--kw-title); }
+.kw-table table { display: table; width: auto; margin: 0; }
+.kw-table th, .kw-table td { padding: .5rem 1.6rem; }
+.kw-table th:first-child, .kw-table td:first-child { min-width: 12rem; }
+.kw-table th:last-child, .kw-table td:last-child { text-align: right; }

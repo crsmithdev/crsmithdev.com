@@ -1,0 +1,86 @@
+---
+// Candidate palettes for the koans figures, each in light and dark: the eight
+// series slots (four colours, then the same striped), red and striped red, grey
+// and hollow, and a mixed grid like Firsts. Not linked from the site; delete
+// before the branch merges.
+import Base from "../../layouts/Base.astro";
+import PageTop from "../../components/PageTop.astro";
+
+type Set = [string, string, string, string];
+const PALETTES: { name: string; note: string; light: Set; dark: Set }[] = [
+  { name: "A · Current", note: "The earlier blue, purple, green, with sky blue fourth.",
+    light: ["#3b78d8", "#5b3fa0", "#00927d", "#4cb0e0"], dark: ["#4f8be6", "#9378dc", "#00a38f", "#6cc3ef"] },
+  { name: "B · IBM Carbon", note: "Blue 60/50, Purple 70/50, Teal 60/40, Cyan 50/40 (light/dark).",
+    light: ["#0f62fe", "#6929c4", "#007d79", "#1192e8"], dark: ["#4589ff", "#a56eff", "#08bdba", "#33b1ff"] },
+  { name: "C · Tailwind", note: "blue, violet, emerald, sky: 600/500 in light, 400/300 in dark.",
+    light: ["#2563eb", "#7c3aed", "#059669", "#0ea5e9"], dark: ["#60a5fa", "#a78bfa", "#34d399", "#7dd3fc"] },
+  { name: "D · Radix", note: "blue, violet, jade, cyan, step 9 (the same in both themes).",
+    light: ["#0090ff", "#6e56cf", "#29a383", "#00a2c7"], dark: ["#0090ff", "#6e56cf", "#29a383", "#00a2c7"] },
+  { name: "E · Okabe–Ito", note: "The colour-blind-safe set: blue, reddish purple, bluish green, sky blue.",
+    light: ["#0072b2", "#cc79a7", "#009e73", "#56b4e9"], dark: ["#0072b2", "#cc79a7", "#009e73", "#56b4e9"] },
+  { name: "F · Tableau 10", note: "The muted cool hues: blue, purple, green, teal.",
+    light: ["#4e79a7", "#b07aa1", "#59a14f", "#76b7b2"], dark: ["#4e79a7", "#b07aa1", "#59a14f", "#76b7b2"] },
+];
+const THEMES = [
+  { key: "light", bg: "#f7f5f9", text: "#3d3a34", stripe: "#fff", red: "#b8322a", grey: "#c9cbd2", line: "#83868f" },
+  { key: "dark", bg: "#161419", text: "#b9b3a8", stripe: "#000", red: "#e0604f", grey: "#45474e", line: "#767982" },
+] as const;
+// A Firsts-like grid: how many squares each slot gets, then grey and hollow.
+const COUNTS = [30, 26, 16, 10, 6, 5, 4, 3];
+const S = 18, G = 4;
+---
+<Base title="Palettes">
+<div class="page">
+  <PageTop />
+  <article class="post prose">
+    <h1 class="page-title">Palettes</h1>
+    <p>Each row: the four colours, the same striped, red and striped red, grey and hollow; below, a grid with each slot in the proportions of the Firsts figure.</p>
+    {PALETTES.map((p, pi) => (
+      <section class="pal">
+        <h2>{p.name}</h2>
+        <p class="note">{p.note}</p>
+        <div class="pair">
+          {THEMES.map(t => {
+            const cols = p[t.key];
+            const id = (j: number) => `p${pi}-${t.key}-${j}`;
+            const fills = [...cols, ...cols.map((_, j) => `url(#${id(j)})`)];
+            const cells = COUNTS.flatMap((n, j) => Array(n).fill(fills[j])).concat(Array(12).fill(t.grey), Array(6).fill("none"));
+            const per = 20;
+            return (
+              <div class="panel" style={`background: ${t.bg}; color: ${t.text}`}>
+                <p class="who">{t.key}</p>
+                <svg width={per * (S + G)} height={Math.ceil(cells.length / per) * (S + G) + 2 * (S + G) + 8}>
+                  <defs>
+                    {[...cols, t.red].map((c, j) => (
+                      <pattern id={id(j)} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                        <rect width="6" height="6" fill={t.stripe} /><rect width="3.6" height="6" fill={c} />
+                      </pattern>
+                    ))}
+                  </defs>
+                  {[...fills, t.red, `url(#${id(4)})`, t.grey, "none"].map((f, j) => (
+                    <rect x={j * (S + G) + 1} y="1" width={S} height={S} rx="3" fill={f} stroke={f === "none" ? t.line : "none"} stroke-width="1.5" />
+                  ))}
+                  {cells.map((f, j) => (
+                    <rect x={(j % per) * (S + G) + 1} y={2 * (S + G) + 8 + Math.floor(j / per) * (S + G)} width={S} height={S} rx="3" fill={f} stroke={f === "none" ? t.line : "none"} stroke-width="1.5" />
+                  ))}
+                </svg>
+                <p class="hex">{cols.join(" ")}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    ))}
+  </article>
+</div>
+</Base>
+
+<style>
+  .pal { margin: 2rem 0; }
+  .pal h2 { margin: 0 0 .2rem; }
+  .note { margin: 0 0 .6rem; font-size: .85rem; }
+  .pair { display: flex; flex-wrap: wrap; gap: 12px; }
+  .panel { padding: 12px; border-radius: 6px; overflow-x: auto; max-width: 100%; }
+  .who, .hex { margin: 0 0 .4rem; font: 500 .75rem "Geist Mono", monospace; }
+  .hex { margin: .3rem 0 0; }
+</style>

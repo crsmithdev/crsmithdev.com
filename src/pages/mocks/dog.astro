@@ -1,0 +1,351 @@
+---
+// Design mocks for the dog timeline of the koans post. Static SVG, drawn here at
+// 640 wide and scaled to the column. Not linked from the site; delete before the
+// branch merges.
+import Base from "../../layouts/Base.astro";
+import PageTop from "../../components/PageTop.astro";
+import "../../components/koans/widgets.css";
+import dog from "../../content/blog/where-the-koans-come-from/dog.json";
+
+// Texts after 1104 that also have a "yes" answer, from a scan of each text's full body
+// (scratch check, 23 Oct). None has a "yes" without a "no".
+const BOTH = 20;
+const HB = dog.versions.find(v => dog.texts[v.i][0] === "T48n2012B")!;
+const more = dog.versions.length - 2, last = Math.max(...dog.versions.map(v => v.text));
+const NO = "var(--kw-grey)", YES = "var(--k1)", OTHER = "var(--k3)";
+const marks = [
+  { y: 857, head: "Huangbo", color: YES, dash: true },
+  { y: 897, head: "Zhaozhou dies", color: "var(--head)" },
+  { y: 952, head: "Zutang ji", color: NO },
+  { y: 1004, head: "Jingde Record", color: OTHER },
+  { y: 1104, head: "Wuzu’s “No”", color: YES },
+];
+const notes: [string, string][] = [
+  ["857", `Huangbo’s Wanling Record. The preface is dated 857, but the sermon with the dog is a later addition, first dated ${HB.passage}.`],
+  ["897", "Zhaozhou dies."],
+  ["952", "The Zutang ji has many of Zhaozhou’s stories, but not this one."],
+  ["1004", "The Jingde Record has another master asked the same question, and he says yes."],
+  ["1104", "Wuzu Fayan’s record has the first dated “No.”"],
+  [`to ${last}`, `${more} more dated texts tell it, and ${dog.undated} undated ones; the appendix lists them. ${BOTH} of the dated ones give both answers, yes and no, and none gives only yes.`],
+];
+
+// To scale: 845 to 1200 across 600 px.
+const W = 640, X = (y: number) => 20 + (y - 845) / (1200 - 845) * 600;
+const stroke = (m: typeof marks[number], width = 2) => `stroke: ${m.color}; stroke-width: ${width}${m.dash ? "; stroke-dasharray: 4 3" : ""}`;
+const wash = (c: string, p = 13) => `fill: color-mix(in srgb, ${c} ${p}%, var(--bg))`;
+// Labels in two rows, so neighbours (857 and 897, 952 and 1004) do not touch.
+const row = (j: number) => j % 2 ? 46 : 22;
+
+// Not to scale: six even columns.
+const C = (j: number) => 10 + j * (W - 20) / 6;
+// C2: year, then the name or the collection, then what the text says.
+const steps = [
+  { y: "857", name: "Huangbo", says: "No, added later", color: YES, dash: true },
+  { y: "897", name: "Zhaozhou dies", says: "", color: "var(--head)" },
+  { y: "952", name: "Zutang ji", says: "Missing", color: NO },
+  { y: "1004", name: "Jingde Record", says: "Yes", color: OTHER },
+  { y: "1104", name: "Wuzu Fayan", says: "No", color: YES },
+];
+// C2: five columns, the last one wider, so the purple bar can run on past 1104.
+const C5 = (j: number) => 10 + j * (W - 20) / 5.6;
+// E and F: what each text says, as one pill. Purple is no, orange is yes, grey and
+// hollow is none, split is both. A dashed edge is an answer that is not Zhaozhou's
+// at that date: added later, or another master's.
+type Pill = { y: number; says?: "no" | "yes" | "none" | "both"; dash?: boolean; sub?: string };
+const pills: Pill[] = [
+  { y: 857, says: "no", dash: true, sub: "added later" },
+  { y: 897, sub: "Zhaozhou dies" },
+  { y: 952, says: "none" },
+  { y: 1004, says: "yes", dash: true, sub: "another master" },
+  { y: 1104, says: "no" },
+  { y: 1151, says: "both" },
+];
+const WORD = { no: "No", yes: "Yes", none: "None", both: "" };
+const pw = (p: Pill) => p.says === "both" ? 70 : WORD[p.says!].length * 7.5 + 18;
+// One pill as SVG markup, centred on x.
+const pill = (p: Pill, x: number, y: number) => {
+  const w = pw(p), l = x - w / 2, h = 20, edge = p.dash ? "stroke-dasharray: 3 2.5;" : "";
+  if (p.says === "both") return `<rect x="${l}" y="${y}" width="${w / 2}" height="${h}" rx="3" style="fill: ${YES}"/>`
+    + `<rect x="${x}" y="${y}" width="${w / 2}" height="${h}" rx="3" style="fill: ${OTHER}"/>`
+    + `<text x="${l + w / 4}" y="${y + 14}" text-anchor="middle" class="pill">No</text><text x="${x + w / 4}" y="${y + 14}" text-anchor="middle" class="pill">Yes</text>`;
+  if (p.says === "none") return `<rect x="${l}" y="${y}" width="${w}" height="${h}" rx="10" style="fill: var(--bg); stroke: ${NO}; stroke-width: 1.5; ${edge}"/>`
+    + `<text x="${x}" y="${y + 14}" text-anchor="middle" class="pill" style="fill: ${NO}">None</text>`;
+  const c = p.says === "no" ? YES : OTHER;
+  return p.dash
+    ? `<rect x="${l}" y="${y}" width="${w}" height="${h}" rx="10" style="fill: color-mix(in srgb, ${c} 14%, var(--bg)); stroke: ${c}; stroke-width: 1.5; ${edge}"/><text x="${x}" y="${y + 14}" text-anchor="middle" class="pill" style="fill: ${c}">${WORD[p.says!]}</text>`
+    : `<rect x="${l}" y="${y}" width="${w}" height="${h}" rx="10" style="fill: ${c}"/><text x="${x}" y="${y + 14}" text-anchor="middle" class="pill">${WORD[p.says!]}</text>`;
+};
+// E: six even columns. F: to scale, 845 to 1200.
+const E = (j: number) => 10 + j * (W - 20) / 6.3;
+const pillsE = pills.map((p, j) => {
+  return `<line x1="${E(j)}" x2="${E(j)}" y1="4" y2="86" style="stroke: var(--rule); stroke-width: 1"/>`
+    + `<text x="${E(j) + 8}" y="22" class="big-year">${p.y}</text>`
+    + (p.says ? pill(p, E(j) + 8 + pw(p) / 2, 34) : `<text x="${E(j) + 8}" y="48" class="name">${p.sub}</text>`)
+    + (p.says && p.sub ? `<text x="${E(j) + 8}" y="70" class="sub2">${p.sub}</text>` : "");
+}).join("")
+  + `<polygon points="${W - 18},38 ${W - 6},44 ${W - 18},50" style="fill: ${YES}"/><line x1="${E(5) + 82}" x2="${W - 18}" y1="44" y2="44" style="stroke: ${YES}; stroke-width: 2"/>`;
+const pillsF = (() => {
+  const axis = 70;
+  let out = `<line x1="${X(845)}" x2="${W - 18}" y1="${axis}" y2="${axis}" class="axis"/>`
+    + `<polygon points="${W - 18},${axis - 5} ${W - 8},${axis} ${W - 18},${axis + 5}" style="fill: var(--kw-muted)"/>`;
+  for (const p of pills) {
+    const x = X(p.y);
+    out += `<line x1="${x}" x2="${x}" y1="${p.says ? 50 : 30}" y2="${axis + 5}" style="stroke: ${p.says ? "var(--rule)" : "var(--head)"}; stroke-width: ${p.says ? 1 : 2}"/>`
+      + `<text x="${x}" y="${axis + 20}" text-anchor="middle" class="count">${p.y}</text>`;
+    if (p.says) out += pill(p, x, 30) + (p.sub ? `<text x="${x}" y="${axis + 34}" text-anchor="middle" class="sub2">${p.sub}</text>` : "");
+    else out += `<text x="${x}" y="22" text-anchor="middle" class="name">${p.sub}</text>`;
+  }
+  return out;
+})();
+// G: the line itself is a bar, filled by what the texts of each period say.
+const BAND = [
+  { from: 952, to: 1004, label: "None", fill: `color-mix(in srgb, ${NO} 45%, var(--bg))`,
+    css: `color-mix(in srgb, ${NO} 45%, var(--bg))` },
+  { from: 1004, to: 1104, label: "Yes, from another master", fill: "url(#g-yes)",
+    css: `repeating-linear-gradient(135deg, ${OTHER} 0 2px, color-mix(in srgb, ${OTHER} 25%, var(--bg)) 2px 5px)` },
+  { from: 1104, to: 1151, label: "No", fill: YES, css: YES },
+  { from: 1151, to: 1200, label: "No, sometimes yes and no", fill: "url(#g-both)",
+    css: `repeating-linear-gradient(135deg, ${YES} 0 4px, ${OTHER} 4px 6px)` },
+];
+const pillsG = (() => {
+  const top = 34, h = 14, end = W - 18;
+  let out = `<defs>
+    <pattern id="g-yes" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" style="fill: color-mix(in srgb, ${OTHER} 25%, var(--bg))"/><rect width="2" height="5" style="fill: ${OTHER}"/></pattern>
+    <pattern id="g-both" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill: ${YES}"/><rect width="2" height="6" style="fill: ${OTHER}"/></pattern>
+  </defs>`;
+  out += `<line x1="${X(845)}" x2="${X(952)}" y1="${top + h / 2}" y2="${top + h / 2}" class="axis"/>`;
+  for (const b of BAND) out += `<rect x="${X(b.from)}" y="${top}" width="${Math.min(X(b.to), end) - X(b.from)}" height="${h}" style="fill: ${b.fill}"/>`;
+  out += `<polygon points="${end},${top - 3} ${W - 6},${top + h / 2} ${end},${top + h + 3}" style="fill: url(#g-both)"/>`;
+  // Huangbo: a later addition, so a dashed ring on the line, not a span.
+  out += `<rect x="${X(857) - 7}" y="${top - 2}" width="14" height="${h + 4}" rx="3" style="fill: var(--bg); stroke: ${YES}; stroke-width: 1.5; stroke-dasharray: 3 2"/>`;
+  out += `<line x1="${X(897)}" x2="${X(897)}" y1="16" y2="${top + h + 6}" style="stroke: var(--head); stroke-width: 2"/>`
+    + `<text x="${X(897)}" y="11" text-anchor="middle" class="name">Zhaozhou dies</text>`;
+  for (const y of [857, 897, 952, 1004, 1104, 1151]) out += `<text x="${X(y)}" y="${top + h + 22}" text-anchor="middle" class="count">${y}</text>`;
+  return out;
+})();
+// H and H2: C2's thin bar and arrow, run from the left edge, filled as in G: grey
+// missing, green yes, purple no, purple stripes for yes and no.
+const GREEN = "var(--k2)", NONE = "var(--kw-agg)";
+const STATES = {
+  none: { label: "Missing", fill: NONE, css: NONE },
+  yes: { label: "Yes", fill: GREEN, css: GREEN },
+  no: { label: "No", fill: YES, css: YES },
+  both: { label: "Yes and no", fill: "url(#h-both)",
+    css: `repeating-linear-gradient(135deg, ${YES} 0 2px, color-mix(in srgb, ${YES} 25%, var(--bg)) 2px 5px)` },
+};
+const HDEFS = `<defs><pattern id="h-both" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" style="fill: color-mix(in srgb, ${YES} 25%, var(--bg))"/><rect width="2" height="5" style="fill: ${YES}"/></pattern></defs>`;
+// The bar and its arrow, from x0 to the right edge; spans are [x from, state].
+const bar = (spans: [number, keyof typeof STATES][], y: number) => {
+  const end = W - 22;
+  let out = "";
+  spans.forEach(([x, k], j) => { const to = j + 1 < spans.length ? spans[j + 1][0] : end; out += `<rect x="${x}" y="${y}" width="${to - x}" height="6" style="fill: ${STATES[k].fill}"/>`; });
+  return out + `<polygon points="${end},${y - 6} ${W - 8},${y + 3} ${end},${y + 12}" style="fill: ${STATES[spans[spans.length - 1][1]].fill}"/>`;
+};
+const SAYS_COLOR = { none: "var(--kw-grey)", yes: GREEN, no: YES, both: YES };
+// H: to scale.
+const pillsH = (() => {
+  const y = 44;
+  let out = HDEFS + bar([[10, "none"], [X(1004), "yes"], [X(1104), "no"], [X(1151), "both"]], y);
+  out += `<line x1="${X(897)}" x2="${X(897)}" y1="22" y2="${y + 12}" style="stroke: var(--head); stroke-width: 2"/>`
+    + `<text x="${X(897)}" y="16" text-anchor="middle" class="name">Zhaozhou dies</text>`;
+  for (const yr of [857, 897, 952, 1004, 1104, 1151]) out += `<text x="${X(yr)}" y="${y + 28}" text-anchor="middle" class="count">${yr}</text>`;
+  return out;
+})();
+// H2: C2's columns, one more for 1151, the bar from the left edge.
+const C6 = (j: number) => 10 + j * (W - 20) / 6.5;
+const cols: { y: number; name: string; says: string; k?: keyof typeof STATES; dash?: boolean }[] = [
+  { y: 857, name: "Huangbo", says: "No, later", k: "no", dash: true },
+  { y: 897, name: "Zhaozhou dies", says: "" },
+  { y: 952, name: "Zutang ji", says: "Missing", k: "none" },
+  { y: 1004, name: "Jingde Record", says: "Yes", k: "yes" },
+  { y: 1104, name: "Wuzu Fayan", says: "No", k: "no" },
+  { y: 1151, name: "Zhenxie Qingliao", says: "Yes and no", k: "both" },
+];
+const pillsH2 = HDEFS + bar([[0, "none"], [C6(3), "yes"], [C6(4), "no"], [C6(5), "both"]], 72) + cols.map((c, j) =>
+  `<line x1="${C6(j)}" x2="${C6(j)}" y1="4" y2="84" style="stroke: ${c.k ? SAYS_COLOR[c.k] : "var(--head)"}; stroke-width: 2${c.dash ? "; stroke-dasharray: 4 3" : ""}"/>`
+  + `<text x="${C6(j) + 7}" y="22" class="big-year">${c.y}</text>`
+  + `<text x="${C6(j) + 7}" y="41" class="name">${c.name}</text>`
+  + (c.says ? `<text x="${C6(j) + 7}" y="58" class="count" style="fill: ${SAYS_COLOR[c.k!]}">${c.says}</text>` : "")).join("");
+// H3: H2 with a plain grey bar; each column's line is wider and carries its
+// answer's fill. Zhaozhou's death stays a thin line, as it is not an answer.
+const pillsH3 = HDEFS + `<rect x="0" y="72" width="${W - 22}" height="4" style="fill: ${NONE}"/>`
+  + `<polygon points="${W - 22},66 ${W - 8},74 ${W - 22},82" style="fill: ${NONE}"/>` + cols.map((c, j) => {
+  const x = C6(j);
+  const mark = !c.k ? `<line x1="${x}" x2="${x}" y1="4" y2="84" style="stroke: var(--head); stroke-width: 2"/>`
+    : c.dash ? `<line x1="${x}" x2="${x}" y1="4" y2="84" style="stroke: ${STATES[c.k].fill}; stroke-width: 6; stroke-dasharray: 6 4"/>`
+    : `<rect x="${x - 3}" y="4" width="6" height="80" style="fill: ${STATES[c.k].fill}"/>`;
+  return mark + `<text x="${x + 9}" y="22" class="big-year">${c.y}</text>`
+    + `<text x="${x + 9}" y="41" class="name">${c.name}</text>`
+    + (c.says ? `<text x="${x + 9}" y="58" class="count" style="fill: ${SAYS_COLOR[c.k!]}">${c.says}</text>` : "");
+}).join("");
+const title = "For two centuries after Zhaozhou, no dated text tells his dog story";
+---
+<Base title="Dog timeline mocks">
+<div class="page">
+  <PageTop />
+  <article class="post prose">
+    <h1 class="page-title">Dog timeline mocks</h1>
+    <p>Five dates and the texts after them. The table under each option is the one under the chart now.</p>
+
+    <h2>A. Ticks on a line</h2>
+    <p>A thin axis, one tick per date, the name above it and the year under it. The axis is grey from 897 to 1104 and purple after.</p>
+    <figure class="kw kw-dog mk">
+      <figcaption class="kw-head"><div><p class="kw-title">{title}</p></div></figcaption>
+      <svg viewBox={`0 0 ${W} 108`} role="img">
+        <line x1={X(845)} x2={X(897)} y1="80" y2="80" class="axis" />
+        <line x1={X(897)} x2={X(1104)} y1="80" y2="80" style={`stroke: ${NO}; stroke-width: 4`} />
+        <line x1={X(1104)} x2={W - 4} y1="80" y2="80" style={`stroke: ${YES}; stroke-width: 4`} />
+        {marks.map((m, j) => <>
+          <line x1={X(m.y)} x2={X(m.y)} y1={row(j) + 6} y2="88" style={stroke(m)} />
+          <text x={X(m.y) + 5} y={row(j)} class="name">{m.head}</text>
+          <text x={X(m.y)} y="102" text-anchor="middle">{m.y}</text>
+        </>)}
+        <text x={W - 4} y="66" text-anchor="end" class="count" style={`fill: ${YES}`}>+{more} more to {last} →</text>
+      </svg>
+      <dl class="notes">{notes.map(([y, t]) => <><dt>{y}</dt><dd>{t}</dd></>)}</dl>
+    </figure>
+
+    <h2>B. Shaded spans</h2>
+    <p>The same ticks, full height, with the span without the dog shaded grey and the span with it shaded purple.</p>
+    <figure class="kw kw-dog mk">
+      <figcaption class="kw-head"><div><p class="kw-title">{title}</p></div></figcaption>
+      <svg viewBox={`0 0 ${W} 100`} role="img">
+        <rect x={X(897)} y="0" width={X(1104) - X(897)} height="80" style={wash(NO)} />
+        <rect x={X(1104)} y="0" width={W - X(1104)} height="80" style={wash(YES)} />
+        <line x1="0" x2={W} y1="80" y2="80" class="axis" />
+        {marks.map((m, j) => <>
+          <line x1={X(m.y)} x2={X(m.y)} y1="0" y2="80" style={stroke(m)} />
+          <text x={X(m.y) + 5} y={row(j)} class="name">{m.head}</text>
+          <text x={X(m.y)} y="95" text-anchor="middle">{m.y}</text>
+        </>)}
+        <text x={W - 6} y="70" text-anchor="end" class="count" style={`fill: ${YES}`}>+{more} more to {last}</text>
+      </svg>
+      <dl class="notes">{notes.map(([y, t]) => <><dt>{y}</dt><dd>{t}</dd></>)}</dl>
+    </figure>
+
+    <h2>C. Even steps, not to scale</h2>
+    <p>Six columns of the same width. The year is large and the name is under it. The bar under the columns is grey where no text has the dog and purple where texts do.</p>
+    <figure class="kw kw-dog mk">
+      <figcaption class="kw-head"><div><p class="kw-title">{title}</p></div></figcaption>
+      <svg viewBox={`0 0 ${W} 74`} role="img">
+        <rect x={C(1)} y="56" width={C(4) - C(1)} height="6" style={`fill: ${NO}`} />
+        <rect x={C(4)} y="56" width={C(6) - C(4)} height="6" style={`fill: ${YES}`} />
+        {marks.map((m, j) => <>
+          <line x1={C(j)} x2={C(j)} y1="4" y2="66" style={stroke(m)} />
+          <text x={C(j) + 7} y="22" class="big-year" style={`fill: ${m.color}`}>{m.y}</text>
+          <text x={C(j) + 7} y="40" class="name">{m.head}</text>
+        </>)}
+        <text x={C(5) + 7} y="22" class="big-year" style={`fill: ${YES}`}>+{more}</text>
+        <text x={C(5) + 7} y="40" class="name">more to {last}</text>
+      </svg>
+      <dl class="notes">{notes.map(([y, t]) => <><dt>{y}</dt><dd>{t}</dd></>)}</dl>
+    </figure>
+
+    <h2>C2. Even steps, three lines</h2>
+    <p>The year, then the master or the collection, then what the text says: yes, no or missing. No tick after 1104; the purple bar runs on to an arrow.</p>
+    <figure class="kw kw-dog mk">
+      <figcaption class="kw-head"><div><p class="kw-title">{title}</p></div></figcaption>
+      <svg viewBox={`0 0 ${W} 90`} role="img">
+        <rect x={C5(1)} y="72" width={C5(4) - C5(1)} height="6" style={`fill: ${NO}`} />
+        <rect x={C5(4)} y="72" width={W - 22 - C5(4)} height="6" style={`fill: ${YES}`} />
+        <polygon points={`${W - 22},66 ${W - 8},75 ${W - 22},84`} style={`fill: ${YES}`} />
+        {steps.map((m, j) => <>
+          <line x1={C5(j)} x2={C5(j)} y1="4" y2="82" style={stroke(m)} />
+          <text x={C5(j) + 7} y="22" class="big-year" style={`fill: ${m.color}`}>{m.y}</text>
+          <text x={C5(j) + 7} y="41" class="name">{m.name}</text>
+          <text x={C5(j) + 7} y="58" class="count" style={`fill: ${m.color}`}>{m.says}</text>
+        </>)}
+      </svg>
+      <dl class="notes">{notes.map(([y, t]) => <><dt>{y}</dt><dd>{t}</dd></>)}</dl>
+    </figure>
+
+    <h2>E. What each text says, in even steps</h2>
+    <p>One pill per text: purple No, orange Yes, hollow None, split for both. A dashed pill is not Zhaozhou’s at that date. The arrow after 1151 says it goes on.</p>
+    <figure class="kw kw-dog mk">
+      <figcaption class="kw-head"><div><p class="kw-title">{title}</p></div></figcaption>
+      <svg viewBox={`0 0 ${W} 90`} role="img" set:html={pillsE} />
+      <dl class="notes">{notes.map(([y, t]) => <><dt>{y}</dt><dd>{t}</dd></>)}</dl>
+    </figure>
+
+    <h2>F. What each text says, to scale</h2>
+    <p>The same pills on a line to scale, so the gap from 897 to 1104 shows.</p>
+    <figure class="kw kw-dog mk">
+      <figcaption class="kw-head"><div><p class="kw-title">{title}</p></div></figcaption>
+      <svg viewBox={`0 0 ${W} 110`} role="img" set:html={pillsF} />
+      <dl class="notes">{notes.map(([y, t]) => <><dt>{y}</dt><dd>{t}</dd></>)}</dl>
+    </figure>
+
+    <h2>G. The line, filled by the answer</h2>
+    <p>The line is a bar, and its fill says what the texts of each period say. The legend reads the fills.</p>
+    <figure class="kw kw-dog mk">
+      <figcaption class="kw-head"><div><p class="kw-title">{title}</p></div></figcaption>
+      <svg viewBox={`0 0 ${W} 76`} role="img" set:html={pillsG} />
+      <ul class="legend below">
+        <li><i style={`background: none; box-shadow: inset 0 0 0 1.5px ${YES}`}></i>No, in a later addition</li>
+        {BAND.map(b => <li><i style={`background: ${b.css}`}></i>{b.label}</li>)}
+      </ul>
+      <dl class="notes">{notes.map(([y, t]) => <><dt>{y}</dt><dd>{t}</dd></>)}</dl>
+    </figure>
+
+    <h2>H. G’s fills on C2’s line, to scale</h2>
+    <p>The thin bar and arrow of C2, from the left edge, filled by the answer of each period: grey missing, green yes, purple no, purple stripes for yes and no.</p>
+    <figure class="kw kw-dog mk">
+      <figcaption class="kw-head"><div><p class="kw-title">{title}</p></div></figcaption>
+      <svg viewBox={`0 0 ${W} 80`} role="img" set:html={pillsH} />
+      <ul class="legend below">
+        {Object.values(STATES).map(b => <li><i style={`background: ${b.css}`}></i>{b.label}</li>)}
+      </ul>
+      <dl class="notes">{notes.map(([y, t]) => <><dt>{y}</dt><dd>{t}</dd></>)}</dl>
+    </figure>
+
+    <h2>H2. The same, on C2’s columns</h2>
+    <p>C2’s three lines per date, with a column for 1151, and the filled bar under them.</p>
+    <figure class="kw kw-dog mk">
+      <figcaption class="kw-head"><div><p class="kw-title">{title}</p></div></figcaption>
+      <svg viewBox={`0 0 ${W} 90`} role="img" set:html={pillsH2} />
+      <ul class="legend below">
+        {Object.values(STATES).map(b => <li><i style={`background: ${b.css}`}></i>{b.label}</li>)}
+      </ul>
+      <dl class="notes">{notes.map(([y, t]) => <><dt>{y}</dt><dd>{t}</dd></>)}</dl>
+    </figure>
+
+    <h2>H3. H2 with a grey bar and coloured lines</h2>
+    <p>The bar is plain grey. Each date’s line is wider and filled by its answer; Zhaozhou’s death stays thin.</p>
+    <figure class="kw kw-dog mk">
+      <figcaption class="kw-head"><div><p class="kw-title">{title}</p></div></figcaption>
+      <svg viewBox={`0 0 ${W} 90`} role="img" set:html={pillsH3} />
+      <ul class="legend below">
+        {Object.values(STATES).map(b => <li><i style={`background: ${b.css}; border-radius: 1px; width: .4em`}></i>{b.label}</li>)}
+      </ul>
+      <dl class="notes">{notes.map(([y, t]) => <><dt>{y}</dt><dd>{t}</dd></>)}</dl>
+    </figure>
+
+    <h2>D. Years only</h2>
+    <p>One bar, a tick per date and its year. The names are only in the table.</p>
+    <figure class="kw kw-dog mk">
+      <figcaption class="kw-head"><div><p class="kw-title">{title}</p></div></figcaption>
+      <svg viewBox={`0 0 ${W} 50`} role="img">
+        <rect x={X(897)} y="14" width={X(1104) - X(897)} height="10" rx="2" style={`fill: ${NO}`} />
+        <rect x={X(1104)} y="14" width={W - 4 - X(1104)} height="10" rx="2" style={`fill: ${YES}`} />
+        <line x1={X(845)} x2={X(897)} y1="19" y2="19" class="axis" />
+        {marks.map(m => <>
+          <line x1={X(m.y)} x2={X(m.y)} y1="6" y2="32" style={stroke(m, 2.5)} />
+          <text x={X(m.y)} y="46" text-anchor="middle" class="count">{m.y}</text>
+        </>)}
+        <text x={W - 4} y="46" text-anchor="end" style={`fill: ${YES}`}>to {last} →</text>
+      </svg>
+      <dl class="notes">{notes.map(([y, t]) => <><dt>{y}</dt><dd>{t}</dd></>)}</dl>
+    </figure>
+  </article>
+</div>
+</Base>
+
+<style is:global>
+  .mk svg { width: 100%; height: auto; display: block; }
+  .mk svg text.big-year { font: 650 19px "Geist", sans-serif; fill: var(--head); }
+  .mk svg text.pill { font: 600 12px "Geist", sans-serif; fill: #fff; }
+  .mk svg text.sub2 { font: italic 11px "Geist", sans-serif; fill: var(--kw-muted); }
+  .kw-dog .notes { display: grid; grid-template-columns: max-content 1fr; gap: .25rem .9rem; margin: .8rem 0 0; padding-top: .7rem; border-top: 1px solid var(--rule); font-size: .82em; }
+  .kw-dog .notes dt { color: var(--head); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .kw-dog .notes dd { margin: 0; }
+</style>

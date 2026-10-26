@@ -1,0 +1,154 @@
+---
+// Experiment 1 of the koans study: two language models read each earliest match of
+// the trace. One square per koan, a band per collection, in koan order, shaded by how
+// many of the two models call the match a different story; koans with no match are
+// hollow. The four matches my reading found wrong are outlined, and listed below: the
+// koan beside the passage it was matched to, each in English and Chinese with its line. A square opens the match and each model's verdict.
+// The data (about 150 KB) loads as a separate file.
+import "./widgets.css";
+
+interface Props { src: string }
+---
+<figure class="kw kw-judge" data-src={Astro.props.src}>
+  <figcaption class="kw-head">
+    <div>
+      <p class="kw-title">Second readings of the matcher’s earliest versions</p>
+      <p class="kw-note">One square per koan, colored by whether the two models call its earliest version the same story. Outlined squares are the matches I found wrong. Hover or tap one for the match and each model’s verdict.</p>
+    </div>
+  </figcaption>
+  <div class="chart"><p class="kw-note">Loading the matches…</p></div>
+  <ul class="legend below"></ul>
+  <div class="wrong"></div>
+  <div class="kw-tip" hidden></div>
+</figure>
+
+<script>
+  import { core, el, svgEl, title } from "./svg";
+  import { onWidth } from "./earliest";
+
+  type Text = [string, string, string | null];
+  type Verdict = { same?: boolean };
+  type Row = { k: "bc" | "gg"; n: number; en: string; t: string; i: number; y: number; l: string; hand: boolean | null; later: boolean | null; claude: Verdict; gpt: Verdict };
+  type Data = { texts: Text[]; rows: Row[] };
+  type Key = Row["k"];
+
+  const COLLECTIONS = [["gg", "Gateless Gate", 48], ["bc", "Blue Cliff Record", 100]] as const;
+  const YEAR = { gg: 1228, bc: 1125 };
+  // Each match my reading found wrong: the koan and the matched passage, in Chinese and
+  // English, and what differs. The Chinese of the match is the exchange from its passage.
+  type Wrong = { kl: string; ken: string; mzh: string; men: string; why: string; name?: string };
+  const WRONG: Record<string, Wrong> = {
+    bc14: { kl: "0154c02", ken: "A monk asked Yunmen, “What are the teachings of a lifetime?” Yunmen said, “A teaching to fit each one.”",
+      mzh: "有僧問雲門：『如何是雲門一曲？』雲門云：『臘月二十五。』", men: "A monk asked Yunmen, “What is Yunmen’s one tune?” Yunmen said, “The twenty-fifth of the twelfth month.”",
+      why: "Another question to Yunmen, with another answer." },
+    bc17: { kl: "0157a19", ken: "A monk asked Xianglin, “What is the meaning of the patriarch’s coming from the west?” Xianglin said, “Sitting long, I get tired.”",
+      mzh: "三聖因僧問：如何是祖師西來意？師曰：臭肉來蠅。", men: "A monk asked Sansheng, “What is the meaning of the patriarch’s coming from the west?” The master said, “Stinking meat draws flies.”",
+      why: "The same stock question, put to another master, with another answer." },
+    bc21: { kl: "0161c21", ken: "A monk asked Zhimen, “What about the lotus before it comes out of the water?” Zhimen said, “A lotus flower.” The monk said, “And after it comes out?” Zhimen said, “Lotus leaves.”",
+      mzh: "問：蓮花未出水時如何？師云：水深蓋不得。進云：出水後如何？師云：不礙往來看。", men: "Asked, “What about the lotus before it comes out of the water?” The master said, “Deep water can’t cover it.” “And after it comes out?” The master said, “It doesn’t block anyone coming or going.”",
+      why: "The same stock question, put to another master, with other answers.", name: "Record of Shishuang Chuyuan" },
+    bc47: { kl: "0183a17", ken: "A monk asked Yunmen, “What is the Dharma body?” Yunmen said, “The six can’t hold it.”",
+      mzh: "僧問雲門：「如何是透法身句？」門云：「北斗裏藏身。」", men: "A monk asked Yunmen, “What is the phrase that passes through the Dharma body?” Yunmen said, “Hide your body in the Northern Dipper.”",
+      why: "Another question about the Dharma body, with another answer." },
+  };
+  const KOANS: Record<Key, string> = { gg: "T48n2005", bc: "T48n2003" };
+  const cbeta = (id: string, line: string) => `https://cbetaonline.dila.edu.tw/zh/${id}_p${line}`;
+  // One model's error is red, bordered in that model's color: violet for Claude, sky for GPT.
+  const KINDS: { label: string; style: string; core?: string; test: (r: Row) => boolean }[] = [
+    { label: "Both models: the same story", style: "fill: var(--kw-teal)", test: r => r.claude.same !== false && r.gpt.same !== false },
+    { label: "Claude only: not the same", style: "fill: var(--kw-violet)", core: "var(--kw-red)", test: r => r.claude.same === false && r.gpt.same !== false },
+    { label: "GPT only: not the same", style: "fill: var(--kw-sky)", core: "var(--kw-red)", test: r => r.claude.same !== false && r.gpt.same === false },
+    { label: "Both models: not the same", style: "fill: var(--kw-red)", test: r => r.claude.same === false && r.gpt.same === false },
+  ];
+  const HOLLOW = "fill: var(--bg); stroke: var(--kw-grey); stroke-width: 1.5", OUTLINE = "; stroke: var(--head); stroke-width: 3";
+
+  async function init(root: HTMLElement) {
+    const data: Data = await (await fetch(root.dataset.src!)).json();
+    const tip = root.querySelector<HTMLElement>(".kw-tip")!;
+    const at = new Map(data.rows.map(r => [r.k + r.n, r]));
+    const kind = (r: Row) => KINDS.find(k => k.test(r))!;
+    const wrong = (r: Row) => (r.k + r.n) in WRONG;
+    const textName = (r: Row) => title(data.texts[r.i]);
+    const label = (k: Key) => COLLECTIONS.find(c => c[0] === k)![1];
+    const verdict = (v: Verdict) => v.same === false ? "not the same story" : "the same story";
+
+    const legend = root.querySelector(".legend")!;
+    const swatch = (style: string, inner?: string) => {
+      const sw = svgEl("svg", { width: 12, height: 12, viewBox: "0 0 12 12", style: "display: inline-block; vertical-align: -1px; margin-right: .4em" });
+      sw.append(svgEl("rect", { x: 1.5, y: 1.5, width: 9, height: 9, rx: 2, style }));
+      if (inner) sw.append(core(1.5, 1.5, 9, inner, 1.5));
+      return sw;
+    };
+    const keys: [string, string, string?][] = [
+      ...KINDS.map(k => [`${k.label}: ${data.rows.filter(k.test).length}`, k.style, k.core] as [string, string, string?]).filter((_, j) => data.rows.some(KINDS[j].test)),
+      [`No match: ${148 - data.rows.length}`, HOLLOW],
+      [`Wrong, by my reading: ${data.rows.filter(wrong).length}`, "fill: var(--bg)" + OUTLINE.replace("3", "2")],
+    ];
+    for (const [text, style, inner] of keys) { const li = el("li"); li.append(swatch(style, inner), text); legend.append(li); }
+
+    // A side: its heading, the English, the Chinese and the line it starts on.
+    const side = (head: string, en: string, zh: string, id: string, line: string) => {
+      const div = el("div", "half"), ref = el("p", "ref"), a = el("a", null, `${id}_p${line}`) as HTMLAnchorElement;
+      a.href = cbeta(id, line);
+      ref.append(a);
+      div.append(el("p", "from", head), el("p", "en", en), el("p", "chars zh small", zh), ref);
+      return div;
+    };
+    const list = root.querySelector(".wrong")!;
+    list.append(el("p", "kw-note", "The matches I found wrong: each koan beside the passage it was matched to"));
+    for (const r of data.rows.filter(wrong)) {
+      const w = WRONG[r.k + r.n], item = el("div", "case"), pair = el("div", "pair");
+      pair.append(side(`*${label(r.k)}* ${r.n} · ${r.en}`, w.ken, r.t, KOANS[r.k], w.kl),
+        side(`Matched to ${w.name ? `*${w.name}*` : textName(r)} (${r.y})`, w.men, w.mzh, data.texts[r.i][0], r.l));
+      item.append(pair, el("p", "why", `✗ ${w.why}`));
+      list.append(item);
+    }
+
+    const show = (r: Row, sq: SVGElement) => {
+      const me = r.hand ?? r.later;
+      tip.replaceChildren(
+        el("p", "who", `*${label(r.k)}* ${r.n} · ${r.en}`),
+        el("p", null, `Matched to ${textName(r)}, ${r.y}`),
+        el("p", null, `Claude: ${verdict(r.claude)}`),
+        el("p", null, `GPT: ${verdict(r.gpt)}`),
+        el("p", null, `My reading: ${me == null ? "not read" : me ? "the same story" : "not the same story"}`));
+      const f = root.getBoundingClientRect(), b = sq.getBoundingClientRect();
+      tip.hidden = false;
+      tip.style.left = `${Math.max(8, Math.min(b.left - f.left, f.width - tip.offsetWidth - 8))}px`;
+      tip.style.top = `${b.bottom - f.top + 6}px`;
+    };
+
+    // Wide: the collection's name left of its band. Narrow: above it.
+    const chart = root.querySelector(".chart")!;
+    onWidth(chart, w => {
+      const W = Math.max(280, w), narrow = W < 520, L = narrow ? 0 : 165, C = narrow ? 22 : 26;
+      const per = Math.floor((W - L + 4) / C);
+      const parts: SVGElement[] = [];
+      let y = 0;
+      for (const [k, name, count] of COLLECTIONS) {
+        parts.push(svgEl("text", { x: 0, y: y + 14, class: "lane" }, `*${name}* (${YEAR[k]})`));
+        if (narrow) y += 22;
+        for (let j = 0; j < count; j++) {
+          const r = at.get(k + (j + 1)), x = L + (j % per) * C + 1, top = y + Math.floor(j / per) * C + 1;
+          if (!r) { parts.push(svgEl("rect", { x: x + .75, y: top + .75, width: C - 6.5, height: C - 6.5, rx: 3, style: HOLLOW })); continue; }
+          const sq = svgEl("rect", { x, y: top, width: C - 5, height: C - 5, rx: 3, tabindex: 0,
+            class: "sq", style: kind(r).style + (wrong(r) ? OUTLINE : ""), "aria-label": `${name} ${r.n}, ${r.en}` });
+          sq.addEventListener("mouseenter", () => show(r, sq));
+          sq.addEventListener("focus", () => show(r, sq));
+          sq.addEventListener("click", () => show(r, sq));
+          sq.addEventListener("mouseleave", () => { tip.hidden = true; });
+          sq.addEventListener("blur", () => { tip.hidden = true; });
+          parts.push(sq);
+          if (kind(r).core) parts.push(core(x, top, C - 5, kind(r).core!));
+        }
+        y += Math.ceil(count / per) * C + 16;
+      }
+      const svg = svgEl("svg", { viewBox: `0 0 ${W} ${y - 16}`, width: W, height: y - 16, role: "img",
+        "aria-label": keys.map(k => k[0]).join("; ") });
+      svg.append(...parts);
+      chart.replaceChildren(svg);
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>(".kw-judge").forEach(init);
+</script>

@@ -1,0 +1,131 @@
+---
+// How Zhaozhou's dog story changes over time: six dated texts, each with its year,
+// its master or collection, what the dog question is answered with, in the color of
+// that answer, and who the text credits with the answer. A bar under them is filled by the answer of each period (missing, yes, mu,
+// mu and yes) and ends in an arrow, as the later texts go on to 1800. The notes for
+// each date sit below.
+// Wide: the dates are columns, the bar runs across. Narrow: the dates are rows, the
+// bar runs down.
+import "./widgets.css";
+
+interface Props { data: unknown }
+const json = JSON.stringify(Astro.props.data).replace(/</g, "\\u003c");
+---
+<figure class="kw kw-dog">
+  <figcaption class="kw-head">
+    <div>
+      <p class="kw-title">Mu and its answers over time</p>
+    </div>
+  </figcaption>
+  <div class="chart"></div>
+  <dl class="notes"></dl>
+  <script type="application/json" set:html={json} />
+</figure>
+
+<script>
+  import { dataOf, el, plain, svgEl } from "./svg";
+  import { onWidth } from "./earliest";
+
+  type Text = [string, string, string | null];
+  type Version = { i: number; text: number; passage: number };
+  type Data = { texts: Text[]; versions: Version[]; undated: number };
+  type Says = "none" | "yes" | "no" | "both";
+  // What Zhaozhou answers, in parts, each in the color of its answer.
+  type Step = { y: number; name: string; says?: Says; word?: [string, Says][]; by?: string; dash?: boolean };
+
+  const HUANGBO = "T48n2012B", WUZU = 1104;
+  // Dated texts after 1104 that also give Zhaozhou's "yes", each checked by reading
+  // (koans dog_answers.py, results/dog_answers.json). None gives the yes alone.
+  const BOTH = 18;
+  const FILL: Record<Says, string> = { none: "var(--kw-agg)", yes: "var(--kw-violet)", no: "var(--kw-blue)", both: "url(#kw-dog-both)" };
+  const INK: Record<Says, string> = { none: "var(--kw-grey)", yes: "var(--kw-violet)", no: "var(--kw-blue)", both: "var(--kw-blue)" };
+  const NO = "“Mu”";
+  const STEPS: Step[] = [
+    { y: 857, name: "Huangbo", says: "no", word: [[NO, "no"]], by: "Zhaozhou", dash: true },
+    { y: 897, name: "Zhaozhou dies" },
+    { y: 952, name: "*Zutang ji*", says: "none", word: [["(missing)", "none"]] },
+    { y: 1004, name: "*Jingde Record*", says: "yes", word: [["“Yes”", "yes"]], by: "Weikuan" },
+    { y: WUZU, name: "Wuzu Fayan", says: "no", word: [[NO, "no"]], by: "Zhaozhou" },
+    { y: 1151, name: "Zhenxie Qingliao", says: "both", word: [[NO, "no"], [" and ", "none"], ["“yes”", "yes"]], by: "Zhaozhou" },
+  ];
+  // The bar's periods: each starts at a step and runs to the next.
+  const SPANS: [number, Says][] = [[0, "none"], [3, "yes"], [4, "no"], [5, "both"]];
+
+  function init(root: HTMLElement) {
+    const data = dataOf<Data>(root);
+    const hb = data.versions.find(v => data.texts[v.i][0] === HUANGBO)!;
+    const later = data.versions.filter(v => v.text > WUZU), last = Math.max(...later.map(v => v.text));
+
+    const notes = root.querySelector(".notes")!;
+    for (const [y, text] of [
+      [hb.text, "Huangbo’s *Wanling Record* seems to record the story as it’s generally known today."],
+      [897, "Zhaozhou dies."],
+      [952, "The *Zutang ji* omits Mu entirely."],
+      [1004, "The *Jingde Record* attributes it to someone else, who responds “yes.”"],
+      [WUZU, "Wuzu Fayan’s record returns to Zhaozhou and *mu*."],
+      ["1151 on", `Zhenxie Qingliao’s record includes both answers: Zhaozhou tells one monk *mu* and another “yes.” In all, ${later.length} dated texts after Wuzu and ${data.undated} undated ones include it ([see the appendix](#every-version-of-mu)); ${BOTH} of the dated ones give both answers, and ${later.length - BOTH} only *mu*.`],
+    ]) {
+      // A word between asterisks is set in italics; [text](href) is a link.
+      const dd = el("dd");
+      const parts = text.split(/\*(.+?)\*|\[(.+?)\]\((.+?)\)/);
+      for (let j = 0; j < parts.length; j += 4) {
+        dd.append(parts[j]);
+        if (parts[j + 1]) dd.append(el("em", null, parts[j + 1]));
+        if (parts[j + 2]) dd.append(Object.assign(el("a", null, parts[j + 2]), { href: parts[j + 3] }));
+      }
+      notes.append(el("dt", null, `${y}`), dd);
+    }
+
+    // Mu and yes: purple and blue stripes with --kw-stripe between them.
+    const defs = `<defs><pattern id="kw-dog-both" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="7" height="7" style="fill: var(--kw-stripe)"/><rect width="2.5" height="7" style="fill: var(--kw-blue)"/><rect x="3.5" width="2.5" height="7" style="fill: var(--kw-violet)"/></pattern></defs>`;
+    const stroke = (s: Step) => `stroke: ${s.says ? INK[s.says] : "var(--head)"}; stroke-width: 2${s.dash ? "; stroke-dasharray: 4 3" : ""}`;
+    const said = (s: Step, x: number, y: number) => {
+      const t = svgEl("text", { x, y, class: "count" });
+      for (const [part, says] of s.word!) t.append(svgEl("tspan", { style: `fill: ${INK[says]}` }, part));
+      return t;
+    };
+    const label = (s: Step, x: number, y: number, gap: number) => [
+      svgEl("text", { x, y, class: "year" }, s.y),
+      svgEl("text", { x, y: y + gap, class: "name" }, s.name),
+      ...(s.word ? [said(s, x, y + 2 * gap)] : []),
+      ...(s.by ? [svgEl("text", { x, y: y + 3 * gap, class: "name" }, `by ${s.by}`)] : []),
+    ];
+
+    const chart = root.querySelector(".chart")!;
+    onWidth(chart, w => {
+      const W = Math.max(280, w);
+      let svg: SVGElement;
+      if (W >= 560) {
+        // Columns, with the bar under them running on to an arrow at the right.
+        const C = (j: number) => 10 + j * (W - 20) / 6.5, bar = 90, end = W - 22, H = 108;
+        svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H });
+        svg.innerHTML = defs;
+        SPANS.forEach(([j, k], n) => {
+          const x = n ? C(j) : 0, to = n + 1 < SPANS.length ? C(SPANS[n + 1][0]) : end;
+          svg.append(svgEl("rect", { x, y: bar, width: to - x, height: 6, style: `fill: ${FILL[k]}` }));
+        });
+        svg.append(svgEl("polygon", { points: `${end},${bar - 6} ${W - 8},${bar + 3} ${end},${bar + 12}`, style: `fill: ${FILL.both}` }));
+        STEPS.forEach((s, j) => svg.append(svgEl("line", { x1: C(j), x2: C(j), y1: 4, y2: 102, style: stroke(s) }), ...label(s, C(j) + 7, 22, 18)));
+      } else {
+        // Rows, with the bar down the left running on to an arrow at the bottom, and a
+        // short tick across it at each date.
+        const RH = 74, TOP = 4, bar = 6, H = TOP + STEPS.length * RH + 18, end = H - 14;
+        const Y = (j: number) => TOP + j * RH;
+        svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H });
+        svg.innerHTML = defs;
+        SPANS.forEach(([j, k], n) => {
+          const y = n ? Y(j) + 13 : 0, to = n + 1 < SPANS.length ? Y(SPANS[n + 1][0]) + 13 : end;
+          svg.append(svgEl("rect", { x: bar, y, width: 6, height: to - y, style: `fill: ${FILL[k]}` }));
+        });
+        svg.append(svgEl("polygon", { points: `${bar - 6},${end} ${bar + 3},${H - 2} ${bar + 12},${end}`, style: `fill: ${FILL.both}` }));
+        STEPS.forEach((s, j) => svg.append(svgEl("line", { x1: 0, x2: 18, y1: Y(j) + 13, y2: Y(j) + 13, style: stroke(s) + "; stroke-width: 3" }), ...label(s, 26, Y(j) + 20, 16)));
+      }
+      svg.setAttribute("role", "img");
+      svg.setAttribute("aria-label", STEPS.map(s => `${s.y}, ${plain(s.name)}${s.word ? `: ${s.word.map(w => w[0]).join("")}` : ""}${s.by ? `, by ${s.by}` : ""}`).join("; ") + `; then on to ${last}.`);
+      chart.replaceChildren(svg);
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>(".kw-dog").forEach(init);
+</script>

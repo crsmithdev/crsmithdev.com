@@ -1,0 +1,61 @@
+---
+// A reading sheet, not a figure: the 11 matches that cleared the shuffle bar by
+// less than 10 points and that nobody has read, plus the post's GG18 and BC12.
+// Not linked from the site; delete before the branch merges.
+import Base from "../../layouts/Base.astro";
+import PageTop from "../../components/PageTop.astro";
+import "../../components/koans/widgets.css";
+import rows from "./read.json";
+
+const cbeta = (id: string, line: string) => `https://cbetaonline.dila.edu.tw/zh/${id}_p${line}`;
+---
+<Base title="Matches to read">
+<div class="page">
+  <PageTop />
+  <article class="post prose">
+    <h1 class="page-title">Matches to read</h1>
+    <p>The 11 matches that beat their best shuffle by less than 10 points over the bar and that nobody has read, narrowest first, then GG18 and BC12 from the post. For each: is the older passage the same story as the koan? Pick an answer; the line at the bottom collects them to paste back.</p>
+    {rows.map(r => (
+      <section class="read" data-id={r.id}>
+        <h2>{r.id} · {r.en}{r.post && <span class="flag">in the post</span>}</h2>
+        <p class="meta">Margin over the best shuffle {r.margin} points · rare-phrase share {r.weight}%</p>
+        <p class="label">The koan</p>
+        <p class="zh">{r.case}</p>
+        <p class="label">{r.text}, {r.y} · <a href={cbeta(r.cbeta, r.l)}>{r.cbeta}_p{r.l}</a></p>
+        <p class="zh">{r.p}</p>
+        <p class="model"><b>Claude: {r.claude.same ? "same" : "not same"}.</b> {r.claude.why}</p>
+        <p class="model"><b>GPT: {r.gpt.same ? "same" : "not same"}.</b> {r.gpt.why}</p>
+        <div class="pick" role="radiogroup" aria-label={`${r.id}: same story?`}>
+          {["same", "not same", "unsure"].map(v => <label><input type="radio" name={r.id} value={v} /> {v}</label>)}
+        </div>
+      </section>
+    ))}
+    <p class="label">Your answers</p>
+    <pre class="out"></pre>
+  </article>
+</div>
+</Base>
+
+<style is:global>
+  .read { margin: 2rem 0; padding-top: 1rem; border-top: 1px solid var(--rule); }
+  .read h2 { margin: 0 0 .2rem; }
+  .read .flag { margin-left: .5rem; padding: 0 .45rem; border-radius: 4px; font-size: .7em; color: var(--k1); background: var(--k-wash); vertical-align: .15em; }
+  .read .meta, .label { margin: 0 0 .4rem; font-size: var(--kw-small); color: var(--kw-muted); }
+  .read .label { margin-top: .8rem; font-weight: 600; }
+  .read .zh { margin: 0; font-family: "Songti TC", "Noto Serif CJK TC", "Source Han Serif TC", serif; line-height: 1.9; }
+  .read .model { margin: .6rem 0 0; font-size: var(--kw-small); }
+  .read .pick { display: flex; gap: 1.2rem; margin-top: .8rem; }
+  .out { white-space: pre-wrap; min-height: 2em; }
+</style>
+
+<script>
+  const out = document.querySelector<HTMLElement>(".out")!;
+  const update = () => {
+    out.textContent = [...document.querySelectorAll<HTMLElement>(".read")].map(s => {
+      const v = s.querySelector<HTMLInputElement>("input:checked")?.value ?? "-";
+      return `${s.dataset.id}: ${v}`;
+    }).join("\n");
+  };
+  document.querySelectorAll(".read input").forEach(i => i.addEventListener("change", update));
+  update();
+</script>

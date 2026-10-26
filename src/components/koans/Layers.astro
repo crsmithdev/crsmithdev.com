@@ -1,0 +1,108 @@
+---
+// Experiment 4 of the koans study: a classifier of early and late Song records,
+// run over passages of 19 Tang and Five Dynasties records that do not overlap.
+// Huangbo's Wanling Record as one strip, start to end: one cell per passage, the
+// darker the blue, the later it reads. A dashed line marks where the 1673 copy
+// ends, and the ranks of the last sermon's passages sit under the strip. A cell
+// opens its passage in English and Chinese; the top-ranked one is open at first.
+// Under it, Zhaozhou's record as a second strip, ranked by the same classifier among
+// the same passages, with the ranks of its two dog passages and its latest-reading one.
+import "./widgets.css";
+
+interface Props { data: unknown }
+const json = JSON.stringify(Astro.props.data).replace(/</g, "\\u003c");
+---
+<figure class="kw kw-layers">
+  <figcaption class="kw-head">
+    <div>
+      <p class="kw-title">Each passage of Huangbo’s and Zhaozhou’s records, by how late it reads</p>
+      <p class="kw-note"></p>
+    </div>
+  </figcaption>
+  <div class="chart"></div>
+  <div class="panel" aria-live="polite"></div>
+  <script type="application/json" set:html={json} />
+</figure>
+
+<script>
+  import { dataOf, el, listbox, selected, svgEl } from "./svg";
+  import { onWidth } from "./earliest";
+
+  type Passage = { s: number; late: number; r: number; t: string };
+  type Other = { s: number; r: number; dog: boolean };
+  type Data = { sermon: number; length: number; total: number; passages: Passage[]; gloss: Record<string, string>;
+    zhaozhou: { length: number; passages: Other[] } };
+
+  const WINDOW = 150, INK = "var(--head)";
+
+  function init(root: Element) {
+    const data = dataOf<Data>(root), total = data.total.toLocaleString("en");
+    const ps = [...data.passages].sort((a, b) => a.s - b.s);
+    // A passage is in the last sermon if any of it is.
+    const inSermon = (p: Passage) => p.s + WINDOW > data.sermon;
+    // How late a passage reads, as its rank's share of all passages: 1 at the top.
+    const heat = (r: number) => 1 - (r - 1) / (data.total - 1);
+    root.querySelector(".kw-note")!.textContent = `One cell per passage, from start to end; the stronger the shade, the later it reads among ${total} passages of Tang records. Numbers under a strip are ranks. Pick a cell of Huangbo’s record to read it.`;
+    const chart = root.querySelector(".chart")!, panel = root.querySelector(".panel")!;
+    let current = ps.findIndex(p => p.r === 1), marks: SVGElement[] = [];
+
+    function show(i: number) {
+      current = i;
+      const p = ps[i], to = Math.min(p.s + WINDOW, data.length);
+      const where = p.s >= data.sermon ? "In the last sermon, after the point where the 1673 copy ends" : inSermon(p) ? "Runs into the last sermon" : "Before the last sermon";
+      panel.replaceChildren(
+        el("p", "who", `Rank ${p.r.toLocaleString("en")} of ${total} · characters ${(p.s + 1).toLocaleString("en")}–${to.toLocaleString("en")}`),
+        el("p", "kw-note", `${where}. Reads later than ${(data.total - p.r).toLocaleString("en")} of the ${total} passages.`),
+        el("p", "en", data.gloss[p.t]), el("p", "zh", p.t));
+      selected(marks, i);
+    }
+
+    const zz = data.zhaozhou, top = Math.min(...zz.passages.map(p => p.r));
+    const fill = (r: number) => `fill: color-mix(in srgb, ${INK} ${Math.round(Math.pow(heat(r), 6) * 100)}%, var(--kw-agg))`;
+
+    onWidth(chart, w => {
+      // Narrow: Huangbo's strip moves down so its name clears the 1673 label.
+      const W = Math.max(280, w), narrow = W < 520, OFF = narrow ? 20 : 0, foot = narrow ? 120 : 116, Z = OFF + foot + 40, H = Z + 92;
+      const X = (c: number) => 10 + c / data.length * (W - 20), cut = X(data.sermon);
+      const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, "aria-label": `Huangbo’s Wanling Record in ${ps.length} passages; pick one to read it. Zhaozhou’s record in ${zz.passages.length} passages; its Mu passages rank ${zz.passages.filter(p => p.dog).map(p => p.r).join(" and ")}, its latest-reading passage ${top}` }) as SVGSVGElement;
+      const g = svgEl("g", { transform: `translate(0 ${OFF})` });
+      svg.append(svgEl("text", { x: 10, y: 14, class: "lane" }, "Huangbo’s *Wanling Record*"), g);
+      const pos = ps.map(p => ({ x: (X(p.s) + X(Math.min(p.s + WINDOW, data.length))) / 2, y: 57 + OFF }));
+      let n = 0;
+      marks = ps.map(p => {
+        const x = X(p.s), wd = X(Math.min(p.s + WINDOW, data.length)) - x - 1;
+        const cell = svgEl("rect", { x, y: 40, width: wd, height: 34, rx: 2, class: "cell", tabindex: -1, "aria-label": `Rank ${p.r} of ${data.total}`,
+          style: fill(p.r) });
+        g.append(cell);
+        // The sermon's ranks, at two heights so they don't touch.
+        if (inSermon(p)) g.append(svgEl("text", { x: x + wd / 2, y: 87 + (n++ % 2) * 13, "text-anchor": "middle", class: "count", style: "font-size: 11px" }, p.r.toLocaleString("en")));
+        return cell;
+      });
+      g.append(
+        svgEl("line", { x1: cut, x2: cut, y1: narrow ? 2 : 8, y2: 76, style: "stroke: var(--head); stroke-width: 1.5; stroke-dasharray: 4 3" }),
+        svgEl("text", { x: cut - 6, y: narrow ? 14 : 24, "text-anchor": "end", class: "name" }, "The 1673 copy ends here"),
+        svgEl("path", { d: `M ${cut} 36 v -6 H ${W - 10} v 6`, style: `fill: none; stroke: ${INK}; stroke-width: 1.5` }),
+        // Narrow: the bracket is too short for its label, so the label sits left of the line.
+        narrow ? svgEl("text", { x: cut - 6, y: 30, "text-anchor": "end", class: "count", style: `fill: ${INK}` }, "Last sermon ›")
+          : svgEl("text", { x: (cut + W - 10) / 2, y: 24, "text-anchor": "middle", class: "count", style: `fill: ${INK}` }, "Last sermon"),
+        svgEl("text", { x: 10, y: foot, class: "name" }, "Character 1"),
+        svgEl("text", { x: W - 10, y: foot, "text-anchor": "end", class: "name" }, `Character ${data.length.toLocaleString("en")}`));
+      // Zhaozhou's record: the same scale, its own length.
+      const XZ = (c: number) => 10 + c / zz.length * (W - 20);
+      svg.append(svgEl("text", { x: 10, y: Z, class: "lane" }, "Zhaozhou’s record"));
+      for (const p of zz.passages) {
+        const x = XZ(p.s), wd = Math.max(1, XZ(Math.min(p.s + WINDOW, zz.length)) - x - (narrow ? 0 : 1));
+        svg.append(svgEl("rect", { x, y: Z + 10, width: wd, height: 34, rx: 1, style: fill(p.r) }));
+        if (p.dog || p.r === top) svg.append(
+          svgEl("line", { x1: x + wd / 2, x2: x + wd / 2, y1: Z + 46, y2: Z + 52, style: "stroke: var(--head); stroke-width: 1" }),
+          svgEl("text", { x: x + wd / 2, y: Z + 64, "text-anchor": "middle", class: "count", style: "font-size: 11px" }, p.r.toLocaleString("en")),
+          svgEl("text", { x: x + wd / 2, y: Z + 78, "text-anchor": "middle", class: "name" }, p.dog ? "Mu" : "latest"));
+      }
+      chart.replaceChildren(svg);
+      listbox(svg, marks, () => pos, show, true);
+      show(current);
+    });
+  }
+
+  document.querySelectorAll(".kw-layers").forEach(init);
+</script>
