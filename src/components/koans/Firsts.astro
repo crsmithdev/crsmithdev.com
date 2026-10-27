@@ -33,7 +33,7 @@ const json = JSON.stringify(Astro.props.data).replace(/</g, "\\u003c");
   const MIN = 5;
   const DEFS = `<svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs>${HUES.map((v, j) =>
     `<pattern id="kw-firsts-${j}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill: var(--kw-stripe)"/><rect width="3.6" height="6" style="fill: var(${v})"/></pattern>`).join("")}</defs></svg>`;
-  const MASTER: Record<string, string> = { X69n1351: "*Records of Baiyun Shouduan*", X69n1352: "*Records of Baiyun Shouduan*" };
+  const MASTER: Record<string, string> = { X69n1351: "*Record of Baiyun Shouduan*", X69n1352: "*Record of Baiyun Shouduan*" };
   const NONE = "fill: var(--bg); stroke: var(--kw-grey); stroke-width: 1.5", ONE = "fill: var(--kw-grey)";
 
   function init(root: HTMLElement) {

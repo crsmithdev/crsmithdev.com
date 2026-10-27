@@ -13,7 +13,7 @@ export const GROUPS = [
   { label: "*Zutang ji*", color: "var(--kw-blue)", ids: ["B25n0144"] },
   { label: "*Jingde Record*", color: "var(--kw-violet)", ids: ["T51n2076"] },
   { label: "*Extended Record of Yunmen*", color: "var(--kw-sky)", ids: ["T47n1988"] },
-  { label: "*Records of Baiyun Shouduan*", color: "var(--kw-green)", ids: ["X69n1351", "X69n1352"] },
+  { label: "*Record of Baiyun Shouduan*", color: "var(--kw-green)", ids: ["X69n1351", "X69n1352"] },
   { label: "Other texts", color: "var(--kw-grey)", ids: [] as string[] },
 ];
 

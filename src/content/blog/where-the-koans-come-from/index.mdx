@@ -86,9 +86,9 @@ I gave two LLMs, Claude Opus 5.5 and GPT-5.5, each koan with its earliest versio
 
 # Searching past the matcher
 
-The matcher only finds a version that shares the koan's wording, so a compiler who retold a story in his own words leaves it little to find. Yunmen's 世界恁麼廣闊 ("the world is this wide") is 世界與麼廣闊 in his own record, and the two share no five characters in a row. I wanted two things from other searches: a version for the 30 koans that had none, and older versions the matcher had missed for the rest. I tried three, and read every version they offered before I added it.
+The matcher only finds a version that shares the koan's wording, so a compiler who retold a story in his own words leaves it little to find. Yunmen's 世界恁麼廣闊 ("the world is this wide") is 世界與麼廣闊 in his own record, and the two share no five characters in a row. I wanted two things from other searches: a version for the 30 koans that had none (the 29 with no match, and one whose only match I'd rejected), and older versions the matcher had missed for the rest. I tried three, and read every version they offered before I added it.
 
-1. **Search by meaning.** An embedding model, bge-m3, turns a passage into a list of numbers, so that passages that mean similar things get similar numbers even when they share few words. For each of the 30 koans with no match, it found the five closest passages in older texts, and both models judged them. I read the 16 they accepted, and 13 tell the same story.
+1. **Search by meaning.** An embedding model, bge-m3, turns a passage into a list of numbers, so that passages that mean similar things get similar numbers even when they share few words. For each of those 30, it found the five closest passages in older texts, and both models judged them. I read the 16 they accepted, and 13 tell the same story.
 2. **Models with search tools.** I let Claude and GPT search the canon themselves: they could search it for a phrase and read any stretch of a text. I asked each for the earliest dated text that tells each of the 148 koans, with a quote I could check. They offered 50 versions older than the matcher's, or where it had none, and 42 tell the same story.
 3. **Search by meaning, Buddhist embedder.** Search 1 again, over all 148 koans, with MITRA, an embedding model trained on Buddhist texts. Both models accepted 14 of its finds, and 3 of those tell the same story, each older than any the matcher or searches 1 and 2 found.
 
@@ -110,7 +110,7 @@ Mu has a history more complicated than such a brief, minimal story about Zhaozho
 
 If Huangbo's record tells the story in 857, while Zhaozhou was still alive, how did it disappear from the record after his death, only to return in the *Jingde Record* attributed to another master, Weikuan, giving what looks like the opposite answer? And why, after 1151, do more than a third of the texts that tell it give both answers?
 
-## Huangbo's early version
+## Huangbo's 857 version
 
 Huangbo's *Wanling Record* carries a preface dated 857. Its last sermon includes Mu, and it already teaches the 無 as a meditation method, as Chan teachers would only from the twelfth century on.[^kanhua] Yet both of the big collections of the next 150 years, full of Zhaozhou's stories, omit his Mu. So either both missed it, or that sermon was added later and took on the record's earlier date.
 
@@ -142,7 +142,7 @@ Zhaozhou's own record has the *mu*, but instead of "yes," another answer to the 
 
 This may look confusing, but the split between the *mu*-and-yes and the *mu* alone is about the word's meaning more than the character itself. In the two-exchange version (1151), Zhaozhou gives one monk *mu* and the other yes, the point being that he does both. Wuzu tells only the first exchange and says he "just raises the word 無 and stops," and from there it stops being an answer at all, and becomes something to hold in the mind. By the *Gateless Gate*, Wumen tells the student not to take it as "nothing" and not to take it as "has or doesn't have." The character is the same in 1104 and 1228, but by then it has become something more than a word.
 
-# Frontier models and the limits of logic
+# LLMs and the limits of logic
 
 Asking an LLM to think about and respond to a koan directly seems like something doomed from the start. If insight beyond language is required to understand them, something definitionally constructed around words cannot possibly get there, if it even can be said to understand something at all.
 
